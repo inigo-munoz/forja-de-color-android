@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only these two cache folders are ever exposed as content URIs: the photo being shared and the camera capture. -->
+<paths>
+    <cache-path name="share" path="share/" />
+    <cache-path name="camera" path="camera/" />
+</paths>

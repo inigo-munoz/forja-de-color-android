@@ -1,4 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- All interface copy, ported verbatim from the PWA's src/ui/copy.ts. Grouped by section; names are section_key. -->
 <resources>
     <string name="app_name">Forja de Color</string>
+
+    <!-- nav -->
+    <string name="nav_projects">Projects</string>
+    <string name="nav_inventory">My paints</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- inventory -->
+    <string name="inventory_title">My paints</string>
+    <string name="inventory_brushes">Brushes</string>
+    <string name="inventory_other_paints">Other paints</string>
+    <string name="inventory_add_title">Add or update a paint</string>
+    <string name="inventory_brand">Brand</string>
+    <string name="inventory_code">Code</string>
+    <string name="inventory_name">Name</string>
+    <string name="inventory_range">Range</string>
+    <string name="inventory_type">Type</string>
+    <string name="inventory_hex">Colour</string>
+    <string name="inventory_add">Save paint</string>
+
+    <!-- settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_backup_reminder">You have not exported a backup for a while. Export one so you do not lose your projects.</string>
+    <string name="settings_export">Export backup</string>
+    <string name="settings_import">Import backup</string>
+    <string name="settings_import_ok">Backup imported.</string>
+    <string name="settings_import_confirm">Importing replaces ALL your current projects, photos and paints with the backup. Continue?</string>
+    <string name="settings_brain">AI instructions</string>
+    <string name="settings_brain_help">Paste these into your Claude Project or custom GPT so it knows your method and paints.</string>
+    <string name="settings_copy_brain">Copy AI instructions</string>
+    <string name="settings_copied">Copied.</string>
+
+    <!-- projects -->
+    <string name="projects_title">Projects</string>
+    <string name="projects_new">New project</string>
+    <string name="projects_name">Name</string>
+    <string name="projects_photo">Photo</string>
+    <string name="projects_create">Create</string>
+    <string name="projects_empty">No projects yet.</string>
+    <string name="projects_in_progress">In progress</string>
+    <string name="projects_done">Done</string>
+
+    <!-- project -->
+    <string name="project_notes">Notes</string>
+    <string name="project_progress">Progress photos</string>
+    <string name="project_add_progress">Add progress photo</string>
+    <string name="project_target">Target image</string>
+    <string name="project_set_target">Set target image</string>
+    <string name="project_mark_done">Mark as done</string>
+    <string name="project_reopen">Reopen</string>
+    <string name="project_ask">Ask the advisor</string>
+    <string name="project_advice">Advice</string>
+    <string name="project_prep">Preparation</string>
+    <string name="project_tips">Tips</string>
+    <string name="project_complements">Complementary colours</string>
+    <string name="project_remaining">Steps left</string>
+    <string name="project_needed">Paints you need</string>
+    <string name="project_unknown">Not in your paints</string>
+    <string name="project_assign">Assign one of mine</string>
+    <string name="project_unknown_brush">Brush not in your inventory</string>
+    <string name="project_already_painted">already painted</string>
+    <string name="project_technique">Technique</string>
+    <string name="project_see_technique">See technique card</string>
+    <string name="project_delete_advice">Delete this advice</string>
+    <string name="project_paint_image">Paint it with ChatGPT</string>
+    <string name="project_paint_image_sent">Save the image ChatGPT makes, then add it below with \"Set target image\".</string>
+    <string name="project_paint_image_fallback">Prompt copied and photo downloaded — paste both in ChatGPT, save the image it makes, then add it below with \"Set target image\".</string>
+    <string name="project_compare">Before / after</string>
+    <string name="project_compare_help">Drag to compare</string>
+
+    <!-- ask -->
+    <string name="ask_title">Ask the advisor</string>
+    <string name="ask_moment">Moment</string>
+    <string name="ask_moment_start">Start</string>
+    <string name="ask_moment_half_painted">Half-painted</string>
+    <string name="ask_moment_during">While painting</string>
+    <string name="ask_zone">Zone</string>
+    <string name="ask_question">What do you need?</string>
+    <string name="ask_question_apply_layer">How to apply a layer</string>
+    <string name="ask_question_light">How to add light</string>
+    <string name="ask_question_shadow">How to add shadow</string>
+    <string name="ask_question_highlight">How to make it stand out</string>
+    <string name="ask_question_which_technique">Which technique</string>
+    <string name="ask_question_free">Something else</string>
+    <string name="ask_details">Details</string>
+    <string name="ask_photo">Photo</string>
+    <string name="ask_send">Send to Claude / ChatGPT</string>
+    <string name="ask_fallback">Prompt copied and image downloaded — paste both in your chat.</string>
+    <string name="ask_prompt_box">If the prompt did not copy, copy it from here:</string>
+    <string name="ask_copy_prompt">Copy prompt</string>
+    <string name="ask_paste">Paste answer</string>
+    <string name="ask_paste_here">Paste the answer here</string>
+    <string name="ask_save">Save answer</string>
+    <string name="ask_errors">The answer could not be used:</string>
 </resources>
