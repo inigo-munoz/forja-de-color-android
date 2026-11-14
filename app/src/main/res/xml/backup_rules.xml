@@ -2,5 +2,4 @@
 <!-- Android 11 and lower. Photos are excluded: they would exceed the 25 MB per-app backup quota. -->
 <full-backup-content>
     <include domain="database" path="." />
-    <include domain="file" path="datastore/" />
 </full-backup-content>
