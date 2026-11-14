@@ -8,6 +8,10 @@ import app.forjadecolor.domain.advice.AdvisorBridge
 import app.forjadecolor.domain.storage.Repository
 import app.forjadecolor.platform.AndroidShareBridge
 import app.forjadecolor.platform.IncomingShares
+import app.forjadecolor.ui.share.SharedAnswerInbox
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import java.io.File
 import java.time.Instant
 
@@ -31,6 +35,12 @@ class AppContainer(
 
     /** Text or images other apps shared into Forja de Color, waiting for a screen to route them. */
     val incomingShares = IncomingShares()
+
+    /** A shared AI answer waiting for its project's ask screen. */
+    val sharedAnswers = SharedAnswerInbox()
+
+    /** Outlives every screen: for writes that must finish after the user leaves (e.g. the last notes). */
+    val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     /** Cleans photo files left by a crash; only the Room-backed store has files to clean. */
     suspend fun removeOrphanPhotos() {
