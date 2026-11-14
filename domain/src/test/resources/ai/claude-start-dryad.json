@@ -1,0 +1,111 @@
+{
+  "version": 1,
+  "kind": "recipe",
+  "moment": "start",
+  "prep": [
+    "Antes de nada, quita los hilos de la impresión FDM: hay muchos entre el brazo extendido, la rama y la cabeza, y en las puntas de las ramas. Córtalos con un cúter y pasa una llama rápida o una pistola de calor para los pelillos sueltos. El pincel seco resalta cualquier fibra que quede.",
+    "Lija o raspa las capas más visibles del vestido y del arco del árbol. El pincel seco las va a marcar todavía más.",
+    "Imprima en negro. En el inventario no hay imprimación; si no tienes espray negro, aplica Vallejo 72.051 Negro diluido 2:1 en dos capas finas.",
+    "Pincel seco intenso con Vallejo 72.049 Gris Muralla y B07001, de arriba abajo, cubriendo todo menos los huecos más profundos.",
+    "Segundo pincel seco, ligero y solo en zonas altas (antlers, hombros, cara, cresta de las ramas y pliegues del vestido), con Vallejo 72.001 Blanco Calavera y B07001.",
+    "Ojo: en la foto la miniatura ya parece tener negro con un pincel seco gris y blanco. Si es así, no lo repitas: limpia los hilos y retoca solo con blanco donde se haya perdido luz."
+  ],
+  "zones": [
+    {
+      "name": "Arco de ramas y tronco",
+      "technique": "slapchop",
+      "paint": { "brand": "Vallejo", "code": "72.124" },
+      "dilution": "1:3",
+      "steps": [
+        "Aplica el marrón translúcido en todo el arco y las ramas del suelo, sin cargar el pincel para que no se encharque en los huecos.",
+        "Deja que el gris y el blanco de debajo hagan las luces; no repases.",
+        "Cuando seque, da un toque más en la parte baja de las ramas para oscurecerla y que la figura quede enmarcada."
+      ],
+      "brush": "B02002"
+    },
+    {
+      "name": "Astas",
+      "technique": "slapchop",
+      "paint": { "brand": "Vallejo", "code": "72.042" },
+      "dilution": "1:3",
+      "steps": [
+        "Una sola capa muy fina para que se distingan del arco: un tono más cálido y claro que la madera.",
+
+        "Si no se diferencian bastante del árbol, repasa las puntas con un pincel seco muy suave de Vallejo 72.001 Blanco Calavera."
+      ],
+      "brush": "B02001"
+    },
+    {
+      "name": "Vestido",
+      "technique": "slapchop",
+      "paint": { "brand": "Vallejo", "code": "72.026" },
+      "dilution": "1:3",
+      "steps": [
+        "Cubre el vestido entero con el verde jade translúcido, de arriba abajo y siguiendo los pliegues.",
+        "Una segunda capa solo en la mitad inferior para hacer un degradado que oscurezca hacia el suelo."
+      ],
+      "brush": "B02002"
+    },
+    {
+      "name": "Pelo",
+      "technique": "slapchop",
+      "paint": { "brand": "Vallejo", "code": "72.009" },
+      "dilution": "1:2",
+      "steps": [
+        "Pelo cobrizo: aplícalo diluido sobre los mechones; es el contraste cálido frente al verde.",
+        "No toques la frente ni las mejillas; si se escapa, se tapa con la piel después."
+      ],
+      "brush": "B02001"
+    },
+    {
+      "name": "Piel (cara, brazos, torso)",
+      "technique": "bsl",
+      "bsl": {
+        "base": { "brand": "Vallejo", "code": "72.099" },
+        "shadow": { "brand": "Vallejo", "code": "72.071" },
+
+        "light": { "brand": "Vallejo", "code": "72.098" }
+      },
+      "steps": [
+        "Base: Piel diluida 1:1, en dos capas finas sobre cara, cuello, brazos y escote.",
+        "Sombra: Piel de Bárbaro muy aguada en las cuencas de los ojos, bajo la barbilla, en el cuello bajo el pelo y entre los dedos.",
+        "Luz: Carne Élfica en la nariz, los pómulos, la frente, la clavícula y el dorso de las manos. Es el punto focal: sé limpio aquí y rápido en lo demás.",
+        "Usa B02001 para todos los pasos."
+      ]
+    },
+    {
+      "name": "Cinturón (punto focal secundario)",
+      "technique": "bsl",
+      "bsl": {
+        "base": { "brand": "Vallejo", "code": "72.006" },
+        "shadow": { "brand": "Vallejo", "code": "72.007" },
+        "light": { "brand": "Vallejo", "code": "72.005" }
+      },
+      "steps": [
+        "Base: Amarillo Soleado en toda la banda del cinturón.",
+        "Sombra: Amarillo Dorado en el borde inferior y en los pliegues.",
+        "Luz: Amarillo Lunar en el canto superior. Así el amarillo lleva la vista al torso y la cara.",
+        "Usa B02001 para todos los pasos."
+      ]
+    },
+    {
+      "name": "Peana",
+      "technique": "slapchop",
+      "paint": { "brand": "Vallejo", "code": "72.028" },
+      "dilution": "1:2",
+      "steps": [
+        "Aplica el verde oscuro en el suelo, entre las raíces, para que parezca musgo.",
+        "Termina el borde de la peana con Vallejo 72.051 Negro opaco para dejarla limpia."
+
+      ],
+      "brush": "B02002"
+    }
+  ],
+  "tips": [
+    "Tu inventario no tiene ningún pincel grande para base: B02002 es el mayor y te va a costar en el arco y el vestido. Si de verdad quieres ir rápido, el cuello de botella es el pincel, no la técnica.",
+    "Diluye con medium mejor que con agua. Con solo agua, el color translúcido se encharca y deja marcas de secado en superficies grandes como el vestido y el arco.",
+    "No pongas BSL en más zonas. Con la cara y el cinturón basta: si detallas también las astas o las ramas, pierdes la velocidad y el punto focal se diluye.",
+    "Prueba primero cada dilución en una rama de atrás. Sobre un pincel seco tan marcado como el tuyo, 1:3 puede quedarse corto en la madera; si casi no tiñe, baja a 1:2.",
+    "Si al final todo se ve demasiado marrón y verde, da un toque muy diluido (1:4) de Vallejo 72.096 Verdín solo en las crestas de las ramas, como líquen. Es opcional."
+  ]
+}
