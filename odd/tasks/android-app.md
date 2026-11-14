@@ -21,7 +21,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T4 | S1 | Domain advice: parse, resolve | inline | done (PWA parse + hardening suites ported, GREEN 47) | 83692d4 |
 | T5 | S1, S2 | Domain projects + backup format, validation, reminder; fixture exported by the PWA | inline | done (imports PWA backup, re-exports identical JSON; GREEN 61) | 84ca88d |
 | T6 | S2, S3 | Storage: Room, photo files, atomic replace-all, auto-backup rules | inline | done (RED compile → GREEN 10 Robolectric; PWA backup round-trips through Room) | 197ad10 |
-| T7 | S1, S4 | Platform: share bridge, share target, image resize, camera / Photo Picker, app shell (container, theme, navigation, strings) | delegated (context backstop) | in progress | |
+| T7 | S1, S4 | Platform: share bridge, share target, image resize, camera / Photo Picker, app shell (container, theme, navigation, strings) | delegated (context backstop) | done (92 tests green, APK builds; parent re-ran suite) | cdf6247 |
 | T8 | S1 | UI: projects, project (with before/after), ask | delegated, parallel with T9 (disjoint surfaces) | todo | |
 | T9 | S1, S2 | UI: inventory, settings (export / import with the file picker), technique cards | delegated, parallel with T8 (disjoint surfaces) | todo | |
 | T10 | S2 | Device check: install, import a real PWA backup, export and import it back in the PWA | inline | todo | |
