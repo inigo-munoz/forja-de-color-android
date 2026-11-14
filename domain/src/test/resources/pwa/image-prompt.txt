@@ -1,0 +1,7 @@
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.
+Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
+Paint each zone with these colours:
+- túnica: Verde Escorpena #4e8437
+- cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
+- peana: Citadel Abaddon Black
+Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
