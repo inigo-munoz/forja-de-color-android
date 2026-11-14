@@ -9,6 +9,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 - S3 — "también hay que ver dónde se guardará todo." Storage as in design §6.
 - S4 — The app never calls an AI API or the network (PWA principle, README).
 - S5 — Prompts sent to the AI are identical to the PWA's (assumption: needed so the user's Claude Project / GPT keeps working).
+- S6 — A "primed" moment (user, on whether they always prime first: "Aveces si a veces no"): for a miniature already primed and drybrushed, the recipe skips the prep. Added to the PWA and Android together, after parity, keeping the backup contract.
 
 ## Tasks
 
@@ -20,12 +21,13 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T4 | S1 | Domain advice: parse, resolve | inline | done (PWA parse + hardening suites ported, GREEN 47) | 83692d4 |
 | T5 | S1, S2 | Domain projects + backup format, validation, reminder; fixture exported by the PWA | inline | done (imports PWA backup, re-exports identical JSON; GREEN 61) | 84ca88d |
 | T6 | S2, S3 | Storage: Room, photo files, atomic replace-all, auto-backup rules | inline | done (RED compile → GREEN 10 Robolectric; PWA backup round-trips through Room) | 197ad10 |
-| T7 | S1, S4 | Platform: share bridge, share target, image resize, camera / Photo Picker | inline | todo | |
-| T8 | S1 | UI: projects, project (with before/after), ask | inline | todo | |
-| T9 | S1, S2 | UI: inventory, settings (export / import with the file picker), technique cards | inline | todo | |
+| T7 | S1, S4 | Platform: share bridge, share target, image resize, camera / Photo Picker, app shell (container, theme, navigation, strings) | delegated (context backstop) | in progress | |
+| T8 | S1 | UI: projects, project (with before/after), ask | delegated, parallel with T9 (disjoint surfaces) | todo | |
+| T9 | S1, S2 | UI: inventory, settings (export / import with the file picker), technique cards | delegated, parallel with T8 (disjoint surfaces) | todo | |
 | T10 | S2 | Device check: install, import a real PWA backup, export and import it back in the PWA | inline | todo | |
+| T11 | S6, S2, S5 | "Primed" moment in PWA + Android, fixtures regenerated, backup contract test both ways | inline | todo (after T10) | |
 
-Route evidence: one developer, sequential dependent tasks, no Writer-trigger reason; everything inline.
+Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
 Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 does not fire; from v2 on every schema change needs a migration test. T6 got its own commit.
 
 ## Log
@@ -37,3 +39,4 @@ Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 do
 - L5 (2026-11-14): decision for T6 — photo file names never come from the blob id (implemented as random names mapped by the `blobs` table), because a backup is untrusted input and ids become paths. Cloud backup excludes photos (25 MB quota); phone-to-phone transfer includes them.
 - L6 (2026-11-14): `lastExportAt` moved from DataStore to the Room `app_state` table (one transaction with the data; DataStore dependency dropped). T6 done. RDD is off globally, so no native review. Next: T7 platform adapters, then T8/T9 UI (candidates for two parallel writers with disjoint surfaces once T7 lands the composition root and navigation shell).
 - L7 (2026-11-14, user): "Tienes acceso mediante Claude tool a un chatgpr y puedes abrir un Claude Ia para el tema de la generación de imágenes." → "si" to an end-to-end check. Sent the real start prompt + a photo of the owner's primed, drybrushed dryad to ChatGPT and Claude through Claude in Chrome. Both answers (hash-verified copies in `domain/src/test/resources/ai/`) parse with every paint and brush owned (RealAnswersTest, 4 tests). The image prompt built from the ChatGPT recipe produced a correctly painted image that kept pose and sculpt; ChatGPT kept the original background despite "plain neutral background". Claude noted the photo is already primed and drybrushed, so a "start" request repeats prep steps the user has done — product idea, not built: a "primed" moment.
+- L8 (2026-11-14, user): recommendation accepted implicitly; on priming: "Aveces si a veces no" → S6/T11 added for after parity. T7 delegated to one writer.
