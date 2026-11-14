@@ -1,0 +1,7 @@
+.gradle/
+build/
+local.properties
+.idea/
+
+# Tool-generated skill registry
+.atl/

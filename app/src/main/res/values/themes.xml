@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Window theme behind Compose: dark background so there is no white flash before the first frame. -->
+    <style name="Theme.ForjaDeColor" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/forge_dark</item>
+        <item name="android:colorBackground">@color/forge_dark</item>
+    </style>
+    <color name="forge_dark">#1A1412</color>
+</resources>

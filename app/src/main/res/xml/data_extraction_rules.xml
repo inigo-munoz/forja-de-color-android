@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <!-- Cloud: database + settings only; photos would exceed the 25 MB per-app quota. -->
+    <cloud-backup>
+        <include domain="database" path="." />
+        <include domain="file" path="datastore/" />
+    </cloud-backup>
+    <!-- Phone-to-phone transfer has no quota: photos go too. -->
+    <device-transfer>
+        <include domain="database" path="." />
+        <include domain="file" path="datastore/" />
+        <include domain="file" path="photos/" />
+    </device-transfer>
+</data-extraction-rules>
