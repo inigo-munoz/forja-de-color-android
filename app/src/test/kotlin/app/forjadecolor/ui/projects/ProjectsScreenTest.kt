@@ -1,5 +1,7 @@
 package app.forjadecolor.ui.projects
 
+import android.graphics.Bitmap
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -17,6 +19,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.ByteArrayOutputStream
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -46,6 +50,20 @@ class ProjectsScreenTest {
         assertEquals("2026-11-11T10:00:00.000Z", p.createdAt)
         assertContentEquals(byteArrayOf(1, 2, 3, 4, 5), runBlocking { app.repository.getBlob(p.initialPhotoBlobId!!) }!!.bytes)
         assertEquals(listOf(p.id), opened)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `shows the taken photo in the new-project form before creating it`() {
+        val out = ByteArrayOutputStream()
+        Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, out)
+        app.photos.nextPhoto = out.toByteArray()
+        show()
+        compose.onAllNodesWithTag("new_project_photo_preview").assertCountEquals(0)
+
+        compose.onNodeWithTag("new_project_take_photo").performScrollTo().performClick()
+
+        compose.onNodeWithTag("new_project_photo_preview").performScrollTo().assertIsDisplayed()
     }
 
     @Test

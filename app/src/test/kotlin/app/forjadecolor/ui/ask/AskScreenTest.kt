@@ -1,6 +1,8 @@
 package app.forjadecolor.ui.ask
 
+import android.graphics.Bitmap
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -34,6 +36,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import java.io.ByteArrayOutputStream
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -102,6 +106,20 @@ class AskScreenTest {
         assertTrue(pkg.text.contains("capa"))
         assertTrue(pkg.text.contains("highlight"))
         assertEquals(photoId, pkg.imageId)
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `shows the taken photo before sending it`() {
+        show()
+        val out = ByteArrayOutputStream()
+        Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, out)
+        app.photos.nextPhoto = out.toByteArray()
+        compose.onAllNodesWithTag("ask_photo_preview").assertCountEquals(0)
+
+        click("ask_take_photo")
+
+        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
     }
 
     @Test

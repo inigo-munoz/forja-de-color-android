@@ -39,6 +39,7 @@ import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
 import app.forjadecolor.domain.projects.createProject
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.ui.components.PhotoPreview
 import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.project.LocalPhotoSources
 import app.forjadecolor.ui.project.onMain
@@ -162,7 +163,7 @@ private fun NewProjectForm(onCreate: (name: String, photo: ByteArray?) -> Unit) 
                 OutlinedButton(onClick = pick, modifier = Modifier.testTag("new_project_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                 OutlinedButton(onClick = shoot, modifier = Modifier.testTag("new_project_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
             }
-            if (photo != null) Text(stringResource(R.string.t8_photo_ready))
+            photo?.let { PhotoPreview(it, tag = "new_project_photo_preview") }
             if (photoError) Text(stringResource(R.string.t8_photo_error), color = MaterialTheme.colorScheme.error)
             Button(
                 onClick = { name.trim().takeIf { it.isNotEmpty() }?.let { onCreate(it, photo) } },

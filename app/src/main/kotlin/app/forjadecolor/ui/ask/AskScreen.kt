@@ -52,6 +52,7 @@ import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.ui.components.PhotoPreview
 import app.forjadecolor.ui.project.LocalPhotoSources
 import app.forjadecolor.ui.project.onMain
 import kotlinx.coroutines.launch
@@ -249,7 +250,7 @@ fun AskScreen(
                     OutlinedButton(onClick = pick, modifier = Modifier.testTag("ask_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                     OutlinedButton(onClick = shoot, modifier = Modifier.testTag("ask_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
                 }
-                if (photo != null) Text(stringResource(R.string.t8_photo_ready))
+                photo?.let { PhotoPreview(it, tag = "ask_photo_preview") }
 
                 Button(onClick = send, modifier = Modifier.testTag("send")) { Text(stringResource(R.string.ask_send)) }
                 if (sendStatus.isNotEmpty()) Text(sendStatus, modifier = Modifier.testTag("send_status"))
