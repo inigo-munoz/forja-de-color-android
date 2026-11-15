@@ -24,7 +24,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T7 | S1, S4 | Platform: share bridge, share target, image resize, camera / Photo Picker, app shell (container, theme, navigation, strings) | delegated (context backstop) | done (92 tests green, APK builds; parent re-ran suite) | cdf6247 |
 | T8 | S1 | UI: projects, project (with before/after), ask | delegated, parallel with T9 (disjoint surfaces) | done (38 UI tests; parent fixed notes-on-leave, RED→GREEN) | aeb5a86 |
 | T9 | S1, S2 | UI: inventory, settings (export / import with the file picker), technique cards | delegated, parallel with T8 (disjoint surfaces) | done (15 UI tests; real PWA backup imports via picker) | cf94286 |
-| T10 | S2 | Device check: install, import a real PWA backup, export and import it back in the PWA | inline | todo | |
+| T10 | S2 | Device check: install, import a real PWA backup, export and import it back in the PWA | inline | in progress (fixes 1fe62df, d8e2d5b) | |
 | T11 | S6, S2, S5 | "Primed" moment in PWA + Android, fixtures regenerated, backup contract test both ways; also fix the PWA inventory form dropping the BSL family when the code is typed unnormalized ("72003") | inline | todo (after T10) | |
 
 Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
