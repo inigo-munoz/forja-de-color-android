@@ -125,9 +125,11 @@ private fun BottomNav(navController: NavHostController) {
     }
 }
 
-/** Switches section keeping one copy of each tab on the back stack, as bottom navigation should. */
+/**
+ * Switches to a section's root, like the PWA's hash links: no tab history is saved or restored,
+ * so the Projects tab always lands on the list even when a project was open.
+ */
 private fun NavHostController.navigateToTab(route: String) = navigate(route) {
-    popUpTo(graph.findStartDestination().id) { saveState = true }
+    popUpTo(graph.findStartDestination().id)
     launchSingleTop = true
-    restoreState = true
 }
