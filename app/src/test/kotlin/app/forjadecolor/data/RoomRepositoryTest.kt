@@ -201,4 +201,17 @@ class RoomRepositoryTest {
         val exported = encodeBackup(exportAll(repo, Instant.parse("2026-11-14T12:00:00Z")))
         assertEquals(ForjaJson.parseToJsonElement(text), ForjaJson.parseToJsonElement(exported))
     }
+
+    @Test
+    fun `keeps the zones ticked off on an advice entry`() = runBlocking {
+        val zone = ZoneRecipe("capa", Technique.SLAPCHOP, paint = PaintRef("Vallejo", "72.021"), dilution = "1:3", steps = emptyList())
+        val entry = AdviceEntry(
+            "a1", "2026-11-11T10:05:00.000Z",
+            RecipeResponse(moment = RecipeMoment.START, prep = emptyList(), tips = emptyList(), zones = listOf(zone, zone, zone)),
+            emptyList(), emptyList(), doneZones = listOf(0, 2),
+        )
+        val p = createProject("Ana", now, "p1").copy(advice = listOf(entry, entry.copy(id = "a2", doneZones = emptyList())))
+        repo.saveProject(p)
+        assertEquals(p, repo.getProject("p1"))
+    }
 }

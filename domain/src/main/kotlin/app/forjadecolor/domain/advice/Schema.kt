@@ -1,6 +1,8 @@
 package app.forjadecolor.domain.advice
 
 import app.forjadecolor.domain.paints.PaintRef
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -96,6 +98,13 @@ data class AdviceEntry(
     val response: AdviceResponse,
     val unknownPaints: List<PaintRef>,
     val unknownBrushes: List<String>,
+    /**
+     * Recipes only: indices into the recipe's zones the user ticked off as painted, sorted and unique.
+     * Optional in the backup (absent means none) and never written when empty, like the PWA.
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val doneZones: List<Int> = emptyList(),
 )
 
 data class AdviceRequest(

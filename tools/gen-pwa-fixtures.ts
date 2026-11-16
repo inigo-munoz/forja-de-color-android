@@ -10,7 +10,7 @@ import { buildImagePrompt } from '${PWA}/src/advice/image-prompt';
 import { parseAdviceResponse } from '${PWA}/src/advice/parse';
 import { openIndexedDbRepository } from '${PWA}/src/storage/indexeddb';
 import { exportAll } from '${PWA}/src/storage/backup';
-import { createProject, addProgressPhoto, addAdvice, setNotes } from '${PWA}/src/projects/project';
+import { createProject, addProgressPhoto, addAdvice, setNotes, setZoneDone } from '${PWA}/src/projects/project';
 
 const out = '${OUT}';
 const photo = new Blob(['x'], { type: 'image/jpeg' });
@@ -53,6 +53,8 @@ p = addProgressPhoto(p, { id: 'pp-1', takenAt: '2026-11-11T10:00:00.000Z', blobI
 p = addAdvice(p, { id: 'adv-1', receivedAt: '2026-11-10T09:30:00.000Z', ...parsed.entry });
 p = addAdvice(p, { id: 'adv-2', receivedAt: '2026-11-11T11:00:00.000Z', ...consult.entry });
 p = addAdvice(p, { id: 'adv-3', receivedAt: '2026-11-11T12:00:00.000Z', ...primed.entry });
+// Zones ticked off as painted on the first recipe; the other recipe has none (doneZones absent).
+p = setZoneDone(setZoneDone(p, 'adv-1', 2, true), 'adv-1', 0, true);
 await repo.saveProject(p);
 await repo.saveProject({ ...createProject('Goblin', new Date('2026-11-12T08:00:00.000Z'), 'project-2'), status: 'done' });
 const backup = await exportAll(repo, new Date('2026-11-14T12:00:00.000Z'));

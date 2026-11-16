@@ -5,6 +5,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
@@ -517,5 +519,37 @@ class ProjectScreenTest {
 
         compose.onNodeWithTag("compare_painted").assert(SemanticsMatcher.expectValue(PaintedRevealStart, 0.3f))
         assertNotNull(app.project("p1")!!.targetImageBlobId)
+    }
+
+    // zone progress (S11 item 3)
+
+    @Test
+    fun `ticking a zone off saves it, updates the progress and survives reopening the screen`() {
+        show()
+        inEntry("e1", "zone_progress").performScrollTo().assert(hasText("0 of 4 zones"))
+        inEntry("e1", "zone_done_1").performScrollTo().assertIsOff().performClick()
+
+        app.waitFor(compose) { app.project("p1")!!.advice[0].doneZones == listOf(1) }
+        inEntry("e1", "zone_progress").assert(hasText("1 of 4 zones"))
+        inEntry("e1", "zone_done_1").assertIsOn()
+
+        inEntry("e1", "zone_done_1").performScrollTo().performClick()
+        app.waitFor(compose) { app.project("p1")!!.advice[0].doneZones.isEmpty() }
+        inEntry("e1", "zone_progress").assert(hasText("0 of 4 zones"))
+    }
+
+    @Test
+    fun `zones already done show ticked and dimmed, and a consultation has no checkboxes`() {
+        runBlocking { app.repository.saveProject(createProject("Bárbara", app.now, "p1").addAdvice(RECIPE.copy(doneZones = listOf(0, 3))).addAdvice(CONSULTATION)) }
+        app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+
+        inEntry("e1", "zone_progress").performScrollTo().assert(hasText("2 of 4 zones"))
+        inEntry("e1", "zone_done_0").assertIsOn()
+        inEntry("e1", "zone_done_1").assertIsOff()
+        compose.onNode(hasTestTag("zone_capa") and SemanticsMatcher.expectValue(ZoneDoneKey, true)).assertExists()
+        compose.onNode(hasTestTag("zone_cara") and SemanticsMatcher.expectValue(ZoneDoneKey, false)).assertExists()
+        compose.onNode(hasText("Veladura") and hasAnyAncestor(hasTestTag("zone_capa"))).assertExists()
+        compose.onAllNodes(hasTestTag("zone_progress") and hasAnyAncestor(hasTestTag("advice_e2"))).assertCountEquals(0)
     }
 }

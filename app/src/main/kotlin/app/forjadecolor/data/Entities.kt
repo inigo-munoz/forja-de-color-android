@@ -1,10 +1,11 @@
 package app.forjadecolor.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 
-// Internal schema of forja.db v1. The backup JSON, not this schema, is the contract with the PWA.
+// Internal schema of forja.db (see ForjaDatabase for the version history). The backup JSON, not this schema, is the contract with the PWA.
 // Inventory rows and project children are keyed by position: order matters and the PWA allows duplicates.
 
 @Entity(tableName = "paints", primaryKeys = ["position"])
@@ -56,6 +57,9 @@ data class AdviceEntity(
     val responseJson: String,
     val unknownPaintsJson: String,
     val unknownBrushesJson: String,
+    /** Indices of the recipe zones ticked off as painted, as a JSON array (added in v2; rows from v1 read as none). */
+    @ColumnInfo(defaultValue = "[]")
+    val doneZonesJson: String,
 )
 
 /** A photo id mapped to its MIME type and the file holding its bytes (a random name, never the id). */

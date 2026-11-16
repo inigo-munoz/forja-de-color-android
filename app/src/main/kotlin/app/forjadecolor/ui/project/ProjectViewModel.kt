@@ -18,6 +18,7 @@ import app.forjadecolor.domain.projects.addProgressPhoto
 import app.forjadecolor.domain.projects.markDone
 import app.forjadecolor.domain.projects.reopen
 import app.forjadecolor.domain.projects.setNotes
+import app.forjadecolor.domain.projects.setZoneDone
 import app.forjadecolor.domain.storage.StoredBlob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,6 +65,9 @@ class ProjectViewModel(private val container: AppContainer, private val projectI
     fun toggleDone() = update { p -> if (p.status == ProjectStatus.DONE) p.reopen() else p.markDone() }
 
     fun deleteAdvice(entryId: String) = update { p -> p.copy(advice = p.advice.filter { it.id != entryId }) }
+
+    /** Ticks a recipe zone off as painted, or back on. */
+    fun setZoneDone(entryId: String, zone: Int, done: Boolean) = update { p -> p.setZoneDone(entryId, zone, done) }
 
     fun assignPaint(entryId: String, unknown: PaintRef, owned: PaintRef) = update { p ->
         p.copy(advice = p.advice.map { if (it.id == entryId) assignUnknownPaint(it, unknown, owned) else it })

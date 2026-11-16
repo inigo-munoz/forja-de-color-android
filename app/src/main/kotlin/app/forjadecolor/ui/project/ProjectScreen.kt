@@ -166,6 +166,7 @@ fun ProjectScreen(
                             confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) { vm.deleteAdvice(entry.id) }
                         },
                         onAssign = { unknown, owned -> vm.assignPaint(entry.id, unknown, owned) },
+                        onZoneDone = { zone, done -> vm.setZoneDone(entry.id, zone, done) },
                         onOpenTechnique = onOpenTechnique,
                         onPaintImage = vm::paintImage,
                     )

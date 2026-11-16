@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
@@ -26,9 +27,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +51,11 @@ import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.paints.paintKey
 import kotlinx.coroutines.launch
 
+private const val DONE_ALPHA = 0.55f
+
+/** Whether a recipe zone is shown as ticked off (dimmed); exposed for tests. */
+internal val ZoneDoneKey = SemanticsPropertyKey<Boolean>("ZoneDone")
+
 /** '#rrggbb' to a colour; grey when the stored text is not a valid hex. */
 fun parseHex(hex: String): Color =
     runCatching { Color(android.graphics.Color.parseColor(hex)) }.getOrDefault(Color.Gray)
@@ -58,6 +67,8 @@ internal fun AdviceCard(
     inventory: Inventory,
     onDelete: () -> Unit,
     onAssign: (unknown: PaintRef, owned: PaintRef) -> Unit,
+    /** Ticks a recipe zone (its index) off as painted, or back on. */
+    onZoneDone: (zone: Int, done: Boolean) -> Unit,
     onOpenTechnique: (TechniqueCardId) -> Unit,
     /** Sends the image prompt; null when there is no photo to paint. */
     onPaintImage: suspend (RecipeResponse) -> SendResult?,
@@ -74,7 +85,7 @@ internal fun AdviceCard(
 
             when (val r = entry.response) {
                 is RecipeResponse -> {
-                    RecipeView(r, label)
+                    RecipeView(r, entry.doneZones.toSet(), onZoneDone, label)
                     Button(
                         onClick = { scope.launch { onPaintImage(r)?.let { imageStatus = paintImageMessage(it) } } },
                         modifier = Modifier.testTag("paint_image"),
@@ -106,10 +117,15 @@ internal fun paintImageMessage(result: SendResult): Int =
     if (result == SendResult.FALLBACK) R.string.project_paint_image_fallback else R.string.project_paint_image_sent
 
 @Composable
-private fun RecipeView(r: RecipeResponse, label: @Composable (PaintRef) -> Unit) {
+private fun RecipeView(r: RecipeResponse, done: Set<Int>, onZoneDone: (Int, Boolean) -> Unit, label: @Composable (PaintRef) -> Unit) {
     Heading(stringResource(R.string.project_prep))
     NumberedList(r.prep)
-    r.zones.forEach { ZoneView(it, label) }
+    Text(
+        stringResource(R.string.project_zone_progress, r.zones.indices.count { it in done }, r.zones.size),
+        style = MaterialTheme.typography.labelLarge,
+        modifier = Modifier.testTag("zone_progress"),
+    )
+    r.zones.forEachIndexed { i, z -> ZoneView(z, i, i in done, { onZoneDone(i, it) }, label) }
     r.complements?.takeIf { it.isNotEmpty() }?.let { complements ->
         Heading(stringResource(R.string.project_complements))
         complements.forEach { label(it) }
@@ -123,11 +139,22 @@ private fun RecipeView(r: RecipeResponse, label: @Composable (PaintRef) -> Unit)
 }
 
 @Composable
-private fun ZoneView(z: ZoneRecipe, label: @Composable (PaintRef) -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp).testTag("zone_${z.name}"), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+private fun ZoneView(z: ZoneRecipe, index: Int, done: Boolean, onDone: (Boolean) -> Unit, label: @Composable (PaintRef) -> Unit) {
+    // A done zone is dimmed but stays readable.
+    val zoneModifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).alpha(if (done) DONE_ALPHA else 1f)
+        .semantics { this[ZoneDoneKey] = done }.testTag("zone_${z.name}")
+    Column(zoneModifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         val technique = if (z.technique == Technique.BSL) "BSL" else "Slapchop"
         val painted = if (z.alreadyPainted == true) " (${stringResource(R.string.project_already_painted)})" else ""
-        Text("${z.name} · $technique$painted", fontWeight = FontWeight.SemiBold)
+        val doneLabel = stringResource(R.string.project_zone_done)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = done,
+                onCheckedChange = onDone,
+                modifier = Modifier.semantics { contentDescription = "$doneLabel: ${z.name}" }.testTag("zone_done_$index"),
+            )
+            Text("${z.name} · $technique$painted", fontWeight = FontWeight.SemiBold)
+        }
         val bsl = z.bsl
         if (z.technique == Technique.BSL && bsl != null) {
             listOf(R.string.t8_bsl_base to bsl.base, R.string.t8_bsl_shadow to bsl.shadow, R.string.t8_bsl_light to bsl.light).forEach { (role, ref) ->

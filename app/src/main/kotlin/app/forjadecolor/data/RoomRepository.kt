@@ -26,6 +26,7 @@ private const val INVENTORY_SAVED = "inventory.saved"
 private fun metaKey(key: MetaKey) = "meta.${key.name}"
 private val REFS = ListSerializer(PaintRef.serializer())
 private val STRINGS = ListSerializer(String.serializer())
+private val INTS = ListSerializer(Int.serializer())
 
 /** Repository port over Room (rows) and [PhotoFiles] (photo bytes). */
 class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFiles) : Repository {
@@ -134,6 +135,7 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
                     ForjaJson.encodeToString(AdviceResponse.serializer(), e.response),
                     ForjaJson.encodeToString(REFS, e.unknownPaints),
                     ForjaJson.encodeToString(STRINGS, e.unknownBrushes),
+                    ForjaJson.encodeToString(INTS, e.doneZones),
                 )
             },
         )
@@ -154,6 +156,7 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
                 ForjaJson.decodeFromString(AdviceResponse.serializer(), it.responseJson),
                 ForjaJson.decodeFromString(REFS, it.unknownPaintsJson),
                 ForjaJson.decodeFromString(STRINGS, it.unknownBrushesJson),
+                ForjaJson.decodeFromString(INTS, it.doneZonesJson),
             )
         },
     )

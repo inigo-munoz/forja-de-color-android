@@ -49,3 +49,10 @@ fun Project.addAdvice(entry: AdviceEntry): Project = copy(advice = advice + entr
 fun Project.markDone(): Project = copy(status = ProjectStatus.DONE)
 
 fun Project.reopen(): Project = copy(status = ProjectStatus.IN_PROGRESS)
+
+/** Ticks a recipe zone off (or back on); keeps doneZones sorted and unique. */
+fun Project.setZoneDone(entryId: String, zone: Int, done: Boolean): Project = copy(
+    advice = advice.map { e ->
+        if (e.id != entryId) e else e.copy(doneZones = (if (done) e.doneZones + zone else e.doneZones - zone).distinct().sorted())
+    },
+)

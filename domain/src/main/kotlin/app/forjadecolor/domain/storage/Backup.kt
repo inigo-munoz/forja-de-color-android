@@ -10,6 +10,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
+import kotlinx.serialization.json.intOrNull
 import java.time.Instant
 import java.time.format.DateTimeParseException
 import kotlin.io.encoding.Base64
@@ -67,6 +68,19 @@ fun parseBackupText(text: String): JsonElement? = try {
 
 private fun JsonObject.strings(vararg keys: String) = keys.all { (this[it] as? JsonPrimitive)?.isString == true }
 
+/** Optional doneZones on an advice entry: distinct integer indices into its recipe's zones. */
+private fun doneZonesProblem(project: JsonObject, projectIndex: Int): String? {
+    (project["advice"] as JsonArray).forEachIndexed { i, entry ->
+        if (entry !is JsonObject || "doneZones" !in entry) return@forEachIndexed
+        val zones = ((entry["response"] as? JsonObject)?.get("zones") as? JsonArray)?.size ?: 0
+        val done = entry["doneZones"] as? JsonArray
+        val indices = done?.map { z -> (z as? JsonPrimitive)?.takeIf { !it.isString }?.intOrNull }
+        val valid = indices != null && indices.none { it == null || it < 0 || it >= zones } && indices.toSet().size == indices.size
+        if (!valid) return "project #${projectIndex + 1}, advice #${i + 1} has invalid done zones: each must be a different zone index below $zones"
+    }
+    return null
+}
+
 /** Why a file cannot be restored, or null when it is a valid backup. */
 fun validateBackup(file: JsonElement?): String? {
     if (file !is JsonObject) return "not a backup file"
@@ -86,6 +100,7 @@ fun validateBackup(file: JsonElement?): String? {
         !(it is JsonObject && it.strings("id", "name", "createdAt", "status", "notes") && it["progress"] is JsonArray && it["advice"] is JsonArray)
     }
     if (badProject >= 0) return "project #${badProject + 1} is incomplete"
+    projects.forEachIndexed { i, p -> doneZonesProblem(p as JsonObject, i)?.let { return it } }
     val blobs = file["blobs"] as? JsonObject ?: return "backup has no valid photos"
     if (blobs.values.any { !(it is JsonObject && it.strings("type", "base64")) }) return "backup has a damaged photo"
     return null

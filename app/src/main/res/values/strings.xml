@@ -67,6 +67,8 @@
     <string name="project_assign">Assign one of mine</string>
     <string name="project_unknown_brush">Brush not in your inventory</string>
     <string name="project_already_painted">already painted</string>
+    <string name="project_zone_done">Painted</string>
+    <string name="project_zone_progress">%1$d of %2$d zones</string>
     <string name="project_technique">Technique</string>
     <string name="project_see_technique">See technique card</string>
     <string name="project_delete_advice">Delete this advice</string>

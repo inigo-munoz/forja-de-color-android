@@ -6,12 +6,14 @@ import app.forjadecolor.domain.advice.RecipeMoment
 import app.forjadecolor.domain.advice.RecipeResponse
 import app.forjadecolor.domain.projects.ProjectStatus
 import app.forjadecolor.domain.projects.createProject
+import app.forjadecolor.domain.projects.setZoneDone
 import app.forjadecolor.domain.pwaFixture
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonElement
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
@@ -147,5 +149,62 @@ class BackupTest {
     @Test
     fun `names the file after the export day`() = runBlocking {
         assertEquals("forja-de-color-2026-11-11.json", backupFileName(exportAll(populated(), now)))
+    }
+
+    // Done zones (S11 item 3): optional, additive, same validation messages as the PWA
+    private fun withDone(doneZones: String?): String {
+        val zone = """{"name":"z","technique":"slapchop","paint":{"brand":"Vallejo","code":"72.021"},"dilution":"1:1","steps":[]}"""
+        val done = doneZones?.let { ""","doneZones":$it""" } ?: ""
+        val recipe = """{"id":"e1","receivedAt":"","unknownPaints":[],"unknownBrushes":[],"response":{"version":1,"kind":"recipe","moment":"start","prep":[],"tips":[],"zones":[$zone,$zone,$zone]}$done}"""
+        val consult = """{"id":"c","receivedAt":"","unknownPaints":[],"unknownBrushes":[],"response":{"version":1,"kind":"consultation","zone":"z","question":"free","technique":"t","steps":[],"paints":[]}}"""
+        return """{"app":"forja-de-color","version":1,"exportedAt":"","inventory":{"paints":[],"brushes":[]},"blobs":{},""" +
+            """"projects":[{"id":"p1","name":"B","createdAt":"","status":"in-progress","notes":"","progress":[],"advice":[$consult,$recipe]}]}"""
+    }
+
+    @Test
+    fun `accepts advice without doneZones and with a valid list`() {
+        assertNull(validateBackup(parseBackupText(withDone(null))))
+        assertNull(validateBackup(parseBackupText(withDone("[0,2]"))))
+        assertNull(validateBackup(parseBackupText(withDone("[]"))))
+    }
+
+    @Test
+    fun `rejects malformed doneZones with the PWA's message and keeps existing data`() = runBlocking {
+        val message = "project #1, advice #2 has invalid done zones: each must be a different zone index below 3"
+        for (bad in listOf("1", "[1.5]", "[\"1\"]", "[-1]", "[3]", "[1,1]", "[true]", "null")) {
+            val repo = populated()
+            val before = repo.listProjects()
+            assertEquals(ImportResult.Failed(message), importAll(repo, parseBackupText(withDone(bad))), bad)
+            assertEquals(before, repo.listProjects())
+        }
+    }
+
+    @Test
+    fun `rejects doneZones on an entry with no zones`() {
+        val file = withDone(null).replace(""""steps":[],"paints":[]}}""", """"steps":[],"paints":[]},"doneZones":[0]}""")
+        assertEquals("project #1, advice #1 has invalid done zones: each must be a different zone index below 0", validateBackup(parseBackupText(file)))
+    }
+
+    @Test
+    fun `exports doneZones only when some zone is done, and round-trips it`() = runBlocking {
+        val repo = InMemoryRepository()
+        importAll(repo, parseBackupText(withDone(null)))
+        assertFalse("doneZones" in encodeBackup(exportAll(repo, now)))
+
+        repo.saveProject(repo.getProject("p1")!!.setZoneDone("e1", 1, true))
+        val text = encodeBackup(exportAll(repo, now))
+        assertTrue(""""doneZones":[1]""" in text)
+        repo.clearAll()
+        assertEquals(ImportResult.Ok, importAll(repo, parseBackupText(text)))
+        assertEquals(listOf(1), repo.getProject("p1")!!.advice[1].doneZones)
+    }
+
+    @Test
+    fun `reads the doneZones the PWA exported`() = runBlocking {
+        val repo = InMemoryRepository()
+        importAll(repo, parseBackupText(pwaFixture("backup-v1.json")))
+        val advice = repo.listProjects()[0].advice
+        assertEquals(listOf(0, 2), advice[0].doneZones)
+        assertEquals(emptyList(), advice[2].doneZones)
     }
 }

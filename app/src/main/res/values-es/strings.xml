@@ -65,6 +65,8 @@
     <string name="project_assign">Asignar una de las mías</string>
     <string name="project_unknown_brush">Pincel que no está en tu inventario</string>
     <string name="project_already_painted">ya pintado</string>
+    <string name="project_zone_done">Pintada</string>
+    <string name="project_zone_progress">%1$d de %2$d zonas</string>
     <string name="project_technique">Técnica</string>
     <string name="project_see_technique">Ver ficha de técnica</string>
     <string name="project_delete_advice">Eliminar este consejo</string>
