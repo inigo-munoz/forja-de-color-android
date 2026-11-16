@@ -38,8 +38,8 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T16 | S10, S5 | BSL roles: seed roles, role in the AI prompt and in My paints, PWA + Android, fixtures regenerated | delegated (context backstop) | done (RED both repos; fixtures regenerated) | 046cc64 |
 | T17 | S11 | UX item 1 | inline | done (visual; suite green) | ee7cccf |
 | T18 | S11 | UX item 2 | delegated (context backstop) | done (RED 21/40; mutation check) | 101e3b4 |
-| T19 | S11 | UX item 3 | — | in progress | |
-| T20 | S11 | UX item 4 | — | todo | |
+| T19 | S11 | UX item 3 | delegated (context backstop) | done (RED both repos; migration test; verifier PASS) | 6a8d3c7 |
+| T20 | S11 | UX item 4 | — | in progress | |
 | T21 | S11 | UX item 5 | — | todo | |
 | T22 | S11 | UX item 6 | — | todo | |
 | T23 | S11 | UX item 7 | — | todo | |
@@ -88,3 +88,4 @@ Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 do
 - L30 (2026-11-16, user): "ok, se ve el icono correctamente." Installed on the Pixel by serial (adb -s) after noticing installDebug had gone to another session's emulator; PWA published to Pages the same day (first successful deploy).
 - L31 (2026-11-16, user): "el copiado para las IAs no tendría que estar más accesible?" Checked: every send already carries method, inventory with roles and format, so the instructions are only needed for free chat in the Claude project / GPT; the real gap is not knowing when they are stale. Owner: "ok" to item 14 after items 1–13.
 - L32 (2026-11-16, user): item 3 "si, por zona y en las dos": a checkbox per recipe zone, saved in the advice entry as an optional list of done zone indices (doneZones), in the shared backup format (PWA + Android, old backups without it still valid), Room schema v1→v2 with a migration test; recipe shows "N of M zones". Risk item 1 (stored data, persisted format) → independent verifier.
+- L33 (2026-11-16): T19 in 6a8d3c7 (Android) and PWA feat/zone-progress. Independent verifier (item 1): PASS, no blockers; advisories: PWA accepts 1.0/1e0 indices that Android rejects (not producible by either app), a fast double tap on Android can leave a zone ticked (idempotent set, no corruption), a v2 database cannot be restored into a v1 app (no downgrade fallback by design), PWA checkbox label lacks the zone name. Installed on the Pixel by serial. PWA branch not pushed yet.
