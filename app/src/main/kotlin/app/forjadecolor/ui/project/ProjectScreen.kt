@@ -24,12 +24,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -51,27 +51,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
-import app.forjadecolor.domain.advice.AdvicePackage
 import app.forjadecolor.domain.advice.TechniqueCardId
-import app.forjadecolor.domain.advice.assignUnknownPaint
-import app.forjadecolor.domain.advice.buildImagePrompt
-import app.forjadecolor.domain.isoString
-import app.forjadecolor.domain.paints.Inventory
-import app.forjadecolor.domain.projects.ProgressPhoto
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
-import app.forjadecolor.domain.projects.addProgressPhoto
-import app.forjadecolor.domain.projects.markDone
-import app.forjadecolor.domain.projects.reopen
-import app.forjadecolor.domain.projects.setNotes
-import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.ConfirmDialog
 import app.forjadecolor.ui.components.Confirmation
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.UUID
 
 /** Where the painted image starts showing in the before/after comparison, from 0 (all painted) to 1. */
 val PaintedRevealStart = SemanticsPropertyKey<Float>("PaintedRevealStart")
@@ -79,7 +67,7 @@ private var SemanticsPropertyReceiver.paintedRevealStart by PaintedRevealStart
 
 private const val NOTES_DEBOUNCE_MS = 800L
 
-/** One project: before/after, advice, notes, progress photos and the target image. */
+/** One project: before/after, advice, notes, progress photos and the target image; state lives in [ProjectViewModel]. */
 @Composable
 fun ProjectScreen(
     container: AppContainer,
@@ -89,33 +77,22 @@ fun ProjectScreen(
     onBack: () -> Unit,
 ) {
     val repository = container.repository
-    val store = remember(projectId) { ProjectStore(repository, projectId) }
-    val scope = rememberCoroutineScope()
-    var loaded by remember { mutableStateOf(false) }
-    var project by remember { mutableStateOf<Project?>(null) }
-    var inventory by remember { mutableStateOf(Inventory(emptyList(), emptyList())) }
+    val vm = viewModel(key = "project:$projectId") { ProjectViewModel(container, projectId) }
     LaunchedEffect(projectId) {
-        inventory = repository.getInventory()
-        project = store.load()
-        loaded = true
         // An answer shared from the AI app for this project: go straight to saving it.
-        if (container.sharedAnswers.hasAnswerFor(projectId)) onMain(onAsk)
+        if (vm.load()) onMain(onAsk)
     }
-    val update: (suspend (Project) -> Project) -> Unit = { change ->
-        scope.launch { store.update(change)?.let { project = it } }
-    }
-    val updateDroppingPhotos: (suspend (Project) -> Pair<Project, List<String?>>) -> Unit = { change ->
-        scope.launch { store.updateDroppingPhotos(change)?.let { project = it } }
-    }
+    val state by vm.state.collectAsState()
     // Every deletion waits here for the user to confirm it.
     var confirmation by remember { mutableStateOf<Confirmation?>(null) }
     // The progress photo shown large, by its blob id.
     var openPhoto by rememberSaveable { mutableStateOf<String?>(null) }
 
-    val current = project
+    val current = state.project
+    val inventory = state.inventory
     if (current == null) {
         Column(Modifier.fillMaxSize().padding(16.dp).testTag("screen_project")) {
-            if (loaded) Text(stringResource(R.string.t8_not_found))
+            if (state.loaded) Text(stringResource(R.string.t8_not_found))
         }
         return
     }
@@ -126,16 +103,11 @@ fun ProjectScreen(
     var targetError by rememberSaveable { mutableStateOf(false) }
     val addProgress: (ByteArray) -> Unit = { bytes ->
         progressError = false
-        update { p ->
-            val blobId = repository.putBlob(StoredBlob("image/jpeg", bytes))
-            p.addProgressPhoto(ProgressPhoto(UUID.randomUUID().toString(), isoString(container.now()), blobId))
-        }
+        vm.addProgressPhoto(bytes)
     }
     val setTarget: (ByteArray) -> Unit = { bytes ->
         targetError = false
-        updateDroppingPhotos { p ->
-            p.copy(targetImageBlobId = repository.putBlob(StoredBlob("image/jpeg", bytes))) to listOf(p.targetImageBlobId)
-        }
+        vm.setTarget(bytes)
     }
     val pickProgress = sources.picker({ progressError = true }, addProgress)
     val shootProgress = sources.camera({ progressError = true }, addProgress)
@@ -150,7 +122,7 @@ fun ProjectScreen(
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = onAsk, modifier = Modifier.testTag("ask")) { Text(stringResource(R.string.project_ask)) }
             OutlinedButton(
-                onClick = { update { p -> if (p.status == ProjectStatus.DONE) p.reopen() else p.markDone() } },
+                onClick = vm::toggleDone,
                 modifier = Modifier.testTag("toggle_done"),
             ) { Text(stringResource(if (current.status == ProjectStatus.DONE) R.string.project_reopen else R.string.project_mark_done)) }
         }
@@ -160,26 +132,16 @@ fun ProjectScreen(
                 entry,
                 inventory,
                 onDelete = {
-                    confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) {
-                        update { p -> p.copy(advice = p.advice.filter { it.id != entry.id }) }
-                    }
+                    confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) { vm.deleteAdvice(entry.id) }
                 },
-                onAssign = { unknown, owned ->
-                    update { p -> p.copy(advice = p.advice.map { if (it.id == entry.id) assignUnknownPaint(it, unknown, owned) else it }) }
-                },
+                onAssign = { unknown, owned -> vm.assignPaint(entry.id, unknown, owned) },
                 onOpenTechnique = onOpenTechnique,
-                onPaintImage = { recipe ->
-                    val photoId = current.initialPhotoBlobId ?: return@AdviceCard null
-                    if (repository.getBlob(photoId) == null) return@AdviceCard null
-                    container.advisorBridge.send(AdvicePackage(buildImagePrompt(recipe, inventory), photoId))
-                },
+                onPaintImage = vm::paintImage,
             )
         }
 
-        // Notes are written on the app scope: the last save runs as the screen closes, when its own scope is gone.
-        NotesCard(current.notes) { text ->
-            container.appScope.launch { store.update { p -> p.setNotes(text) }?.let { project = it } }
-        }
+        // Saved on the app scope (see ProjectViewModel.saveNotes): the last save runs as the screen closes.
+        NotesCard(current.notes, vm::saveNotes)
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -195,9 +157,7 @@ fun ProjectScreen(
                             Text(photo.takenAt.take(10), style = MaterialTheme.typography.labelSmall)
                             TextButton(
                                 onClick = {
-                                    confirmation = Confirmation(R.string.confirm_delete_progress, R.string.action_delete) {
-                                        updateDroppingPhotos { p -> p.copy(progress = p.progress.filter { it.id != photo.id }) to listOf(photo.blobId) }
-                                    }
+                                    confirmation = Confirmation(R.string.confirm_delete_progress, R.string.action_delete) { vm.deleteProgressPhoto(photo) }
                                 },
                                 modifier = Modifier.testTag("delete_progress_photo"),
                             ) { Text(stringResource(R.string.project_delete_photo)) }
@@ -219,9 +179,7 @@ fun ProjectScreen(
                 if (current.targetImageBlobId != null) {
                     TextButton(
                         onClick = {
-                            confirmation = Confirmation(R.string.confirm_remove_target, R.string.action_remove) {
-                                updateDroppingPhotos { p -> p.copy(targetImageBlobId = null) to listOf(p.targetImageBlobId) }
-                            }
+                            confirmation = Confirmation(R.string.confirm_remove_target, R.string.action_remove) { vm.removeTarget() }
                         },
                         modifier = Modifier.testTag("remove_target"),
                     ) { Text(stringResource(R.string.project_remove_target)) }
@@ -233,12 +191,7 @@ fun ProjectScreen(
 
         TextButton(
             onClick = {
-                confirmation = Confirmation(R.string.confirm_delete_project, R.string.action_delete) {
-                    scope.launch {
-                        store.delete()
-                        onMain(onBack)
-                    }
-                }
+                confirmation = Confirmation(R.string.confirm_delete_project, R.string.action_delete) { vm.delete(onBack) }
             },
             modifier = Modifier.testTag("delete_project"),
         ) { Text(stringResource(R.string.project_delete), color = MaterialTheme.colorScheme.error) }

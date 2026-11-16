@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.projects.Project
@@ -43,10 +43,7 @@ import app.forjadecolor.ui.components.PhotoPreview
 import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.project.LocalPhotoSources
-import app.forjadecolor.ui.project.onMain
 import app.forjadecolor.ui.share.IncomingSharePrompt
-import app.forjadecolor.ui.share.routeShare
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 /** In-progress projects first, then finished ones; newest first within each group (as the PWA). */
@@ -61,19 +58,18 @@ suspend fun createAndSaveProject(container: AppContainer, name: String, photo: B
     return project
 }
 
-/** The project list, the new-project form, and the routing of anything shared into the app. */
+/** The project list, the new-project form, and the routing of anything shared into the app; state lives in [ProjectsViewModel]. */
 @Composable
 fun ProjectsScreen(
     container: AppContainer,
     onOpenProject: (projectId: String) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
+    val vm = viewModel { ProjectsViewModel(container) }
     val context = LocalContext.current
-    var projects by remember { mutableStateOf<List<Project>?>(null) }
-    LaunchedEffect(Unit) { projects = orderProjects(container.repository.listProjects()) }
-    val share by container.incomingShares.current.collectAsState()
-    var shareError by remember { mutableStateOf(false) }
-    var creating by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { vm.load() }
+    val projects by vm.projects.collectAsState()
+    val share by vm.share.collectAsState()
+    val shareError by vm.shareError.collectAsState()
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_projects"),
@@ -86,15 +82,8 @@ fun ProjectsScreen(
             IncomingSharePrompt(
                 pending,
                 projects.orEmpty(),
-                onPick = { p ->
-                    scope.launch {
-                        val taken = container.incomingShares.consume() ?: return@launch
-                        val ok = runCatching { routeShare(container, context, taken, p.id) }.isSuccess
-                        shareError = !ok
-                        if (ok) onMain { onOpenProject(p.id) }
-                    }
-                },
-                onDismiss = { container.incomingShares.consume() },
+                onPick = { p -> vm.routeShareTo(context, p, onOpenProject) },
+                onDismiss = vm::dismissShare,
             )
         }
         if (shareError) Text(stringResource(R.string.t8_share_image_failed), color = MaterialTheme.colorScheme.error)
@@ -112,16 +101,7 @@ fun ProjectsScreen(
             }
         }
 
-        NewProjectForm(onCreate = { name, photo ->
-            // One tap, one project: a second tap while saving is ignored.
-            if (!creating) {
-                creating = true
-                scope.launch {
-                    val id = createAndSaveProject(container, name, photo).id
-                    onMain { onOpenProject(id) }
-                }
-            }
-        })
+        NewProjectForm(onCreate = { name, photo -> vm.create(name, photo, onOpenProject) })
     }
 }
 

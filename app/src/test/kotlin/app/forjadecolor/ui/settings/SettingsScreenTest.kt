@@ -3,6 +3,7 @@ package app.forjadecolor.ui.settings
 import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
+import android.os.Looper
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -115,7 +116,11 @@ class SettingsScreenTest {
         show()
 
         compose.onNodeWithTag("export").performClick()
-        compose.waitUntil(5_000) { out.size() > 0 && runBlocking { repo.getMeta(MetaKey.LAST_EXPORT_AT) } != null }
+        compose.waitUntil(5_000) {
+            // The export runs in the ViewModel on the main looper, which only node lookups idle by themselves.
+            shadowOf(Looper.getMainLooper()).idle()
+            out.size() > 0 && runBlocking { repo.getMeta(MetaKey.LAST_EXPORT_AT) } != null
+        }
 
         assertEquals(listOf<Any?>("forja-de-color-2026-11-11.json"), picker.inputs)
         val json = parseBackupText(out.toString(Charsets.UTF_8.name()))

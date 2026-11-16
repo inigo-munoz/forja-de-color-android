@@ -25,10 +25,10 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.advice.AdviceRequest
@@ -45,18 +46,13 @@ import app.forjadecolor.domain.advice.Moment
 import app.forjadecolor.domain.advice.ParseResult
 import app.forjadecolor.domain.advice.Question
 import app.forjadecolor.domain.advice.RecipeResponse
-import app.forjadecolor.domain.advice.SendResult
-import app.forjadecolor.domain.advice.buildAdvicePackage
 import app.forjadecolor.domain.advice.parseAdviceResponse
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
-import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.PhotoPreview
 import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.LocalPhotoSources
-import app.forjadecolor.ui.project.onMain
-import kotlinx.coroutines.launch
 import java.util.UUID
 
 /** Zone names from the project's recipes, each once, for the "while painting" question. */
@@ -104,7 +100,7 @@ private val QUESTION_LABELS = listOf(
     Question.FREE to R.string.ask_question_free,
 )
 
-/** Ask the advisor: build the package, send it to the user's AI app, then paste and save the answer. */
+/** Ask the advisor: build the package, send it to the user's AI app, then paste and save the answer; state lives in [AskViewModel]. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AskScreen(
@@ -112,79 +108,54 @@ fun AskScreen(
     projectId: String,
     onDone: () -> Unit,
 ) {
-    val repository = container.repository
-    val scope = rememberCoroutineScope()
+    val vm = viewModel(key = "ask:$projectId") { AskViewModel(container, projectId) }
     val context = LocalContext.current
-    var project by remember { mutableStateOf<Project?>(null) }
-    var loaded by remember { mutableStateOf(false) }
-    LaunchedEffect(projectId) {
-        project = repository.getProject(projectId)
-        loaded = true
-    }
+    LaunchedEffect(projectId) { vm.load() }
+    val state by vm.state.collectAsState()
 
     // An answer shared into the app for this project arrives ready to save.
-    val shared = remember(projectId) { container.sharedAnswers.take(projectId) }
+    val shared = vm.sharedAnswer
     var moment by rememberSaveable { mutableStateOf(Moment.START) }
     var pickedZone by rememberSaveable { mutableStateOf<String?>(null) }
     var typedZone by rememberSaveable { mutableStateOf("") }
     var question by rememberSaveable { mutableStateOf(Question.APPLY_LAYER) }
     var details by rememberSaveable { mutableStateOf("") }
     var photo by rememberPendingPhoto()
-    var photoId by remember { mutableStateOf<String?>(null) }
-    var sendStatus by remember { mutableStateOf("") }
-    var prompt by remember { mutableStateOf<String?>(null) }
     var answer by rememberSaveable { mutableStateOf(shared.orEmpty()) }
     var showAnswer by rememberSaveable { mutableStateOf(shared != null) }
-    var errors by remember { mutableStateOf<List<String>>(emptyList()) }
 
-    val current = project
+    val current = state.project
     if (current == null) {
         Column(Modifier.fillMaxSize().padding(16.dp).testTag("screen_ask")) {
-            if (loaded) Text(stringResource(R.string.t8_not_found))
+            if (state.loaded) Text(stringResource(R.string.t8_not_found))
         }
         return
     }
     val zones = remember(current) { recipeZones(current) }
-    val photoMissing = stringResource(R.string.ask_photo)
-    val fallbackText = "${stringResource(R.string.ask_fallback)} ${stringResource(R.string.ask_prompt_box)}"
+    val sendStatus = when (state.sendStatus) {
+        SendStatus.NONE -> ""
+        SendStatus.PHOTO_MISSING -> stringResource(R.string.ask_photo)
+        SendStatus.FALLBACK -> "${stringResource(R.string.ask_fallback)} ${stringResource(R.string.ask_prompt_box)}"
+    }
+    val prompt = state.prompt
+    val errors = state.errors
 
     val sources = LocalPhotoSources.current
-    val onPhoto: (ByteArray) -> Unit = { photo = it; photoId = null }
+    val onPhoto: (ByteArray) -> Unit = { photo = it; vm.photoChanged() }
     val pick = sources.picker({}, onPhoto)
     val shoot = sources.camera({}, onPhoto)
 
     val send: () -> Unit = {
-        scope.launch {
-            val picked = photo
-            val id = when {
-                picked != null -> photoId ?: repository.putBlob(StoredBlob("image/jpeg", picked)).also { photoId = it }
-                else -> defaultPhotoId(current)?.takeIf { repository.getBlob(it) != null }
-            }
-            if (id == null) {
-                sendStatus = photoMissing
-                return@launch
-            }
-            val req = buildRequest(moment, typedZone, pickedZone ?: zones.firstOrNull(), question, details)
-            val pkg = buildAdvicePackage(req, repository.getInventory(), id)
-            val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
-            sendStatus = if (fallback) fallbackText else ""
-            prompt = if (fallback) pkg.text else null
-        }
+        vm.send(photo, buildRequest(moment, typedZone, pickedZone ?: zones.firstOrNull(), question, details))
     }
     val accept: (String) -> Unit = { raw ->
-        scope.launch {
-            val failed = saveAnswer(container, projectId, raw)
-            if (failed == null) {
-                onMain(onDone)
-            } else {
-                answer = raw
-                showAnswer = true
-                errors = failed
-            }
-        }
+        vm.accept(raw, onSaved = onDone, onRejected = {
+            answer = raw
+            showAnswer = true
+        })
     }
     val paste: () -> Unit = {
-        val raw = container.advisorBridge.readAnswer()
+        val raw = vm.readAnswer()
         if (raw.isNullOrBlank()) showAnswer = true else accept(raw)
     }
 

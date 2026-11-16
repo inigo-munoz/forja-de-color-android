@@ -23,10 +23,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.paints.Inventory
@@ -46,7 +47,6 @@ import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.addPaint
 import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.storage.Repository
-import kotlinx.coroutines.launch
 
 private val HEX = Regex("^#[0-9a-fA-F]{6}$")
 
@@ -73,15 +73,14 @@ internal suspend fun savePaint(repo: Repository, paint: Paint) {
     repo.saveInventory(current.addPaint(if (prior?.family != null) paint.copy(family = prior.family) else paint))
 }
 
-/** The paints and brushes the user owns, and a form to add or update a paint. */
+/** The paints and brushes the user owns, and a form to add or update a paint; state lives in [InventoryViewModel]. */
 @Composable
 fun InventoryScreen(
     container: AppContainer,
 ) {
-    var inventory by remember { mutableStateOf<Inventory?>(null) }
-    var version by remember { mutableStateOf(0) }
-    val scope = rememberCoroutineScope()
-    LaunchedEffect(version) { inventory = container.repository.getInventory() }
+    val vm = viewModel { InventoryViewModel(container) }
+    LaunchedEffect(Unit) { vm.load() }
+    val inventory by vm.inventory.collectAsState()
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_inventory"),
@@ -101,7 +100,7 @@ fun InventoryScreen(
                     }
                 }
             }
-            AddPaintForm(onSave = { paint -> scope.launch { savePaint(container.repository, paint); version++ } })
+            AddPaintForm(onSave = vm::save)
         }
     }
 }
