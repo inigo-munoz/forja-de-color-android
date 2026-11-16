@@ -32,6 +32,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T12 | S7 | Delete with confirmation: advice, project, progress photo, target image; delete their photo files unless another project uses them; replacing the target deletes the old one | inline | done (RED: 4 domain + 7 screen + 1 share; independent verifier) | b4b2979 |
 | T13 | S8 | Spanish translation: values-es for every string file, locale-aware technique cards | delegated (parallel with T14, disjoint surfaces, isolated worktree: Gradle runs collide in one tree) | done (RED: 4 of 10 new tests; parity test guards future strings) | ee896ba |
 | T14 | S9 | ViewModels for projects, project, ask, inventory and settings screens; declare lifecycle-viewmodel-compose 2.11.0 (already resolved transitively) | delegated (parallel with T13, disjoint surfaces) | done (all existing tests unchanged but one wait; 6 new VM tests; independent verifier PASS) | f14ba90 |
+| T15 | — | App launcher icon, designed with ChatGPT (owner, 2026-11-16: "Apunta para crear un icono con Chatgpt más tarde.") | inline | todo (later) | |
 
 Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
 Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 does not fire; from v2 on every schema change needs a migration test. T6 got its own commit.
