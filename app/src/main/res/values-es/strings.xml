@@ -126,4 +126,32 @@
         <item quantity="one">%d gota</item>
         <item quantity="other">%d gotas</item>
     </plurals>
+    <string name="nav_wheel">Colores</string>
+    <string name="wheel_title">Teoría del color</string>
+    <string name="wheel_hint">Toca un color para ver sus armonías y cuáles de tus pinturas encajan.</string>
+    <string name="wheel_your_paints">Tus pinturas de este color</string>
+    <string name="wheel_complementary">Complementario</string>
+    <string name="wheel_complementary_hint">El color opuesto en la rueda: el máximo contraste.</string>
+    <string name="wheel_analogous">Análogos</string>
+    <string name="wheel_analogous_hint">Los dos colores vecinos: una armonía suave.</string>
+    <string name="wheel_triad">Tríada</string>
+    <string name="wheel_triad_hint">Tres colores a la misma distancia: un contraste equilibrado.</string>
+    <string name="wheel_no_paints">Ninguna de tus pinturas.</string>
+    <string name="wheel_neutrals">Neutros</string>
+    <string name="wheel_neutrals_hint">El negro, el blanco, los grises y los metálicos no están en la rueda: combinan con cualquier color.</string>
+    <string name="wheel_kind_primary">Primario</string>
+    <string name="wheel_kind_secondary">Secundario</string>
+    <string name="wheel_kind_tertiary">Terciario</string>
+    <string name="wheel_red">Rojo</string>
+    <string name="wheel_red_orange">Rojo anaranjado</string>
+    <string name="wheel_orange">Naranja</string>
+    <string name="wheel_yellow_orange">Amarillo anaranjado</string>
+    <string name="wheel_yellow">Amarillo</string>
+    <string name="wheel_yellow_green">Amarillo verdoso</string>
+    <string name="wheel_green">Verde</string>
+    <string name="wheel_blue_green">Verde azulado</string>
+    <string name="wheel_blue">Azul</string>
+    <string name="wheel_blue_violet">Azul violáceo</string>
+    <string name="wheel_violet">Violeta</string>
+    <string name="wheel_red_violet">Rojo violáceo</string>
 </resources>

@@ -33,13 +33,15 @@ import app.forjadecolor.ui.project.ProjectScreen
 import app.forjadecolor.ui.projects.ProjectsScreen
 import app.forjadecolor.ui.settings.SettingsScreen
 import app.forjadecolor.ui.technique.TechniqueScreen
+import app.forjadecolor.ui.wheel.ColourWheelScreen
 
-/** Routes mirror the PWA hash router: #/projects, #/project/:id, #/ask/:id, #/inventory, #/settings, #/technique/:id. */
+/** Routes mirror the PWA hash router: #/projects, #/project/:id, #/ask/:id, #/inventory, #/wheel, #/settings, #/technique/:id. */
 object Routes {
     const val PROJECTS = "projects"
     const val PROJECT = "project/{id}"
     const val ASK = "ask/{id}"
     const val INVENTORY = "inventory"
+    const val WHEEL = "wheel"
     const val SETTINGS = "settings"
     const val TECHNIQUE = "technique/{id}"
 
@@ -54,6 +56,7 @@ object Routes {
 private enum class Tab(val route: String, @StringRes val label: Int, val tag: String, @DrawableRes val icon: Int) {
     PROJECTS(Routes.PROJECTS, R.string.nav_projects, "nav_projects", R.drawable.ic_nav_projects),
     INVENTORY(Routes.INVENTORY, R.string.nav_inventory, "nav_inventory", R.drawable.ic_nav_paints),
+    WHEEL(Routes.WHEEL, R.string.nav_wheel, "nav_wheel", R.drawable.ic_nav_wheel),
     SETTINGS(Routes.SETTINGS, R.string.nav_settings, "nav_settings", R.drawable.ic_nav_settings),
 }
 
@@ -83,6 +86,7 @@ fun AppNavHost(container: AppContainer, navController: NavHostController = remem
                 )
             }
             composable(Routes.INVENTORY) { InventoryScreen(container) }
+            composable(Routes.WHEEL) { ColourWheelScreen(container) }
             composable(Routes.SETTINGS) { SettingsScreen(container) }
             composable(Routes.TECHNIQUE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
                 val cardId = Routes.techniqueId(entry.arguments?.getString("id"))
