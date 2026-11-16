@@ -36,8 +36,8 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T14 | S9 | ViewModels for projects, project, ask, inventory and settings screens; declare lifecycle-viewmodel-compose 2.11.0 (already resolved transitively) | delegated (parallel with T13, disjoint surfaces) | done (all existing tests unchanged but one wait; 6 new VM tests; independent verifier PASS) | f14ba90 |
 | T15 | — | App launcher icon, designed with ChatGPT (owner, 2026-11-16: "Apunta para crear un icono con Chatgpt más tarde.") | inline | done | 17b7a15 |
 | T16 | S10, S5 | BSL roles: seed roles, role in the AI prompt and in My paints, PWA + Android, fixtures regenerated | delegated (context backstop) | done (RED both repos; fixtures regenerated) | 046cc64 |
-| T17 | S11 | UX item 1 | — | in progress | |
-| T18 | S11 | UX item 2 | — | todo | |
+| T17 | S11 | UX item 1 | inline | done (visual; suite green) | ee7cccf |
+| T18 | S11 | UX item 2 | — | in progress | |
 | T19 | S11 | UX item 3 | — | todo | |
 | T20 | S11 | UX item 4 | — | todo | |
 | T21 | S11 | UX item 5 | — | todo | |
