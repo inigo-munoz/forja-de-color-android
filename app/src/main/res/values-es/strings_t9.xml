@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish copy for the inventory, settings and technique screens that the PWA does not have as text. -->
+<resources>
+    <string name="technique_back">Volver</string>
+    <string name="settings_export_failed">No se pudo escribir el archivo de copia de seguridad.</string>
+</resources>

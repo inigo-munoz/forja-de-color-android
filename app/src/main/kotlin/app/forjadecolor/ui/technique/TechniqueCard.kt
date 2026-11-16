@@ -8,6 +8,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import app.forjadecolor.domain.advice.TechniqueCardId
 import java.io.FileNotFoundException
+import java.io.InputStream
+import java.util.Locale
 
 /** The few Markdown blocks a technique card uses. */
 sealed interface MdBlock {
@@ -24,11 +26,30 @@ private val HEADING = Regex("^(#{1,6}) (.+)$")
 private val BULLET = Regex("^[-*] (.+)$")
 private val BOLD = Regex("\\*\\*(.+?)\\*\\*")
 
-/** The card's Markdown from `assets/cards/<id>.md`; empty when the file is missing, as in the PWA. */
-fun readCardMarkdown(assets: AssetManager, id: TechniqueCardId): String = try {
-    assets.open("cards/${id.wire}.md").bufferedReader().use { it.readText() }
-} catch (e: FileNotFoundException) {
-    ""
+/**
+ * The card's Markdown for [language] (an ISO 639 code such as "es"): `assets/cards-<language>/<id>.md` when that
+ * translation exists, else the English `assets/cards/<id>.md`; empty when neither exists, as in the PWA.
+ */
+fun readCardMarkdown(
+    assets: AssetManager,
+    id: TechniqueCardId,
+    language: String = Locale.getDefault().language,
+): String = readCardMarkdown(assets::open, id, language)
+
+/** Same as above over any [open] that throws [FileNotFoundException] for a missing path, so the fallback is testable. */
+fun readCardMarkdown(open: (String) -> InputStream, id: TechniqueCardId, language: String): String {
+    val paths = listOfNotNull(
+        "cards-$language/${id.wire}.md".takeIf { language.isNotEmpty() && language != "en" },
+        "cards/${id.wire}.md",
+    )
+    for (path in paths) {
+        try {
+            return open(path).bufferedReader().use { it.readText() }
+        } catch (e: FileNotFoundException) {
+            // try the next one
+        }
+    }
+    return ""
 }
 
 /** Like the PWA's `getCard`: the title is the first `# ` heading, else the id; the body drops a leading title. */

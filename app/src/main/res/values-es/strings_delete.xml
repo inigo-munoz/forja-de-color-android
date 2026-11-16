@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish copy for deleting things, always after a confirmation (T12). -->
+<resources>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_remove">Quitar</string>
+    <string name="project_delete">Eliminar proyecto</string>
+    <string name="project_delete_photo">Eliminar</string>
+    <string name="project_remove_target">Quitar imagen objetivo</string>
+    <string name="confirm_delete_advice">¿Eliminar este consejo? No se puede deshacer.</string>
+    <string name="confirm_delete_project">¿Eliminar este proyecto y sus fotos? No se puede deshacer.</string>
+    <string name="confirm_delete_progress">¿Eliminar esta foto de progreso? No se puede deshacer.</string>
+    <string name="confirm_remove_target">¿Quitar la imagen objetivo? No se puede deshacer.</string>
+    <string name="action_close">Cerrar</string>
+</resources>
