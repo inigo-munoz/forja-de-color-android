@@ -4,6 +4,7 @@
     <string name="t8_choose_photo">Choose photo</string>
     <string name="t8_take_photo">Take photo</string>
     <string name="t8_photo_ready">Photo added</string>
+    <string name="t8_remove_photo">Remove photo</string>
     <string name="t8_photo_missing">Photo not found</string>
     <string name="t8_photo_error">The photo could not be read.</string>
     <string name="t8_not_found">Project not found.</string>

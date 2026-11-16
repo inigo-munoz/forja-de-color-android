@@ -87,6 +87,38 @@ class ProjectsScreenTest {
     }
 
     @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `removes the taken photo, so the project is created without it`() {
+        val out = ByteArrayOutputStream()
+        Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, out)
+        app.photos.nextPhoto = out.toByteArray()
+        show()
+        compose.onNodeWithTag("new_project_name").performScrollTo().performTextInput("Búho")
+        compose.onNodeWithTag("new_project_take_photo").performScrollTo().performClick()
+        compose.onNodeWithTag("new_project_photo_preview").performScrollTo().assertIsDisplayed()
+
+        compose.onNodeWithTag("new_project_photo_preview_remove").performScrollTo().performClick()
+
+        compose.onAllNodesWithTag("new_project_photo_preview").assertCountEquals(0)
+        compose.onAllNodesWithTag("new_project_photo_preview_remove").assertCountEquals(0)
+        compose.onNodeWithTag("new_project_create").performScrollTo().performClick()
+        app.waitFor(compose) { opened.isNotEmpty() }
+        assertNull(app.projects().single().initialPhotoBlobId)
+    }
+
+    @Test
+    fun `removes a chosen photo too`() {
+        app.photos.nextPhoto = byteArrayOf(1, 2, 3)
+        show()
+        compose.onNodeWithTag("new_project_choose_photo").performScrollTo().performClick()
+        compose.onNodeWithTag("new_project_photo_preview").performScrollTo().assertIsDisplayed()
+
+        compose.onNodeWithTag("new_project_photo_preview_remove").performScrollTo().performClick()
+
+        compose.onAllNodesWithTag("new_project_photo_preview").assertCountEquals(0)
+    }
+
+    @Test
     fun `creates a project without a photo, as the photo is optional`() {
         show()
         compose.onNodeWithTag("new_project_name").performScrollTo().performTextInput("Druida")

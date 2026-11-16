@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,11 +18,11 @@ import androidx.compose.ui.unit.dp
 import app.forjadecolor.R
 
 /**
- * The photo just taken or chosen, shown before it is used, so the user sees what they picked.
- * Falls back to the "Photo added" text when the bytes cannot be decoded.
+ * The photo just taken or chosen, shown before it is used, so the user sees what they picked,
+ * with a button to remove it. Falls back to the "Photo added" text when the bytes cannot be decoded.
  */
 @Composable
-fun PhotoPreview(bytes: ByteArray, tag: String) {
+fun PhotoPreview(bytes: ByteArray, tag: String, onRemove: () -> Unit) {
     val image = remember(bytes) { BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.asImageBitmap() }
     val description = stringResource(R.string.t8_photo_ready)
     if (image != null) {
@@ -34,4 +35,5 @@ fun PhotoPreview(bytes: ByteArray, tag: String) {
     } else {
         Text(description, modifier = Modifier.testTag(tag))
     }
+    TextButton(onClick = onRemove, modifier = Modifier.testTag("${tag}_remove")) { Text(stringResource(R.string.t8_remove_photo)) }
 }

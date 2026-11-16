@@ -251,7 +251,7 @@ fun AskScreen(
                     OutlinedButton(onClick = pick, modifier = Modifier.testTag("ask_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                     OutlinedButton(onClick = shoot, modifier = Modifier.testTag("ask_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
                 }
-                photo?.let { PhotoPreview(it, tag = "ask_photo_preview") }
+                photo?.let { PhotoPreview(it, tag = "ask_photo_preview", onRemove = { photo = null }) }
 
                 Button(onClick = send, modifier = Modifier.testTag("send")) { Text(stringResource(R.string.ask_send)) }
                 if (sendStatus.isNotEmpty()) Text(sendStatus, modifier = Modifier.testTag("send_status"))

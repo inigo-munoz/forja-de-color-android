@@ -164,7 +164,7 @@ private fun NewProjectForm(onCreate: (name: String, photo: ByteArray?) -> Unit) 
                 OutlinedButton(onClick = pick, modifier = Modifier.testTag("new_project_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                 OutlinedButton(onClick = shoot, modifier = Modifier.testTag("new_project_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
             }
-            photo?.let { PhotoPreview(it, tag = "new_project_photo_preview") }
+            photo?.let { PhotoPreview(it, tag = "new_project_photo_preview", onRemove = { photo = null }) }
             if (photoError) Text(stringResource(R.string.t8_photo_error), color = MaterialTheme.colorScheme.error)
             Button(
                 onClick = { name.trim().takeIf { it.isNotEmpty() }?.let { onCreate(it, photo) } },

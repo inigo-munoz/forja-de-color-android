@@ -141,6 +141,22 @@ class AskScreenTest {
     }
 
     @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `removes the taken photo, so the project photo is sent instead`() {
+        show()
+        app.photos.nextPhoto = jpeg()
+        click("ask_take_photo")
+        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
+
+        click("ask_photo_preview_remove")
+
+        compose.onAllNodesWithTag("ask_photo_preview").assertCountEquals(0)
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        assertEquals(photoId, app.bridge.sent.single().imageId)
+    }
+
+    @Test
     fun `sends a freshly picked photo, stored first`() {
         show()
         app.photos.nextPhoto = byteArrayOf(4, 4)
