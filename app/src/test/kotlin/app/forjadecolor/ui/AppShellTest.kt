@@ -41,6 +41,17 @@ class AppShellTest {
     }
 
     @Test
+    fun `bottom navigation opens the colour wheel`() {
+        val container = AppContainer(ApplicationProvider.getApplicationContext())
+        compose.setContent { ForgeTheme { AppNavHost(container) } }
+
+        compose.onNodeWithText("Colours", useUnmergedTree = true).assertIsDisplayed()
+        compose.onNodeWithTag("nav_wheel").performClick()
+
+        compose.onNodeWithTag("screen_wheel").assertIsDisplayed()
+    }
+
+    @Test
     fun `Projects tab returns to the projects list from Settings`() {
         val container = AppContainer(ApplicationProvider.getApplicationContext())
         compose.setContent { ForgeTheme { AppNavHost(container) } }

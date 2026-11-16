@@ -58,6 +58,8 @@ import app.forjadecolor.domain.paints.addPaint
 import app.forjadecolor.domain.paints.bslRole
 import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.storage.Repository
+import app.forjadecolor.ui.components.Swatch
+import app.forjadecolor.ui.components.parseHex
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -228,18 +230,6 @@ private fun roleLabel(role: BslRole): Int = when (role) {
     BslRole.LIGHT -> R.string.bsl_role_light
     BslRole.FOURTH -> R.string.bsl_role_fourth
 }
-
-@Composable
-private fun Swatch(hex: String, tag: String = "swatch") {
-    val color = remember(hex) { parseHex(hex) }
-    Box(
-        Modifier.size(20.dp).background(color ?: Color.Transparent, CircleShape)
-            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape).testTag(tag),
-    )
-}
-
-private fun parseHex(hex: String): Color? =
-    if (HEX.matches(hex.trim())) Color(0xFF000000 or hex.trim().drop(1).toLong(16)) else null
 
 /** The add/update form; saving goes through [onSave] (the ViewModel and [savePaint]). */
 @OptIn(ExperimentalLayoutApi::class)

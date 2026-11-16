@@ -128,4 +128,32 @@
         <item quantity="one">%d drop</item>
         <item quantity="other">%d drops</item>
     </plurals>
+    <string name="nav_wheel">Colours</string>
+    <string name="wheel_title">Colour theory</string>
+    <string name="wheel_hint">Tap a colour to see its harmonies and which of your paints match.</string>
+    <string name="wheel_your_paints">Your paints in this colour</string>
+    <string name="wheel_complementary">Complementary</string>
+    <string name="wheel_complementary_hint">The opposite colour on the wheel: the strongest contrast.</string>
+    <string name="wheel_analogous">Analogous</string>
+    <string name="wheel_analogous_hint">The two neighbouring colours: a soft harmony.</string>
+    <string name="wheel_triad">Triad</string>
+    <string name="wheel_triad_hint">Three colours evenly spaced: a balanced contrast.</string>
+    <string name="wheel_no_paints">None of your paints.</string>
+    <string name="wheel_neutrals">Neutrals</string>
+    <string name="wheel_neutrals_hint">Black, white, grey and metallics are not on the wheel: they go with any colour.</string>
+    <string name="wheel_kind_primary">Primary</string>
+    <string name="wheel_kind_secondary">Secondary</string>
+    <string name="wheel_kind_tertiary">Tertiary</string>
+    <string name="wheel_red">Red</string>
+    <string name="wheel_red_orange">Red-orange</string>
+    <string name="wheel_orange">Orange</string>
+    <string name="wheel_yellow_orange">Yellow-orange</string>
+    <string name="wheel_yellow">Yellow</string>
+    <string name="wheel_yellow_green">Yellow-green</string>
+    <string name="wheel_green">Green</string>
+    <string name="wheel_blue_green">Blue-green</string>
+    <string name="wheel_blue">Blue</string>
+    <string name="wheel_blue_violet">Blue-violet</string>
+    <string name="wheel_violet">Violet</string>
+    <string name="wheel_red_violet">Red-violet</string>
 </resources>

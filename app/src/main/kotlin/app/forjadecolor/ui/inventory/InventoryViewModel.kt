@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-/** The owned paints and brushes, and saving a paint, for [InventoryScreen]. */
+/** The owned paints and brushes, and saving a paint, for [InventoryScreen] and the colour wheel. */
 class InventoryViewModel(private val container: AppContainer) : ViewModel() {
     private val _inventory = MutableStateFlow<Inventory?>(null)
 
