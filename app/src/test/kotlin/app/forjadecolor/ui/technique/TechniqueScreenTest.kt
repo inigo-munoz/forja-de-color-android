@@ -28,7 +28,7 @@ class TechniqueScreenTest {
         compose.setContent { ForgeTheme { TechniqueScreen(container, TechniqueCardId.SLAPCHOP, onBack = { backs++ }) } }
 
         compose.onNodeWithTag("technique_title").assertTextEquals("Slapchop")
-        compose.onNodeWithText("TODO(user): write from the BSL book").assertExists()
+        compose.onNodeWithText("Grey drybrush", substring = true).assertExists()
         compose.onNodeWithText("# Slapchop", substring = true).assertDoesNotExist()
         compose.onNodeWithTag("technique_back").performClick()
         assertEquals(1, backs)

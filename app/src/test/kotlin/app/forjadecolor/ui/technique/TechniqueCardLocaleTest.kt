@@ -56,7 +56,7 @@ class TechniqueCardLocaleTest {
 
         compose.onNodeWithTag("technique_title").assertTextEquals("Pincel seco")
         compose.onNodeWithTag("technique_back").assertTextEquals("Volver")
-        compose.onNodeWithText("TODO(usuario): redactar a partir del libro BSL").assertExists()
+        compose.onNodeWithText("Errores típicos").assertExists()
     }
 
     @Test
@@ -66,6 +66,6 @@ class TechniqueCardLocaleTest {
         compose.setContent { ForgeTheme { TechniqueScreen(container, TechniqueCardId.DRYBRUSH, onBack = {}) } }
 
         compose.onNodeWithTag("technique_back").assertTextEquals("Back")
-        compose.onNodeWithText("TODO(user): write from the BSL book").assertExists()
+        compose.onNodeWithText("Common mistakes").assertExists()
     }
 }
