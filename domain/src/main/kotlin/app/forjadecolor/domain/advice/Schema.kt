@@ -4,7 +4,7 @@ import app.forjadecolor.domain.paints.PaintRef
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-enum class Moment(val wire: String) { START("start"), HALF_PAINTED("half-painted"), DURING("during") }
+enum class Moment(val wire: String) { START("start"), PRIMED("primed"), HALF_PAINTED("half-painted"), DURING("during") }
 
 enum class Question(val wire: String) {
     APPLY_LAYER("apply-layer"),
@@ -26,6 +26,8 @@ enum class TechniqueCardId(val wire: String) {
 @Serializable
 enum class RecipeMoment(val wire: String) {
     @SerialName("start") START("start"),
+    /** The miniature is already primed and drybrushed: prep is empty. */
+    @SerialName("primed") PRIMED("primed"),
     @SerialName("half-painted") HALF_PAINTED("half-painted"),
 }
 

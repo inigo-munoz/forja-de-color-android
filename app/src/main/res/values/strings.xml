@@ -76,6 +76,7 @@
     <string name="ask_title">Ask the advisor</string>
     <string name="ask_moment">Moment</string>
     <string name="ask_moment_start">Start</string>
+    <string name="ask_moment_primed">Primed and drybrushed</string>
     <string name="ask_moment_half_painted">Half-painted</string>
     <string name="ask_moment_during">While painting</string>
     <string name="ask_zone">Zone</string>

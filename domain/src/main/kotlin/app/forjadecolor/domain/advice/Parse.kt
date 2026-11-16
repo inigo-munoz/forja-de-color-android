@@ -89,7 +89,7 @@ private fun validate(data: JsonElement): List<String> {
 
 private fun validateRecipe(data: JsonObject, errors: MutableList<String>) {
     val moment = data["moment"].str()
-    if (moment != "start" && moment != "half-painted") errors += "recipe: moment must be \"start\" or \"half-painted\""
+    if (moment != "start" && moment != "primed" && moment != "half-painted") errors += "recipe: moment must be \"start\", \"primed\" or \"half-painted\""
     if (!data["prep"].isStrArray()) errors += "recipe: prep must be a list of steps"
     if (!data["tips"].isStrArray()) errors += "recipe: tips must be a list"
     val zones = data["zones"]

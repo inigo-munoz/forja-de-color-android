@@ -59,7 +59,7 @@ brush|B02001|Detail núm. 1
 brush|B02002|Detail núm. 2
 brush|B07001|Dry Brush Small
 
-When I send a photo I will say the moment (start, half-painted or during). For start and half-painted answer with this format:
+When I send a photo I will say the moment (start, primed, half-painted or during). For start, primed and half-painted answer with this format (for primed, leave prep empty):
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {

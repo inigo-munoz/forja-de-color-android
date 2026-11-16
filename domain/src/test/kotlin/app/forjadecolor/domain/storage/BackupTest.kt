@@ -2,6 +2,7 @@ package app.forjadecolor.domain.storage
 
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.advice.ConsultationResponse
+import app.forjadecolor.domain.advice.RecipeMoment
 import app.forjadecolor.domain.advice.RecipeResponse
 import app.forjadecolor.domain.projects.ProjectStatus
 import app.forjadecolor.domain.projects.createProject
@@ -45,6 +46,8 @@ class BackupTest {
         assertEquals("photo-target", paladin.targetImageBlobId)
         assertEquals(listOf("pp-1"), paladin.progress.map { it.id })
         assertIs<RecipeResponse>(paladin.advice[0].response)
+        assertEquals(RecipeMoment.PRIMED, assertIs<RecipeResponse>(paladin.advice[2].response).moment)
+        assertEquals(emptyList(), (paladin.advice[2].response as RecipeResponse).prep)
         assertEquals(listOf("X999"), assertIs<ConsultationResponse>(paladin.advice[1].response).let { paladin.advice[1].unknownBrushes })
         assertEquals(ProjectStatus.DONE, projects[1].status)
         assertEquals(4, repo.getInventory().paints.size)

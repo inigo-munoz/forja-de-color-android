@@ -87,6 +87,7 @@ suspend fun saveAnswer(container: AppContainer, projectId: String, raw: String):
 
 private val MOMENT_LABELS = listOf(
     Moment.START to R.string.ask_moment_start,
+    Moment.PRIMED to R.string.ask_moment_primed,
     Moment.HALF_PAINTED to R.string.ask_moment_half_painted,
     Moment.DURING to R.string.ask_moment_during,
 )

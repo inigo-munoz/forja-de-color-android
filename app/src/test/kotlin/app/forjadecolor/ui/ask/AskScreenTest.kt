@@ -82,11 +82,28 @@ class AskScreenTest {
     private fun click(tag: String) = compose.onNodeWithTag(tag).performScrollTo().performClick()
 
     @Test
-    fun `offers the three moments`() {
+    fun `offers the four moments in order`() {
         show()
-        compose.onNodeWithTag("moment_start").assertExists()
-        compose.onNodeWithTag("moment_half-painted").assertExists()
-        compose.onNodeWithTag("moment_during").assertExists()
+        val tops = listOf("start", "primed", "half-painted", "during").map {
+            compose.onNodeWithTag("moment_$it").assertExists().fetchSemanticsNode().boundsInRoot.top
+        }
+        assertEquals(tops.sorted(), tops)
+        assertEquals(4, tops.distinct().size)
+    }
+
+    @Test
+    fun `sends a primed package asking for a recipe without prep`() {
+        show()
+        click("moment_primed")
+        compose.onNodeWithTag("during_fields").assertDoesNotExist()
+        click("send")
+
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        val pkg = app.bridge.sent.single()
+        assertTrue(pkg.text.contains("MOMENT: primed."))
+        assertTrue(pkg.text.contains("\"moment\": \"primed\""))
+        assertTrue(pkg.text.contains("\"prep\": []"))
+        assertEquals(photoId, pkg.imageId)
     }
 
     @Test

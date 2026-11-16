@@ -27,7 +27,7 @@ private fun recipeFormat(moment: RecipeMoment): String {
   "version": 1,
   "kind": "recipe",
   "moment": "${moment.wire}",
-  "prep": ["step", "..."],
+  "prep": ${if (moment == RecipeMoment.PRIMED) "[]" else "[\"step\", \"...\"]"},
   "zones": [
     { "name": "zone", "technique": "slapchop", "paint": { "brand": "Vallejo", "code": "72.021" }, "dilution": "1:3", "steps": ["..."], "brush": "B02001" },
     { "name": "zone", "technique": "bsl", "bsl": { "base": { "brand": "Vallejo", "code": "72.099" }, "shadow": { "brand": "Vallejo", "code": "72.071" }, "light": { "brand": "Vallejo", "code": "72.098" } }, "steps": ["..."] }
@@ -59,6 +59,7 @@ private fun inventoryLines(inv: Inventory): String {
 
 private fun momentRequest(req: AdviceRequest): String = when (req.moment) {
     Moment.START -> "MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones."
+    Moment.PRIMED -> "MOMENT: primed. The photo shows my miniature already primed in black with the grey and white drybrush done. Skip priming and drybrushing (leave prep empty) and give me a palette by zones, starting from the colour layers."
     Moment.HALF_PAINTED -> "MOMENT: half-painted. The photo shows my miniature partly painted. Say which zones are already painted, propose complementary colours and the steps left to finish it."
     Moment.DURING -> {
         val details = if (req.freeText.isNullOrEmpty()) "" else " Details: ${req.freeText}"
@@ -69,6 +70,7 @@ private fun momentRequest(req: AdviceRequest): String = when (req.moment) {
 fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): AdvicePackage {
     val format = when (req.moment) {
         Moment.START -> recipeFormat(RecipeMoment.START)
+        Moment.PRIMED -> recipeFormat(RecipeMoment.PRIMED)
         Moment.HALF_PAINTED -> recipeFormat(RecipeMoment.HALF_PAINTED)
         Moment.DURING -> CONSULTATION_FORMAT
     }
@@ -79,7 +81,7 @@ fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): Adv
 fun buildBrainInstructions(inv: Inventory): String = listOf(
     METHOD,
     inventoryLines(inv),
-    "When I send a photo I will say the moment (start, half-painted or during). For start and half-painted answer with this format:",
+    "When I send a photo I will say the moment (start, primed, half-painted or during). For start, primed and half-painted answer with this format (for primed, leave prep empty):",
     recipeFormat(RecipeMoment.START),
     "For during answer with this format:",
     CONSULTATION_FORMAT,

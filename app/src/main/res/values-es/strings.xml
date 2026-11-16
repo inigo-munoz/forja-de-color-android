@@ -74,6 +74,7 @@
     <string name="ask_title">Consultar al asesor</string>
     <string name="ask_moment">Momento</string>
     <string name="ask_moment_start">Inicio</string>
+    <string name="ask_moment_primed">Imprimada y con pincel seco</string>
     <string name="ask_moment_half_painted">A medio pintar</string>
     <string name="ask_moment_during">Mientras pinto</string>
     <string name="ask_zone">Zona</string>

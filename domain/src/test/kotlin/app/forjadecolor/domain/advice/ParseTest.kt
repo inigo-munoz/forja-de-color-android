@@ -49,6 +49,20 @@ class ParseTest {
 
     @Test fun `accepts a bare JSON object`() { ok(parse(recipe(slap("72.021")))) }
 
+    @Test fun `accepts a primed recipe with no prep steps`() {
+        val r = ok(parse(recipe(slap("72.021")) { put("moment", JsonPrimitive("primed")); put("prep", buildJsonArray {}) }))
+        val response = assertIs<RecipeResponse>(r.entry.response)
+        assertEquals(RecipeMoment.PRIMED, response.moment)
+        assertEquals(emptyList(), response.prep)
+    }
+
+    @Test fun `rejects a recipe with an unknown moment naming the accepted ones`() {
+        assertContains(
+            errorsOf(parse(recipe(slap("72.021")) { put("moment", JsonPrimitive("during")) })),
+            "recipe: moment must be \"start\", \"primed\" or \"half-painted\"",
+        )
+    }
+
     @Test fun `rejects text with no JSON`() {
         assertContains(errorsOf(parseAdviceResponse("Lo siento, no puedo ayudar.", SEED_INVENTORY)), "no JSON found in the answer")
     }
@@ -117,7 +131,7 @@ class ParseTest {
 
     // hardening: the prompt pasted back by mistake
     @Test fun `rejects every prompt itself`() {
-        listOf(Moment.START, Moment.HALF_PAINTED, Moment.DURING).forEach { m ->
+        Moment.entries.forEach { m ->
             val pkg = buildAdvicePackage(AdviceRequest(m, zone = "capa", question = Question.LIGHT), SEED_INVENTORY, "p")
             assertContains(errorsOf(parseAdviceResponse(pkg.text, SEED_INVENTORY)), "this is the prompt, not the AI answer")
         }

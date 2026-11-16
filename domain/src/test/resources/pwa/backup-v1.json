@@ -186,6 +186,82 @@
           "unknownBrushes": [
             "X999"
           ]
+        },
+        {
+          "id": "adv-3",
+          "receivedAt": "2026-11-11T12:00:00.000Z",
+          "response": {
+            "version": 1,
+            "kind": "recipe",
+            "moment": "primed",
+            "prep": [],
+            "tips": [
+              "Capas finas"
+            ],
+            "zones": [
+              {
+                "name": "túnica",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Vallejo",
+                  "code": "72.032"
+                },
+                "dilution": "1:3",
+                "steps": [
+                  "Aplicar"
+                ],
+                "brush": "B02001"
+              },
+              {
+                "name": "cara",
+                "technique": "bsl",
+                "bsl": {
+                  "base": {
+                    "brand": "Vallejo",
+                    "code": "72.099"
+                  },
+                  "shadow": {
+                    "brand": "Vallejo",
+                    "code": "72.071"
+                  },
+                  "light": {
+                    "brand": "Vallejo",
+                    "code": "72.098"
+                  }
+                },
+                "steps": []
+              },
+              {
+                "name": "peana",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Citadel",
+                  "code": "Abaddon Black"
+                },
+                "dilution": "1:1",
+                "steps": []
+              }
+            ]
+          },
+          "unknownPaints": [
+            {
+              "brand": "Vallejo",
+              "code": "72.032"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.099"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.071"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.098"
+            }
+          ],
+          "unknownBrushes": []
         }
       ],
       "initialPhotoBlobId": "photo-initial",

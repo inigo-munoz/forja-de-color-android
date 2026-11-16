@@ -21,6 +21,14 @@ class AdvicePackageTest {
     }
 
     @Test
+    fun `primed prompt is identical to the PWA's and asks for an empty prep without complements`() {
+        val primed = buildAdvicePackage(AdviceRequest(Moment.PRIMED), SEED_INVENTORY, "p").text
+        assertEquals(pwaFixture("prompt-primed.txt"), primed)
+        assertTrue(primed.contains("\"prep\": []"))
+        assertFalse(primed.contains("\"complements\""))
+    }
+
+    @Test
     fun `during prompt with zone, question and details is identical to the PWA's`() {
         val req = AdviceRequest(Moment.DURING, zone = "capa", question = Question.HIGHLIGHT, freeText = "borde dorado")
         assertEquals(pwaFixture("prompt-during.txt"), buildAdvicePackage(req, SEED_INVENTORY, "p").text)
@@ -36,6 +44,7 @@ class AdvicePackageTest {
         val brain = buildBrainInstructions(SEED_INVENTORY)
         assertEquals(pwaFixture("brain-instructions.txt"), brain)
         assertFalse(brain.contains("MOMENT:"))
+        assertTrue(brain.contains("start, primed, half-painted or during"))
     }
 
     @Test
