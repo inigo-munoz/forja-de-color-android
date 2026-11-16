@@ -18,7 +18,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -67,7 +69,18 @@ private var SemanticsPropertyReceiver.paintedRevealStart by PaintedRevealStart
 
 private const val NOTES_DEBOUNCE_MS = 800L
 
-/** One project: before/after, advice, notes, progress photos and the target image; state lives in [ProjectViewModel]. */
+/** The sections below the project header, one shown at a time. */
+private enum class ProjectTab(val tag: String, val label: Int) {
+    RECIPE("tab_recipe", R.string.project_tab_recipe),
+    DIARY("tab_diary", R.string.project_tab_diary),
+    PHOTOS("tab_photos", R.string.project_tab_photos),
+}
+
+/**
+ * One project: title, before/after and the main actions on top, then tabs for the advice (Recipe),
+ * the notes (Diary) and the progress and target photos (Photos); "Delete project" closes the screen
+ * under any tab. State lives in [ProjectViewModel].
+ */
 @Composable
 fun ProjectScreen(
     container: AppContainer,
@@ -87,6 +100,8 @@ fun ProjectScreen(
     var confirmation by remember { mutableStateOf<Confirmation?>(null) }
     // The progress photo shown large, by its blob id.
     var openPhoto by rememberSaveable { mutableStateOf<String?>(null) }
+    // Survives rotation; declared before the loading return so restoring never loses it.
+    var selectedTab by rememberSaveable { mutableStateOf(ProjectTab.RECIPE) }
 
     val current = state.project
     val inventory = state.inventory
@@ -127,65 +142,86 @@ fun ProjectScreen(
             ) { Text(stringResource(if (current.status == ProjectStatus.DONE) R.string.project_reopen else R.string.project_mark_done)) }
         }
 
-        current.advice.asReversed().forEach { entry ->
-            AdviceCard(
-                entry,
-                inventory,
-                onDelete = {
-                    confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) { vm.deleteAdvice(entry.id) }
-                },
-                onAssign = { unknown, owned -> vm.assignPaint(entry.id, unknown, owned) },
-                onOpenTechnique = onOpenTechnique,
-                onPaintImage = vm::paintImage,
-            )
-        }
-
-        // Saved on the app scope (see ProjectViewModel.saveNotes): the last save runs as the screen closes.
-        NotesCard(current.notes, vm::saveNotes)
-
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.project_progress), style = MaterialTheme.typography.titleMedium)
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    current.progress.forEach { photo ->
-                        Column(Modifier.testTag("progress_photo")) {
-                            BlobImage(
-                                repository,
-                                photo.blobId,
-                                Modifier.size(96.dp).clickable { openPhoto = photo.blobId }.testTag("open_progress_photo"),
-                            )
-                            Text(photo.takenAt.take(10), style = MaterialTheme.typography.labelSmall)
-                            TextButton(
-                                onClick = {
-                                    confirmation = Confirmation(R.string.confirm_delete_progress, R.string.action_delete) { vm.deleteProgressPhoto(photo) }
-                                },
-                                modifier = Modifier.testTag("delete_progress_photo"),
-                            ) { Text(stringResource(R.string.project_delete_photo)) }
-                        }
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = pickProgress, modifier = Modifier.testTag("add_progress")) { Text(stringResource(R.string.project_add_progress)) }
-                    OutlinedButton(onClick = shootProgress, modifier = Modifier.testTag("add_progress_camera")) { Text(stringResource(R.string.t8_take_photo)) }
-                }
-                if (progressError) PhotoErrorText("progress_photo_error")
+        PrimaryTabRow(selectedTabIndex = selectedTab.ordinal) {
+            ProjectTab.entries.forEach { tab ->
+                Tab(
+                    selected = tab == selectedTab,
+                    onClick = { selectedTab = tab },
+                    text = { Text(stringResource(tab.label)) },
+                    modifier = Modifier.testTag(tab.tag),
+                )
             }
         }
 
-        Card(Modifier.fillMaxWidth()) {
-            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.project_target), style = MaterialTheme.typography.titleMedium)
-                current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.fillMaxWidth().aspectRatio(1f)) }
-                if (current.targetImageBlobId != null) {
-                    TextButton(
-                        onClick = {
-                            confirmation = Confirmation(R.string.confirm_remove_target, R.string.action_remove) { vm.removeTarget() }
-                        },
-                        modifier = Modifier.testTag("remove_target"),
-                    ) { Text(stringResource(R.string.project_remove_target)) }
+        when (selectedTab) {
+            ProjectTab.RECIPE -> {
+                if (current.advice.isEmpty()) {
+                    Text(stringResource(R.string.project_advice_empty), modifier = Modifier.testTag("advice_empty"))
                 }
-                OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) { Text(stringResource(R.string.project_set_target)) }
-                if (targetError) PhotoErrorText("target_photo_error")
+                current.advice.asReversed().forEach { entry ->
+                    AdviceCard(
+                        entry,
+                        inventory,
+                        onDelete = {
+                            confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) { vm.deleteAdvice(entry.id) }
+                        },
+                        onAssign = { unknown, owned -> vm.assignPaint(entry.id, unknown, owned) },
+                        onOpenTechnique = onOpenTechnique,
+                        onPaintImage = vm::paintImage,
+                    )
+                }
+            }
+            ProjectTab.DIARY -> {
+                // Saved on the app scope (see ProjectViewModel.saveNotes): the last save runs as the card
+                // leaves composition, when the screen closes or another tab is selected.
+                NotesCard(current.notes, vm::saveNotes)
+            }
+            ProjectTab.PHOTOS -> {
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.project_progress), style = MaterialTheme.typography.titleMedium)
+                        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            current.progress.forEach { photo ->
+                                Column(Modifier.testTag("progress_photo")) {
+                                    BlobImage(
+                                        repository,
+                                        photo.blobId,
+                                        Modifier.size(96.dp).clickable { openPhoto = photo.blobId }.testTag("open_progress_photo"),
+                                    )
+                                    Text(photo.takenAt.take(10), style = MaterialTheme.typography.labelSmall)
+                                    TextButton(
+                                        onClick = {
+                                            confirmation = Confirmation(R.string.confirm_delete_progress, R.string.action_delete) { vm.deleteProgressPhoto(photo) }
+                                        },
+                                        modifier = Modifier.testTag("delete_progress_photo"),
+                                    ) { Text(stringResource(R.string.project_delete_photo)) }
+                                }
+                            }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = pickProgress, modifier = Modifier.testTag("add_progress")) { Text(stringResource(R.string.project_add_progress)) }
+                            OutlinedButton(onClick = shootProgress, modifier = Modifier.testTag("add_progress_camera")) { Text(stringResource(R.string.t8_take_photo)) }
+                        }
+                        if (progressError) PhotoErrorText("progress_photo_error")
+                    }
+                }
+
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.project_target), style = MaterialTheme.typography.titleMedium)
+                        current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.fillMaxWidth().aspectRatio(1f)) }
+                        if (current.targetImageBlobId != null) {
+                            TextButton(
+                                onClick = {
+                                    confirmation = Confirmation(R.string.confirm_remove_target, R.string.action_remove) { vm.removeTarget() }
+                                },
+                                modifier = Modifier.testTag("remove_target"),
+                            ) { Text(stringResource(R.string.project_remove_target)) }
+                        }
+                        OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) { Text(stringResource(R.string.project_set_target)) }
+                        if (targetError) PhotoErrorText("target_photo_error")
+                    }
+                }
             }
         }
 
@@ -264,7 +300,8 @@ private fun CompareView(container: AppContainer, beforeId: String, afterId: Stri
 
 /**
  * Notes are saved while typing (debounced), when the field loses focus, when the app goes to the
- * background and when the screen closes, so Android discarding the app cannot lose them.
+ * background and when the card leaves composition (the screen closes or another tab is selected),
+ * so Android discarding the app cannot lose them.
  */
 @Composable
 private fun NotesCard(stored: String, save: (String) -> Unit) {

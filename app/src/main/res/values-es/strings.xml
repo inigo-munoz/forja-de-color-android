@@ -51,6 +51,10 @@
     <string name="project_mark_done">Marcar como terminado</string>
     <string name="project_reopen">Reabrir</string>
     <string name="project_ask">Consultar al asesor</string>
+    <string name="project_tab_recipe">Receta</string>
+    <string name="project_tab_diary">Diario</string>
+    <string name="project_tab_photos">Fotos</string>
+    <string name="project_advice_empty">Todavía no hay consejos: toca Consultar al asesor.</string>
     <string name="project_advice">Consejo</string>
     <string name="project_prep">Preparación</string>
     <string name="project_tips">Consejos</string>
@@ -65,8 +69,8 @@
     <string name="project_see_technique">Ver ficha de técnica</string>
     <string name="project_delete_advice">Eliminar este consejo</string>
     <string name="project_paint_image">Pintarla con ChatGPT</string>
-    <string name="project_paint_image_sent">Guarda la imagen que genere ChatGPT y luego añádela abajo con \"Poner imagen objetivo\".</string>
-    <string name="project_paint_image_fallback">Prompt copiado y foto descargada: pega ambos en ChatGPT, guarda la imagen que genere y luego añádela abajo con \"Poner imagen objetivo\".</string>
+    <string name="project_paint_image_sent">Guarda la imagen que genere ChatGPT y luego añádela en la pestaña Fotos con \"Poner imagen objetivo\".</string>
+    <string name="project_paint_image_fallback">Prompt copiado y foto descargada: pega ambos en ChatGPT, guarda la imagen que genere y luego añádela en la pestaña Fotos con \"Poner imagen objetivo\".</string>
     <string name="project_compare">Antes / después</string>
     <string name="project_compare_help">Arrastra para comparar</string>
 

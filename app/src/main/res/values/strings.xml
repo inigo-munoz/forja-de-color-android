@@ -53,6 +53,10 @@
     <string name="project_mark_done">Mark as done</string>
     <string name="project_reopen">Reopen</string>
     <string name="project_ask">Ask the advisor</string>
+    <string name="project_tab_recipe">Recipe</string>
+    <string name="project_tab_diary">Diary</string>
+    <string name="project_tab_photos">Photos</string>
+    <string name="project_advice_empty">No advice yet: tap Ask the advisor.</string>
     <string name="project_advice">Advice</string>
     <string name="project_prep">Preparation</string>
     <string name="project_tips">Tips</string>
@@ -67,8 +71,8 @@
     <string name="project_see_technique">See technique card</string>
     <string name="project_delete_advice">Delete this advice</string>
     <string name="project_paint_image">Paint it with ChatGPT</string>
-    <string name="project_paint_image_sent">Save the image ChatGPT makes, then add it below with \"Set target image\".</string>
-    <string name="project_paint_image_fallback">Prompt copied and photo downloaded — paste both in ChatGPT, save the image it makes, then add it below with \"Set target image\".</string>
+    <string name="project_paint_image_sent">Save the image ChatGPT makes, then add it in the Photos tab with \"Set target image\".</string>
+    <string name="project_paint_image_fallback">Prompt copied and photo downloaded — paste both in ChatGPT, save the image it makes, then add it in the Photos tab with \"Set target image\".</string>
     <string name="project_compare">Before / after</string>
     <string name="project_compare_help">Drag to compare</string>
 

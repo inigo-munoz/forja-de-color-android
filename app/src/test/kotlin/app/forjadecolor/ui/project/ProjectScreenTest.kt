@@ -5,6 +5,8 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -102,8 +104,11 @@ class ProjectScreenTest {
         app.setContent(compose) {
             ProjectScreen(app.container, "p1", onAsk = { asked++ }, onOpenTechnique = { techniques += it }, onBack = { backs++ })
         }
-        app.waitFor(compose) { compose.onAllNodesWithTag("notes").fetchSemanticsNodes().isNotEmpty() }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
     }
+
+    /** Selects one of the project tabs: "recipe", "diary" or "photos". */
+    private fun openTab(name: String) = compose.onNodeWithTag("tab_$name").performScrollTo().performClick()
 
     private fun inEntry(id: String, tag: String) = compose.onNode(hasTestTag(tag) and hasAnyAncestor(hasTestTag("advice_$id")))
 
@@ -112,6 +117,7 @@ class ProjectScreenTest {
     @Test
     fun `persists notes after typing`() {
         show()
+        openTab("diary")
         compose.onNodeWithTag("notes").performScrollTo().performTextInput("capa roja")
         app.waitFor(compose) { app.project("p1")?.notes == "capa roja" }
     }
@@ -119,6 +125,7 @@ class ProjectScreenTest {
     @Test
     fun `adds a dated progress photo`() {
         show()
+        openTab("photos")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
         app.waitFor(compose) { app.project("p1")?.progress?.size == 1 }
         assertEquals("2026-11-11T10:00:00.000Z", app.project("p1")!!.progress[0].takenAt)
@@ -128,6 +135,7 @@ class ProjectScreenTest {
     @Test
     fun `tapping a progress photo shows it large, and closing goes back`() {
         show()
+        openTab("photos")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
         app.waitFor(compose) { compose.onAllNodesWithTag("open_progress_photo").fetchSemanticsNodes().size == 1 }
 
@@ -146,7 +154,8 @@ class ProjectScreenTest {
             app.repository.saveProject(p)
         }
         app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
-        app.waitFor(compose) { compose.onAllNodesWithTag("add_progress").fetchSemanticsNodes().isNotEmpty() }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+        openTab("photos")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
 
         app.waitFor(compose) { app.project("p1")?.progress?.size == 2 }
@@ -156,6 +165,7 @@ class ProjectScreenTest {
     @Test
     fun `sets an optional target image`() {
         show()
+        openTab("photos")
         compose.onNodeWithTag("set_target").performScrollTo().performClick()
         app.waitFor(compose) { app.project("p1")?.targetImageBlobId != null }
     }
@@ -163,6 +173,7 @@ class ProjectScreenTest {
     @Test
     fun `says so when a progress photo cannot be read, and adds nothing`() {
         show()
+        openTab("photos")
         app.photos.failure = IllegalArgumentException("not an image")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
 
@@ -173,6 +184,7 @@ class ProjectScreenTest {
     @Test
     fun `says so when a progress photo from the camera cannot be read`() {
         show()
+        openTab("photos")
         app.photos.failure = IllegalArgumentException("not an image")
         compose.onNodeWithTag("add_progress_camera").performScrollTo().performClick()
 
@@ -182,6 +194,7 @@ class ProjectScreenTest {
     @Test
     fun `clears the progress photo error once a photo works`() {
         show()
+        openTab("photos")
         app.photos.failure = IllegalArgumentException("not an image")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
         compose.onNodeWithTag("progress_photo_error").performScrollTo().assertIsDisplayed()
@@ -196,6 +209,7 @@ class ProjectScreenTest {
     @Test
     fun `says so when the target image cannot be read, and keeps none`() {
         show()
+        openTab("photos")
         app.photos.failure = IllegalArgumentException("not an image")
         compose.onNodeWithTag("set_target").performScrollTo().performClick()
 
@@ -215,6 +229,7 @@ class ProjectScreenTest {
     @Test
     fun `keeps notes typed right before marking the project done`() {
         show()
+        openTab("diary")
         compose.onNodeWithTag("notes").performScrollTo().performTextInput("no perder esto")
         compose.onNodeWithTag("toggle_done").performScrollTo().performClick()
         app.waitFor(compose) { app.project("p1")?.status == ProjectStatus.DONE && app.project("p1")?.notes == "no perder esto" }
@@ -227,7 +242,8 @@ class ProjectScreenTest {
         app.setContent(compose) {
             if (open) ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {})
         }
-        app.waitFor(compose) { compose.onAllNodesWithTag("notes").fetchSemanticsNodes().isNotEmpty() }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+        openTab("diary")
         compose.onNodeWithTag("notes").performScrollTo().performTextInput("antes de salir")
         open = false // leaves before the typing pause that triggers the normal save
         app.waitFor(compose) { app.project("p1")?.notes == "antes de salir" }
@@ -238,6 +254,86 @@ class ProjectScreenTest {
         show()
         compose.onNodeWithTag("ask").performScrollTo().performClick()
         assertEquals(1, asked)
+    }
+
+    // tabs
+
+    @Test
+    fun `shows three tabs with the recipe selected first`() {
+        show()
+        compose.onNodeWithTag("tab_recipe").assertIsSelected()
+        compose.onNodeWithTag("tab_diary").assertIsNotSelected()
+        compose.onNodeWithTag("tab_photos").assertIsNotSelected()
+        inEntry("e1", "delete_advice").assertExists()
+        compose.onNodeWithTag("notes").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the diary tab shows the notes and hides the advice`() {
+        show()
+        openTab("diary")
+        compose.onNodeWithTag("tab_diary").assertIsSelected()
+        compose.onNodeWithTag("notes").assertExists()
+        compose.onNodeWithTag("advice_e1").assertDoesNotExist()
+        compose.onNodeWithTag("add_progress").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the photos tab shows progress photos and the target image, and hides the notes`() {
+        show()
+        openTab("photos")
+        compose.onNodeWithTag("add_progress").assertExists()
+        compose.onNodeWithTag("set_target").assertExists()
+        compose.onNodeWithTag("notes").assertDoesNotExist()
+        compose.onNodeWithTag("advice_e1").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the recipe tab says how to get advice when there is none`() {
+        runBlocking { app.repository.saveProject(createProject("Bárbara", app.now, "p1")) }
+        app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("advice_empty").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("advice_empty").assert(hasText("No advice yet: tap Ask the advisor."))
+    }
+
+    @Test
+    fun `delete project stays at the end whatever tab is selected`() {
+        show()
+        listOf("recipe", "diary", "photos").forEach {
+            openTab(it)
+            compose.onNodeWithTag("delete_project").assertExists()
+        }
+    }
+
+    @Test
+    fun `the selected tab survives recreation`() {
+        runBlocking { app.repository.saveProject(createProject("Bárbara", app.now, "p1")) }
+        val restoration = app.setRestorableContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+        openTab("photos")
+
+        restoration.emulateSavedInstanceStateRestore()
+
+        compose.onNodeWithTag("tab_photos").assertIsSelected()
+        compose.onNodeWithTag("add_progress").assertExists()
+    }
+
+    @Test
+    fun `notes typed right before switching tab are saved`() {
+        runBlocking { app.repository.saveProject(createProject("Bárbara", app.now, "p1")) }
+        app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+        openTab("diary")
+        app.waitFor(compose) { compose.onAllNodesWithTag("notes").fetchSemanticsNodes().isNotEmpty() }
+        // Frozen clock: the typing pause that triggers the normal save never elapses.
+        compose.mainClock.autoAdvance = false
+        compose.onNodeWithTag("notes").performScrollTo().performTextInput("antes de cambiar")
+        compose.mainClock.advanceTimeByFrame()
+        openTab("photos")
+        repeat(3) { compose.mainClock.advanceTimeByFrame() }
+
+        compose.onNodeWithTag("notes").assertDoesNotExist()
+        app.waitFor(compose) { app.project("p1")?.notes == "antes de cambiar" }
     }
 
     // advice
@@ -333,6 +429,7 @@ class ProjectScreenTest {
     @Test
     fun `deletes a progress photo and its file after confirming`() {
         show()
+        openTab("photos")
         compose.onNodeWithTag("add_progress").performScrollTo().performClick()
         app.waitFor(compose) { compose.onAllNodesWithTag("delete_progress_photo").fetchSemanticsNodes().size == 1 }
         val blobId = app.project("p1")!!.progress.single().blobId
@@ -349,6 +446,7 @@ class ProjectScreenTest {
     fun `removes the target image and its file after confirming`() {
         show(withTarget = true)
         val blobId = app.project("p1")!!.targetImageBlobId!!
+        openTab("photos")
         compose.onNodeWithTag("remove_target").performScrollTo().performClick()
         compose.onNodeWithText("Remove the target image? This cannot be undone.").assertIsDisplayed()
         compose.onNodeWithTag("confirm_delete").performClick()
@@ -361,6 +459,7 @@ class ProjectScreenTest {
     fun `replacing the target image deletes the old one`() {
         show(withTarget = true)
         val old = app.project("p1")!!.targetImageBlobId!!
+        openTab("photos")
         compose.onNodeWithTag("set_target").performScrollTo().performClick()
 
         app.waitFor(compose) { app.project("p1")?.targetImageBlobId.let { it != null && it != old } }
