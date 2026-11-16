@@ -81,7 +81,6 @@ internal fun AdviceCard(
     Card(Modifier.fillMaxWidth().testTag("advice_${entry.id}")) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("${stringResource(R.string.project_advice)} · ${entry.receivedAt.take(10)}", style = MaterialTheme.typography.titleMedium)
-            TextButton(onClick = onDelete, modifier = Modifier.testTag("delete_advice")) { Text(stringResource(R.string.project_delete_advice)) }
 
             when (val r = entry.response) {
                 is RecipeResponse -> {
@@ -108,6 +107,10 @@ internal fun AdviceCard(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.testTag("unknown_brush"),
                 )
+            }
+            // Last, so the first thing seen is the advice itself, not the button least often used.
+            TextButton(onClick = onDelete, modifier = Modifier.align(Alignment.End).testTag("delete_advice")) {
+                Text(stringResource(R.string.project_delete_advice))
             }
         }
     }

@@ -396,6 +396,14 @@ class ProjectScreenTest {
     }
 
     @Test
+    fun `delete advice sits at the end of its card, after the recipe and the needed paints`() {
+        show()
+        val delete = inEntry("e1", "delete_advice").fetchSemanticsNode().positionInRoot.y
+        val needed = compose.onNode(hasTestTag("needed") and hasAnyAncestor(hasTestTag("advice_e1"))).fetchSemanticsNode().positionInRoot.y
+        assertTrue(delete > needed, "delete at $delete, needed paints at $needed")
+    }
+
+    @Test
     fun `keeps an advice entry when the deletion is cancelled`() {
         show()
         inEntry("e1", "delete_advice").performScrollTo().performClick()
