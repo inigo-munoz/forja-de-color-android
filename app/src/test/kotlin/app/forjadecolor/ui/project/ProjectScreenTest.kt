@@ -15,6 +15,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
@@ -439,6 +440,19 @@ class ProjectScreenTest {
         openTab("photos")
         compose.onNodeWithTag("set_target").performScrollTo().assert(hasText("Set target image"))
         compose.onAllNodesWithTag("target_thumb").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a recipe without prep or tips hides those empty sections`() {
+        runBlocking {
+            val bare = RECIPE.copy(response = (RECIPE.response as RecipeResponse).copy(prep = emptyList(), tips = emptyList()))
+            app.repository.saveProject(createProject("Búho", app.now, "p1").addAdvice(bare))
+        }
+        app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("zone_progress").fetchSemanticsNodes().isNotEmpty() }
+
+        compose.onAllNodesWithText("Preparation").assertCountEquals(0)
+        compose.onAllNodesWithText("Tips").assertCountEquals(0)
     }
 
     @Test

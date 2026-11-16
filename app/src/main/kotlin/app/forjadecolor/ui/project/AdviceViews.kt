@@ -129,8 +129,11 @@ private fun RecipeView(
     label: @Composable (PaintRef) -> Unit,
     steps: StepText,
 ) {
-    Heading(stringResource(R.string.project_prep))
-    NumberedList(r.prep)
+    // Empty sections are hidden: a primed recipe has no prep, and a heading over nothing reads like a bug.
+    if (r.prep.isNotEmpty()) {
+        Heading(stringResource(R.string.project_prep))
+        NumberedList(r.prep)
+    }
     Text(
         stringResource(R.string.project_zone_progress, r.zones.indices.count { it in done }, r.zones.size),
         style = MaterialTheme.typography.labelLarge,
@@ -145,8 +148,10 @@ private fun RecipeView(
         Heading(stringResource(R.string.project_remaining))
         NumberedList(it, steps)
     }
-    Heading(stringResource(R.string.project_tips))
-    NumberedList(r.tips)
+    if (r.tips.isNotEmpty()) {
+        Heading(stringResource(R.string.project_tips))
+        NumberedList(r.tips)
+    }
 }
 
 @Composable
