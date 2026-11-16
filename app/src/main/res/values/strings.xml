@@ -43,6 +43,9 @@
     <string name="projects_empty">No projects yet.</string>
     <string name="projects_in_progress">In progress</string>
     <string name="projects_done">Done</string>
+    <string name="projects_new_button">+ New project</string>
+    <string name="projects_last_activity">Last activity: %1$s</string>
+    <string name="projects_zone_progress">%1$d of %2$d zones</string>
 
     <!-- project -->
     <string name="project_notes">Notes</string>
