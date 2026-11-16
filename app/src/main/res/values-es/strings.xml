@@ -48,6 +48,7 @@
     <string name="project_add_progress">Añadir foto de progreso</string>
     <string name="project_target">Imagen objetivo</string>
     <string name="project_set_target">Poner imagen objetivo</string>
+    <string name="project_change_target">Cambiar imagen objetivo</string>
     <string name="project_mark_done">Marcar como terminado</string>
     <string name="project_reopen">Reabrir</string>
     <string name="project_ask">Consultar al asesor</string>

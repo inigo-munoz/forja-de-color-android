@@ -15,6 +15,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performClick
@@ -401,6 +402,24 @@ class ProjectScreenTest {
         val delete = inEntry("e1", "delete_advice").fetchSemanticsNode().positionInRoot.y
         val needed = compose.onNode(hasTestTag("needed") and hasAnyAncestor(hasTestTag("advice_e1"))).fetchSemanticsNode().positionInRoot.y
         assertTrue(delete > needed, "delete at $delete, needed paints at $needed")
+    }
+
+    @Test
+    fun `with a target image, Photos shows it as a thumbnail and offers to change it`() {
+        show(withTarget = true)
+        openTab("photos")
+        compose.onNodeWithTag("set_target").performScrollTo().assert(hasText("Change target image"))
+        val thumb = compose.onNodeWithTag("target_thumb").fetchSemanticsNode().size.width
+        val screen = compose.onRoot().fetchSemanticsNode().size.width
+        assertTrue(thumb < screen / 2, "thumbnail $thumb px on a $screen px screen")
+    }
+
+    @Test
+    fun `without a target image, Photos offers to set one`() {
+        show()
+        openTab("photos")
+        compose.onNodeWithTag("set_target").performScrollTo().assert(hasText("Set target image"))
+        compose.onAllNodesWithTag("target_thumb").assertCountEquals(0)
     }
 
     @Test

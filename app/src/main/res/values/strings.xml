@@ -50,6 +50,7 @@
     <string name="project_add_progress">Add progress photo</string>
     <string name="project_target">Target image</string>
     <string name="project_set_target">Set target image</string>
+    <string name="project_change_target">Change target image</string>
     <string name="project_mark_done">Mark as done</string>
     <string name="project_reopen">Reopen</string>
     <string name="project_ask">Ask the advisor</string>

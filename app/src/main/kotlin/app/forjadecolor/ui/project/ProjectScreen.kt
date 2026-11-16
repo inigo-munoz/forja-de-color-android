@@ -210,7 +210,8 @@ fun ProjectScreen(
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(stringResource(R.string.project_target), style = MaterialTheme.typography.titleMedium)
-                        current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.fillMaxWidth().aspectRatio(1f)) }
+                        // A thumbnail: the full image is already in the before/after at the top.
+                        current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.size(120.dp).testTag("target_thumb")) }
                         if (current.targetImageBlobId != null) {
                             TextButton(
                                 onClick = {
@@ -219,7 +220,9 @@ fun ProjectScreen(
                                 modifier = Modifier.testTag("remove_target"),
                             ) { Text(stringResource(R.string.project_remove_target)) }
                         }
-                        OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) { Text(stringResource(R.string.project_set_target)) }
+                        OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) {
+                            Text(stringResource(if (current.targetImageBlobId != null) R.string.project_change_target else R.string.project_set_target))
+                        }
                         if (targetError) PhotoErrorText("target_photo_error")
                     }
                 }
