@@ -456,6 +456,18 @@ class ProjectScreenTest {
     }
 
     @Test
+    fun `without progress photos, Photos says how to start, and the hint goes once there is one`() {
+        show()
+        openTab("photos")
+        compose.onNodeWithTag("progress_empty").performScrollTo().assert(hasText("No progress photos yet", substring = true))
+
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+
+        app.waitFor(compose) { compose.onAllNodesWithTag("progress_photo").fetchSemanticsNodes().size == 1 }
+        compose.onAllNodesWithTag("progress_empty").assertCountEquals(0)
+    }
+
+    @Test
     fun `keeps an advice entry when the deletion is cancelled`() {
         show()
         inEntry("e1", "delete_advice").performScrollTo().performClick()

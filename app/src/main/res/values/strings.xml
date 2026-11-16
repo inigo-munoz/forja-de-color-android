@@ -117,4 +117,5 @@
     <string name="ask_no_photo">Choose or take a photo to send.</string>
     <string name="ask_paste_help">Copy the answer in Claude or ChatGPT, or share it to Forja de Color.</string>
     <string name="settings_backup_too_big">This file is too big to be a Forja de Color backup.</string>
+    <string name="project_progress_empty">No progress photos yet: take one at the end of each painting session to see how it grows.</string>
 </resources>

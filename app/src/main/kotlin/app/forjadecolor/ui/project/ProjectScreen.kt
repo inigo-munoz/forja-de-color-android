@@ -181,6 +181,14 @@ fun ProjectScreen(
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(stringResource(R.string.project_progress), style = MaterialTheme.typography.titleMedium)
+                        if (current.progress.isEmpty()) {
+                            Text(
+                                stringResource(R.string.project_progress_empty),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.testTag("progress_empty"),
+                            )
+                        }
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             current.progress.forEach { photo ->
                                 Column(Modifier.testTag("progress_photo")) {

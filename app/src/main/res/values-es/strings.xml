@@ -115,4 +115,5 @@
     <string name="ask_no_photo">Elige o haz una foto para enviar.</string>
     <string name="ask_paste_help">Copia la respuesta en Claude o ChatGPT, o compártela con Forja de Color.</string>
     <string name="settings_backup_too_big">Este archivo es demasiado grande para ser una copia de seguridad de Forja de Color.</string>
+    <string name="project_progress_empty">Todavía no hay fotos de progreso: saca una al terminar cada sesión de pintura para ver cómo avanza.</string>
 </resources>
