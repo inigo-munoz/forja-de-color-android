@@ -40,8 +40,8 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T18 | S11 | UX item 2 | delegated (context backstop) | done (RED 21/40; mutation check) | 101e3b4 |
 | T19 | S11 | UX item 3 | delegated (context backstop) | done (RED both repos; migration test; verifier PASS) | 6a8d3c7 |
 | T20 | S11 | UX item 4 | delegated (context backstop) | done (RED 6/22) | 5e5feaa |
-| T21 | S11 | UX item 5 | — | in progress | |
-| T22 | S11 | UX item 6 | — | todo | |
+| T21 | S11 | UX item 5 | inline | done (RED 1) | d93d481 |
+| T22 | S11 | UX item 6 | — | in progress | |
 | T23 | S11 | UX item 7 | — | todo | |
 | T24 | S11 | UX item 8 | — | todo | |
 | T25 | S11 | UX item 9 | — | todo | |
