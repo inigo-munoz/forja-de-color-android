@@ -1,6 +1,4 @@
 package app.forjadecolor.ui.settings
-import android.content.ClipData
-import android.content.ClipboardManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
+import app.forjadecolor.domain.advice.InstructionsStatus
+import app.forjadecolor.ui.components.clipboardCopier
 import app.forjadecolor.platform.MAX_BACKUP_BYTES
 import java.time.Instant
 import java.time.ZoneId
@@ -90,13 +90,15 @@ fun SettingsScreen(
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.settings_brain), style = MaterialTheme.typography.titleMedium)
                 Text(stringResource(R.string.settings_brain_help))
+                if (state.instructions == InstructionsStatus.STALE) {
+                    Text(
+                        stringResource(R.string.ai_instructions_stale),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("ai_instructions_stale"),
+                    )
+                }
                 OutlinedButton(
-                    onClick = {
-                        vm.copyBrain { text ->
-                            context.getSystemService(ClipboardManager::class.java)
-                                .setPrimaryClip(ClipData.newPlainText(context.getString(R.string.settings_brain), text))
-                        }
-                    },
+                    onClick = { vm.copyBrain(clipboardCopier(context)) },
                     modifier = Modifier.testTag("copy_brain"),
                 ) { Text(stringResource(R.string.settings_copy_brain)) }
                 if (state.copied) Text(stringResource(R.string.settings_copied), Modifier.semantics { liveRegion = LiveRegionMode.Polite })

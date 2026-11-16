@@ -3,7 +3,11 @@ package app.forjadecolor.domain.storage
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.projects.Project
 
-enum class MetaKey { LAST_EXPORT_AT }
+enum class MetaKey {
+    LAST_EXPORT_AT,
+    /** Fingerprint of the AI instructions last copied (see instructionsFingerprint). */
+    AI_INSTRUCTIONS_COPIED,
+}
 
 /** A stored photo: its MIME type and bytes. */
 class StoredBlob(val type: String, val bytes: ByteArray) {

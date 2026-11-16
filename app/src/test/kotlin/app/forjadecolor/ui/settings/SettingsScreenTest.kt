@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -26,6 +27,10 @@ import app.forjadecolor.data.PhotoFiles
 import app.forjadecolor.data.RoomRepository
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.advice.buildBrainInstructions
+import app.forjadecolor.domain.advice.instructionsFingerprint
+import app.forjadecolor.domain.paints.Paint
+import app.forjadecolor.domain.paints.PaintType
+import app.forjadecolor.domain.paints.addPaint
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.paints.SEED_INVENTORY
 import app.forjadecolor.domain.projects.createProject
@@ -271,5 +276,32 @@ class SettingsScreenTest {
 
         val clip = context.getSystemService(ClipboardManager::class.java).primaryClip
         assertEquals(buildBrainInstructions(SEED_INVENTORY), clip?.getItemAt(0)?.text?.toString())
+    }
+
+    @Test
+    fun `warns when the AI instructions changed since the last copy, and copying hides the warning`() {
+        runBlocking {
+            repo.setMeta(MetaKey.AI_INSTRUCTIONS_COPIED, instructionsFingerprint(buildBrainInstructions(repo.getInventory())))
+            repo.saveInventory(repo.getInventory().addPaint(Paint("Citadel", "Nuln Oil", "Nuln Oil", "Shade", PaintType.WASH, "#222222")))
+        }
+        show()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("ai_instructions_stale").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("ai_instructions_stale").assert(hasText("The AI instructions changed since you last copied them: copy them again."))
+
+        compose.onNodeWithTag("copy_brain").performScrollTo().performClick()
+        waitForText("Copied.")
+
+        compose.onNodeWithTag("ai_instructions_stale").assertDoesNotExist()
+        assertEquals(
+            instructionsFingerprint(buildBrainInstructions(runBlocking { repo.getInventory() })),
+            runBlocking { repo.getMeta(MetaKey.AI_INSTRUCTIONS_COPIED) },
+        )
+    }
+
+    @Test
+    fun `no instructions warning before the first copy`() {
+        show()
+        compose.waitForIdle()
+        compose.onNodeWithTag("ai_instructions_stale").assertDoesNotExist()
     }
 }

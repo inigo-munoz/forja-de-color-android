@@ -40,12 +40,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.advice.AdviceRequest
+import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.advice.Moment
 import app.forjadecolor.domain.advice.ParseResult
 import app.forjadecolor.domain.advice.Question
@@ -55,6 +58,7 @@ import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
 import app.forjadecolor.ui.components.PhotoPreview
+import app.forjadecolor.ui.components.clipboardCopier
 import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.LocalPhotoSources
@@ -283,6 +287,8 @@ fun AskScreen(
                 }
             }
         }
+
+        AiInstructionsLine(state.instructions, state.instructionsCopied, onCopy = { vm.copyInstructions(clipboardCopier(context)) })
     }
 
     // A modal, not a line above the answer: with a long answer that line was off screen and saving seemed to do nothing.
@@ -305,6 +311,33 @@ private fun DefaultPhoto(container: AppContainer, photoId: String?) {
         } else {
             Text(stringResource(R.string.ask_no_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+/** Only matters for free chat in the user's Claude project or custom GPT: invites to copy, or warns they are out of date. */
+@Composable
+private fun AiInstructionsLine(status: InstructionsStatus?, copied: Boolean, onCopy: () -> Unit) {
+    val text = when (status) {
+        InstructionsStatus.NEVER -> R.string.ai_instructions_never
+        InstructionsStatus.STALE -> R.string.ai_instructions_stale
+        InstructionsStatus.CURRENT, null -> null
+    }
+    if (text != null) {
+        Row(Modifier.fillMaxWidth().testTag("ask_ai_instructions"), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(text),
+                style = MaterialTheme.typography.bodySmall,
+                color = if (status == InstructionsStatus.STALE) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onCopy, modifier = Modifier.testTag("ask_copy_instructions")) { Text(stringResource(R.string.ai_instructions_copy)) }
+        }
+    } else if (copied) {
+        Text(
+            stringResource(R.string.settings_copied),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
     }
 }
 

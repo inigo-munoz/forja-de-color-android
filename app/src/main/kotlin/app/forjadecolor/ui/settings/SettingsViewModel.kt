@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.forjadecolor.AppContainer
-import app.forjadecolor.domain.advice.buildBrainInstructions
+import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.storage.ImportResult
 import app.forjadecolor.domain.storage.MetaKey
 import app.forjadecolor.domain.storage.importAll
@@ -13,6 +13,8 @@ import app.forjadecolor.domain.storage.parseBackupText
 import app.forjadecolor.domain.storage.shouldRemindBackup
 import app.forjadecolor.domain.storage.validateBackup
 import app.forjadecolor.platform.FileTooLargeException
+import app.forjadecolor.ui.components.aiInstructionsStatus
+import app.forjadecolor.ui.components.copyAiInstructions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +40,8 @@ data class SettingsState(
     val copied: Boolean = false,
     /** When the last backup was exported (ISO instant), null if never. */
     val lastExportAt: String? = null,
+    /** Whether the AI instructions last copied are today's; null until loaded. */
+    val instructions: InstructionsStatus? = null,
 )
 
 /** Backup export and import, the backup reminder and the AI instructions, for [SettingsScreen]. */
@@ -50,7 +54,11 @@ class SettingsViewModel(
     private val _state = MutableStateFlow(SettingsState())
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
-    suspend fun load() = refreshReminder()
+    suspend fun load() {
+        refreshReminder()
+        val instructions = aiInstructionsStatus(repo)
+        _state.update { it.copy(instructions = instructions) }
+    }
 
     private suspend fun refreshReminder() {
         val last = repo.getMeta(MetaKey.LAST_EXPORT_AT)
@@ -98,11 +106,11 @@ class SettingsViewModel(
         }
     }
 
-    /** Builds the AI instructions from the inventory and hands them to [copy] (the clipboard). */
+    /** Builds the AI instructions from the inventory, hands them to [copy] (the clipboard) and remembers them. */
     fun copyBrain(copy: (String) -> Unit) {
         viewModelScope.launch {
-            copy(buildBrainInstructions(repo.getInventory()))
-            _state.update { it.copy(copied = true) }
+            copyAiInstructions(repo, copy)
+            _state.update { it.copy(copied = true, instructions = InstructionsStatus.CURRENT) }
         }
     }
 }

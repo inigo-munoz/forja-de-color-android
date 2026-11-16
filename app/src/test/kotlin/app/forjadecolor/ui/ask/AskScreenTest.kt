@@ -1,6 +1,14 @@
 package app.forjadecolor.ui.ask
 
 import android.graphics.Bitmap
+import android.content.ClipboardManager
+import androidx.compose.ui.test.onAllNodesWithText
+import app.forjadecolor.domain.advice.buildBrainInstructions
+import app.forjadecolor.domain.advice.instructionsFingerprint
+import app.forjadecolor.domain.paints.Paint
+import app.forjadecolor.domain.paints.PaintType
+import app.forjadecolor.domain.paints.addPaint
+import app.forjadecolor.domain.storage.MetaKey
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyAncestor
@@ -8,6 +16,7 @@ import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -341,6 +350,59 @@ class AskScreenTest {
         show()
         compose.onNodeWithTag("ask_step_1").assert(hasText("1. Elige el momento"))
         compose.onNodeWithTag("moment_help_start", useUnmergedTree = true).assert(hasText("Miniatura sin pintar: paleta completa desde la imprimación."))
+    }
+
+    private val extraPaint = Paint("Citadel", "Nuln Oil", "Nuln Oil", "Shade", PaintType.WASH, "#222222")
+
+    private fun instructions(): String = runBlocking { buildBrainInstructions(app.repository.getInventory()) }
+
+    private fun storeCopiedFingerprint() = runBlocking {
+        app.repository.setMeta(MetaKey.AI_INSTRUCTIONS_COPIED, instructionsFingerprint(instructions()))
+    }
+
+    private fun waitForTag(tag: String) = app.waitFor(compose) { compose.onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty() }
+
+    @Test
+    fun `never copied, invites to copy the AI instructions`() {
+        show()
+        waitForTag("ask_ai_instructions")
+        compose.onNodeWithText("Using a Claude project or a custom GPT? Copy the AI instructions.").performScrollTo()
+            .assert(hasAnyAncestor(hasTestTag("ask_ai_instructions")))
+        compose.onNodeWithTag("ask_copy_instructions").assertExists()
+    }
+
+    @Test
+    fun `copying puts the instructions on the clipboard, remembers them and hides the line`() {
+        show()
+        waitForTag("ask_copy_instructions")
+        click("ask_copy_instructions")
+
+        app.waitFor(compose) { compose.onAllNodesWithText("Copied.").fetchSemanticsNodes().isNotEmpty() }
+        val clip = app.context.getSystemService(ClipboardManager::class.java).primaryClip
+        assertEquals(instructions(), clip?.getItemAt(0)?.text?.toString())
+        assertEquals(instructionsFingerprint(instructions()), runBlocking { app.repository.getMeta(MetaKey.AI_INSTRUCTIONS_COPIED) })
+        compose.onNodeWithTag("ask_copy_instructions").assertDoesNotExist()
+        compose.onNodeWithText("Using a Claude project or a custom GPT? Copy the AI instructions.").assertDoesNotExist()
+    }
+
+    @Test
+    fun `instructions changed since the last copy warns to copy them again`() {
+        storeCopiedFingerprint()
+        runBlocking { app.repository.saveInventory(app.repository.getInventory().addPaint(extraPaint)) }
+        show()
+        waitForTag("ask_ai_instructions")
+        compose.onNodeWithText("The AI instructions changed since you last copied them: copy them again.").performScrollTo()
+            .assert(hasAnyAncestor(hasTestTag("ask_ai_instructions")))
+        compose.onNodeWithTag("ask_copy_instructions").assertExists()
+    }
+
+    @Test
+    fun `instructions current shows nothing about them`() {
+        storeCopiedFingerprint()
+        show()
+        compose.waitForIdle()
+        compose.onNodeWithTag("ask_ai_instructions").assertDoesNotExist()
+        compose.onNodeWithTag("ask_copy_instructions").assertDoesNotExist()
     }
 }
 

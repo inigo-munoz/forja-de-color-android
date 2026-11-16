@@ -31,6 +31,9 @@
     <string name="settings_brain_help">Pégalas en tu proyecto de Claude o en tu GPT personalizado para que conozca tu método y tus pinturas.</string>
     <string name="settings_copy_brain">Copiar instrucciones para la IA</string>
     <string name="settings_copied">Copiado.</string>
+    <string name="ai_instructions_never">¿Usas un proyecto de Claude o un GPT personalizado? Copia las instrucciones para la IA.</string>
+    <string name="ai_instructions_stale">Las instrucciones para la IA cambiaron desde la última vez que las copiaste: cópialas de nuevo.</string>
+    <string name="ai_instructions_copy">Copiar</string>
 
     <!-- projects -->
     <string name="projects_title">Proyectos</string>

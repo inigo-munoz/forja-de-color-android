@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.forjadecolor.AppContainer
 import app.forjadecolor.domain.advice.AdviceRequest
+import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.advice.SendResult
 import app.forjadecolor.domain.advice.buildAdvicePackage
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.ui.components.aiInstructionsStatus
+import app.forjadecolor.ui.components.copyAiInstructions
 import app.forjadecolor.ui.project.onMain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +29,10 @@ data class AskState(
     val prompt: String? = null,
     /** Why the last answer could not be saved. */
     val errors: List<String> = emptyList(),
+    /** Whether the AI instructions last copied are today's; null until loaded. */
+    val instructions: InstructionsStatus? = null,
+    /** The AI instructions were just copied from this screen. */
+    val instructionsCopied: Boolean = false,
 )
 
 /** Sends the advice package to the user's AI app and saves the answer, for [AskScreen]. */
@@ -42,7 +49,16 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
 
     suspend fun load() {
         val project = repository.getProject(projectId)
-        _state.update { it.copy(loaded = true, project = project) }
+        val instructions = aiInstructionsStatus(repository)
+        _state.update { it.copy(loaded = true, project = project, instructions = instructions) }
+    }
+
+    /** Copies the AI instructions with [copy] (the clipboard), as Settings does. */
+    fun copyInstructions(copy: (String) -> Unit) {
+        viewModelScope.launch {
+            copyAiInstructions(repository, copy)
+            _state.update { it.copy(instructions = InstructionsStatus.CURRENT, instructionsCopied = true) }
+        }
     }
 
     /** A new photo was picked or taken: it is stored on the next send. */
