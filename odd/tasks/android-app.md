@@ -48,8 +48,8 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T26 | S11 | UX item 10 | inline | done (RED 1) | bdb5c5b |
 | T27 | S11 | UX item 11 | delegated (context backstop) | done (RED 12/14 + domain) | 8f79fc6 |
 | T28 | S11 | UX item 12 | inline | done (RED 1) | 4fd0c88 |
-| T29 | S11 | UX item 13 | — | in progress | |
-| T30 | S11 | UX item 14 | — | todo | |
+| T29 | S11 | UX item 13 | inline | done (RED 2) | 2f9f577 |
+| T30 | S11 | UX item 14 | — | in progress | |
 
 Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
 Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 does not fire; from v2 on every schema change needs a migration test. T6 got its own commit.
