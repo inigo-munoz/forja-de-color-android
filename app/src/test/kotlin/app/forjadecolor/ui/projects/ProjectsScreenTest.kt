@@ -67,6 +67,26 @@ class ProjectsScreenTest {
     }
 
     @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `keeps the taken photo when the screen is recreated, as on rotation`() {
+        val out = ByteArrayOutputStream()
+        Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, out)
+        app.photos.nextPhoto = out.toByteArray()
+        val restoration = app.setRestorableContent(compose) { ProjectsScreen(app.container, onOpenProject = { opened += it }) }
+        compose.onNodeWithTag("new_project_name").performScrollTo().performTextInput("Búho")
+        compose.onNodeWithTag("new_project_take_photo").performScrollTo().performClick()
+        compose.onNodeWithTag("new_project_photo_preview").performScrollTo().assertIsDisplayed()
+
+        restoration.emulateSavedInstanceStateRestore()
+
+        compose.onNodeWithTag("new_project_photo_preview").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("new_project_create").performScrollTo().performClick()
+        app.waitFor(compose) { opened.isNotEmpty() }
+        val p = app.projects().single()
+        assertContentEquals(out.toByteArray(), runBlocking { app.repository.getBlob(p.initialPhotoBlobId!!) }!!.bytes)
+    }
+
+    @Test
     fun `creates a project without a photo, as the photo is optional`() {
         show()
         compose.onNodeWithTag("new_project_name").performScrollTo().performTextInput("Druida")

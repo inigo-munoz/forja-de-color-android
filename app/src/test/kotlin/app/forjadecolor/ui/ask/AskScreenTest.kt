@@ -1,10 +1,12 @@
 package app.forjadecolor.ui.ask
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -63,14 +65,17 @@ class AskScreenTest {
     private var done = 0
     private lateinit var photoId: String
 
-    private fun show(readAnswer: String? = ANSWER, sendResult: SendResult = SendResult.SHARED) {
+    private var restoration: StateRestorationTester? = null
+
+    private fun show(readAnswer: String? = ANSWER, sendResult: SendResult = SendResult.SHARED, restorable: Boolean = false) {
         app.bridge.answer = readAnswer
         app.bridge.result = sendResult
         runBlocking {
             photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
             app.repository.saveProject(createProject("Bárbara", app.now, "p1").addAdvice(PRIOR).copy(initialPhotoBlobId = photoId))
         }
-        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        val screen = @Composable { AskScreen(app.container, "p1", onDone = { done++ }) }
+        if (restorable) restoration = app.setRestorableContent(compose, screen) else app.setContent(compose, screen)
         app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
     }
 
@@ -112,13 +117,26 @@ class AskScreenTest {
     @GraphicsMode(GraphicsMode.Mode.NATIVE)
     fun `shows the taken photo before sending it`() {
         show()
-        val out = ByteArrayOutputStream()
-        Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, out)
-        app.photos.nextPhoto = out.toByteArray()
+        app.photos.nextPhoto = jpeg()
         compose.onAllNodesWithTag("ask_photo_preview").assertCountEquals(0)
 
         click("ask_take_photo")
 
+        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `keeps the taken photo when the screen is recreated, as on rotation`() {
+        show(restorable = true)
+        app.photos.nextPhoto = jpeg()
+        click("ask_take_photo")
+        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
+
+        restoration!!.emulateSavedInstanceStateRestore()
+
+        // The recreated screen loads its project again before showing the form.
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
     }
 
@@ -218,3 +236,7 @@ class AskScreenTest {
 private fun hasText(regex: Regex) = SemanticsMatcher("text matches $regex") { node ->
     node.config.getOrNull(SemanticsProperties.Text)?.any { regex.containsMatchIn(it.text) } == true
 }
+
+private fun jpeg(): ByteArray = ByteArrayOutputStream().also {
+    Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.JPEG, 90, it)
+}.toByteArray()

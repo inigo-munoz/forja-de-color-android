@@ -5,6 +5,7 @@ import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import app.forjadecolor.AppContainer
@@ -56,6 +57,11 @@ class TestApp {
 
     fun setContent(rule: ComposeContentTestRule, content: @Composable () -> Unit) = rule.setContent {
         CompositionLocalProvider(LocalPhotoSources provides photos) { ForgeTheme { content() } }
+    }
+
+    /** Like [setContent], but the returned tester can recreate the screen as Android does on rotation. */
+    fun setRestorableContent(rule: ComposeContentTestRule, content: @Composable () -> Unit) = StateRestorationTester(rule).apply {
+        setContent { CompositionLocalProvider(LocalPhotoSources provides photos) { ForgeTheme { content() } } }
     }
 
     /** Waits for the repository to reach a state; writes run on Room's own threads. */

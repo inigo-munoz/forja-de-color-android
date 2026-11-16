@@ -53,6 +53,7 @@ import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
 import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.PhotoPreview
+import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.LocalPhotoSources
 import app.forjadecolor.ui.project.onMain
 import kotlinx.coroutines.launch
@@ -128,7 +129,7 @@ fun AskScreen(
     var typedZone by rememberSaveable { mutableStateOf("") }
     var question by rememberSaveable { mutableStateOf(Question.APPLY_LAYER) }
     var details by rememberSaveable { mutableStateOf("") }
-    var photo by remember { mutableStateOf<ByteArray?>(null) }
+    var photo by rememberPendingPhoto()
     var photoId by remember { mutableStateOf<String?>(null) }
     var sendStatus by remember { mutableStateOf("") }
     var prompt by remember { mutableStateOf<String?>(null) }

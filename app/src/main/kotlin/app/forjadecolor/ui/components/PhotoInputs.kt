@@ -6,10 +6,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
@@ -82,4 +84,30 @@ private suspend fun deliver(context: Context, uri: Uri, onPhoto: (ByteArray) -> 
         }
     }
     result.fold(onPhoto, onError)
+}
+
+/**
+ * A photo picked or taken but not saved yet, kept when Android recreates the screen (rotating the phone,
+ * often while the camera is open). The bytes are too big for the saved-state bundle, so they are parked in
+ * `cacheDir/pending-photos/` under an id that is itself saved; the file is overwritten, never piled up.
+ */
+@Composable
+fun rememberPendingPhoto(): MutableState<ByteArray?> {
+    val context = LocalContext.current
+    val id = rememberSaveable { UUID.randomUUID().toString() }
+    val file = remember(id) { File(File(context.cacheDir, "pending-photos"), "$id.jpg") }
+    return rememberSaveable(
+        saver = Saver(
+            save = { state ->
+                val bytes = state.value
+                if (bytes == null) {
+                    file.delete()
+                    false
+                } else {
+                    runCatching { file.parentFile?.mkdirs(); file.writeBytes(bytes) }.isSuccess
+                }
+            },
+            restore = { saved -> mutableStateOf(if (saved) runCatching { file.readBytes() }.getOrNull() else null) },
+        ),
+    ) { mutableStateOf(null) }
 }

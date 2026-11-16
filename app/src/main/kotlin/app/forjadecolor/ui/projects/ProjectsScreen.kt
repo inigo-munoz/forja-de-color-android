@@ -40,6 +40,7 @@ import app.forjadecolor.domain.projects.ProjectStatus
 import app.forjadecolor.domain.projects.createProject
 import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.PhotoPreview
+import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.project.LocalPhotoSources
 import app.forjadecolor.ui.project.onMain
@@ -140,7 +141,7 @@ private fun ProjectRow(container: AppContainer, project: Project, onClick: () ->
 @Composable
 private fun NewProjectForm(onCreate: (name: String, photo: ByteArray?) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
-    var photo by remember { mutableStateOf<ByteArray?>(null) }
+    var photo by rememberPendingPhoto()
     var photoError by remember { mutableStateOf(false) }
     val sources = LocalPhotoSources.current
     val onPhoto: (ByteArray) -> Unit = { photo = it; photoError = false }
