@@ -5,3 +5,8 @@ local.properties
 
 # Tool-generated skill registry
 .atl/
+
+# Release signing: never commit keys or their passwords
+*.jks
+*.keystore
+signing.properties

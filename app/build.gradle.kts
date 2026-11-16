@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -13,13 +15,35 @@ android {
         applicationId = "app.forjadecolor"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "1.0.0"
+    }
+
+    // Release signing reads a properties file kept OUTSIDE the repository (storeFile, storePassword,
+    // keyAlias, keyPassword). Override its path with -PforjaSigning=<file>. Without it, the release
+    // build is produced unsigned instead of failing.
+    val signingFile = file(
+        (project.findProperty("forjaSigning") as String?)
+            ?: "${System.getProperty("user.home")}/keys/forja-de-color/signing.properties",
+    )
+    val signing = Properties().apply { if (signingFile.isFile) signingFile.inputStream().use { load(it) } }
+    signingConfigs {
+        if (signing.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = file(signing.getProperty("storeFile"))
+                storePassword = signing.getProperty("storePassword")
+                keyAlias = signing.getProperty("keyAlias")
+                keyPassword = signing.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfigs.findByName("release")?.let { signingConfig = it }
         }
     }
 
