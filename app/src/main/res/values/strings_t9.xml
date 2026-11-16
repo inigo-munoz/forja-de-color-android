@@ -7,4 +7,8 @@
     <string name="bsl_role_shadow">shadow</string>
     <string name="bsl_role_light">light</string>
     <string name="bsl_role_fourth">extra light</string>
+    <string name="inventory_add_button">+ Add paint</string>
+    <string name="inventory_cancel">Cancel</string>
+    <string name="inventory_hue">Hue</string>
+    <string name="inventory_lightness">Lightness</string>
 </resources>

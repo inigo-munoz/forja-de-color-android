@@ -110,10 +110,11 @@ class InventoryScreenTest {
     @Test
     fun `adding Vallejo 72003 replaces the stored paint with code 72_003 and keeps its family`() {
         show()
+        compose.onNodeWithTag("add_paint").performClick()
 
         compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("72003")
         compose.onNodeWithTag("field_name").performScrollTo().performTextReplacement("Carne Pálida (renombrada)")
-        compose.onNodeWithTag("field_hex").performScrollTo().performTextReplacement("#C9A47F")
+        compose.onNodeWithTag("color_hex").performScrollTo().performTextReplacement("#C9A47F")
         compose.onNodeWithTag("save_paint").performScrollTo().performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithText("Carne Pálida (renombrada)", substring = true).fetchSemanticsNodes().isNotEmpty() }
 
@@ -129,6 +130,7 @@ class InventoryScreenTest {
     @Test
     fun `a new paint without a family is saved and listed under Other paints`() {
         show()
+        compose.onNodeWithTag("add_paint").performClick()
 
         compose.onNodeWithTag("field_brand").performScrollTo().performTextReplacement("Citadel")
         compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("Nuln Oil")
