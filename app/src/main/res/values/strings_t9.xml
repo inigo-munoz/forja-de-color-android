@@ -11,4 +11,22 @@
     <string name="inventory_cancel">Cancel</string>
     <string name="inventory_hue">Hue</string>
     <string name="inventory_lightness">Lightness</string>
+    <string name="family_warm_flesh">BSL Warm Flesh</string>
+    <string name="family_flesh">BSL Flesh</string>
+    <string name="family_yellow">BSL Yellow</string>
+    <string name="family_orange">BSL Orange</string>
+    <string name="family_magenta">BSL Magenta</string>
+    <string name="family_violet">BSL Violet</string>
+    <string name="family_blue">BSL Blue</string>
+    <string name="family_turquoise">BSL Turquoise</string>
+    <string name="family_cold_green">BSL Cold Green</string>
+    <string name="family_green">BSL Green</string>
+    <string name="family_black">BSL Black</string>
+    <string name="family_multipurpose">BSL Multipurpose</string>
+    <string name="paint_type_opaque">opaque</string>
+    <string name="paint_type_wash">wash</string>
+    <string name="paint_type_metallic">metallic</string>
+    <string name="paint_type_medium">medium</string>
+    <string name="paint_type_primer">primer</string>
+    <string name="paint_type_other">other</string>
 </resources>

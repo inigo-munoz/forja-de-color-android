@@ -1,5 +1,6 @@
 package app.forjadecolor.ui.inventory
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -176,7 +177,7 @@ fun InventoryScreen(
         inventory?.let { inv ->
             val edit = { p: Paint -> draft = PaintDraft.of(p) }
             val groups = groupPaints(inv)
-            groups.families.forEach { (name, paints) -> PaintSection(name, "family_$name", paints, edit) }
+            groups.families.forEach { (name, paints) -> PaintSection(familyLabel(name), "family_$name", paints, edit) }
             if (groups.others.isNotEmpty()) PaintSection(stringResource(R.string.inventory_other_paints), "family_other", groups.others, edit)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.inventory_brushes), style = MaterialTheme.typography.titleMedium)
@@ -262,7 +263,7 @@ private fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, o
                         FilterChip(
                             selected = draft.type == t,
                             onClick = { onChange(draft.copy(type = t)) },
-                            label = { Text(wire) },
+                            label = { Text(stringResource(paintTypeLabel(t))) },
                             modifier = Modifier.testTag("type_$wire"),
                         )
                     }
@@ -338,4 +339,36 @@ private fun FormField(label: Int, value: String, tag: String, onChange: (String)
         singleLine = true,
         modifier = Modifier.fillMaxWidth().testTag(tag),
     )
+}
+
+/**
+ * Family names are stored and sent to the AI as written in the seed ("BSL Warm Flesh"); only what is
+ * shown is translated. A family the user created keeps its own name.
+ */
+private val FAMILY_LABELS = mapOf(
+    "BSL Warm Flesh" to R.string.family_warm_flesh,
+    "BSL Flesh" to R.string.family_flesh,
+    "BSL Yellow" to R.string.family_yellow,
+    "BSL Orange" to R.string.family_orange,
+    "BSL Magenta" to R.string.family_magenta,
+    "BSL Violet" to R.string.family_violet,
+    "BSL Blue" to R.string.family_blue,
+    "BSL Turquoise" to R.string.family_turquoise,
+    "BSL Cold Green" to R.string.family_cold_green,
+    "BSL Green" to R.string.family_green,
+    "BSL Black" to R.string.family_black,
+    "BSL Multipurpose" to R.string.family_multipurpose,
+)
+
+@Composable
+private fun familyLabel(name: String): String = FAMILY_LABELS[name]?.let { stringResource(it) } ?: name
+
+@StringRes
+private fun paintTypeLabel(type: PaintType): Int = when (type) {
+    PaintType.OPAQUE -> R.string.paint_type_opaque
+    PaintType.WASH -> R.string.paint_type_wash
+    PaintType.METALLIC -> R.string.paint_type_metallic
+    PaintType.MEDIUM -> R.string.paint_type_medium
+    PaintType.PRIMER -> R.string.paint_type_primer
+    PaintType.OTHER -> R.string.paint_type_other
 }
