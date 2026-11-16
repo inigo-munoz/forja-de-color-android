@@ -47,8 +47,8 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T25 | S11 | UX item 9 | delegated (context backstop) | done (RED 6/10; mutation check) | 6b66e0a |
 | T26 | S11 | UX item 10 | inline | done (RED 1) | bdb5c5b |
 | T27 | S11 | UX item 11 | delegated (context backstop) | done (RED 12/14 + domain) | 8f79fc6 |
-| T28 | S11 | UX item 12 | — | in progress | |
-| T29 | S11 | UX item 13 | — | todo | |
+| T28 | S11 | UX item 12 | inline | done (RED 1) | 4fd0c88 |
+| T29 | S11 | UX item 13 | — | in progress | |
 | T30 | S11 | UX item 14 | — | todo | |
 
 Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
