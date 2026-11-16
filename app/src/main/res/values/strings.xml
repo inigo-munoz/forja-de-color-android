@@ -27,6 +27,7 @@
     <string name="settings_export">Export backup</string>
     <string name="settings_import">Import backup</string>
     <string name="settings_import_ok">Backup imported.</string>
+    <string name="settings_export_ok">Backup exported.</string>
     <string name="settings_import_confirm">Importing replaces ALL your current projects, photos and paints with the backup. Continue?</string>
     <string name="settings_brain">AI instructions</string>
     <string name="settings_brain_help">Paste these into your Claude Project or custom GPT so it knows your method and paints.</string>

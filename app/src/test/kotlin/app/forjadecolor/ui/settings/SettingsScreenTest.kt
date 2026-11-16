@@ -127,6 +127,18 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun `says so when the export worked`() {
+        val uri = Uri.parse("content://test/out.json")
+        shadowOf(context.contentResolver).registerOutputStream(uri, ByteArrayOutputStream())
+        picker.result = uri
+        show()
+
+        compose.onNodeWithTag("export").performClick()
+
+        waitForText("Backup exported.")
+    }
+
+    @Test
     fun `cancelling the export picker records no export`() {
         show()
 
@@ -136,6 +148,7 @@ class SettingsScreenTest {
         assertEquals(1, picker.inputs.size)
         assertNull(runBlocking { repo.getMeta(MetaKey.LAST_EXPORT_AT) })
         compose.onNodeWithTag("backup_reminder").assertExists()
+        compose.onNodeWithText("Backup exported.").assertDoesNotExist()
     }
 
     @Test

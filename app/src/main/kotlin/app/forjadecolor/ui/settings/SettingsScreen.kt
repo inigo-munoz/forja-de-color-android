@@ -51,6 +51,7 @@ import kotlinx.serialization.json.JsonElement
 /** What the last export or import said; errors are the domain's own messages, as in the PWA. */
 private sealed interface Status {
     data object Imported : Status
+    data object Exported : Status
     data object ExportFailed : Status
     data class Error(val message: String) : Status
 }
@@ -76,7 +77,7 @@ fun SettingsScreen(
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) {
             scope.launch {
-                if (!exportBackup(resolver, uri, repo, container.now())) status = Status.ExportFailed
+                status = if (exportBackup(resolver, uri, repo, container.now())) Status.Exported else Status.ExportFailed
                 reload++
             }
         }
@@ -175,6 +176,7 @@ private fun StatusText(status: Status) {
     val live = Modifier.testTag("import_status").semantics { liveRegion = LiveRegionMode.Polite }
     when (status) {
         Status.Imported -> Text(stringResource(R.string.settings_import_ok), live)
+        Status.Exported -> Text(stringResource(R.string.settings_export_ok), live)
         Status.ExportFailed -> Text(stringResource(R.string.settings_export_failed), live, color = MaterialTheme.colorScheme.error)
         is Status.Error -> Text(status.message, live, color = MaterialTheme.colorScheme.error)
     }

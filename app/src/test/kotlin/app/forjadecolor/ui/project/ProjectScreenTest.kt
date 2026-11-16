@@ -126,6 +126,19 @@ class ProjectScreenTest {
     }
 
     @Test
+    fun `tapping a progress photo shows it large, and closing goes back`() {
+        show()
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+        app.waitFor(compose) { compose.onAllNodesWithTag("open_progress_photo").fetchSemanticsNodes().size == 1 }
+
+        compose.onNodeWithTag("open_progress_photo").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithTag("progress_photo_large").assertIsDisplayed()
+
+        compose.onNodeWithTag("close_photo").performClick()
+        compose.onAllNodesWithTag("progress_photo_large").assertCountEquals(0)
+    }
+
+    @Test
     fun `adding a progress photo keeps them in date order`() {
         runBlocking {
             // an older photo taken later than the clock, so the new one must go first

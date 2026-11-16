@@ -1,5 +1,6 @@
 package app.forjadecolor.ui.project
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +35,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.drawscope.clipRect
@@ -105,6 +109,8 @@ fun ProjectScreen(
     }
     // Every deletion waits here for the user to confirm it.
     var confirmation by remember { mutableStateOf<Confirmation?>(null) }
+    // The progress photo shown large, by its blob id.
+    var openPhoto by rememberSaveable { mutableStateOf<String?>(null) }
 
     val current = project
     if (current == null) {
@@ -181,7 +187,11 @@ fun ProjectScreen(
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     current.progress.forEach { photo ->
                         Column(Modifier.testTag("progress_photo")) {
-                            BlobImage(repository, photo.blobId, Modifier.size(96.dp))
+                            BlobImage(
+                                repository,
+                                photo.blobId,
+                                Modifier.size(96.dp).clickable { openPhoto = photo.blobId }.testTag("open_progress_photo"),
+                            )
                             Text(photo.takenAt.take(10), style = MaterialTheme.typography.labelSmall)
                             TextButton(
                                 onClick = {
@@ -235,6 +245,23 @@ fun ProjectScreen(
     }
 
     confirmation?.let { ConfirmDialog(it, onDismiss = { confirmation = null }) }
+    openPhoto?.let { blobId -> LargePhoto(container, blobId, onClose = { openPhoto = null }) }
+}
+
+/** A photo shown as large as the screen allows, over the project, until closed. */
+@Composable
+private fun LargePhoto(container: AppContainer, blobId: String, onClose: () -> Unit) {
+    Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            BlobImage(
+                container.repository,
+                blobId,
+                Modifier.fillMaxWidth().aspectRatio(1f).testTag("progress_photo_large"),
+                contentScale = ContentScale.Fit,
+            )
+            Button(onClick = onClose, modifier = Modifier.testTag("close_photo")) { Text(stringResource(R.string.action_close)) }
+        }
+    }
 }
 
 @Composable
