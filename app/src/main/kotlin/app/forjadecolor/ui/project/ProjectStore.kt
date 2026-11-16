@@ -2,6 +2,8 @@ package app.forjadecolor.ui.project
 
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.Repository
+import app.forjadecolor.domain.storage.deletePhotosIfUnused
+import app.forjadecolor.domain.storage.deleteProjectWithPhotos
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -25,4 +27,19 @@ class ProjectStore(private val repository: Repository, private val projectId: St
         val latest = repository.getProject(projectId) ?: return@withLock null
         change(latest).also { repository.saveProject(it) }
     }
+
+    /**
+     * Like [update], then deletes the photos [change] dropped (unless another project uses them), once
+     * the change is saved: a replaced or removed photo must not keep filling storage and backups.
+     */
+    suspend fun updateDroppingPhotos(change: suspend (Project) -> Pair<Project, List<String?>>): Project? = mutex.withLock {
+        val latest = repository.getProject(projectId) ?: return@withLock null
+        val (next, dropped) = change(latest)
+        repository.saveProject(next)
+        repository.deletePhotosIfUnused(dropped)
+        next
+    }
+
+    /** Deletes the project and the photos only it used, in turn with the writes above. */
+    suspend fun delete() = mutex.withLock { repository.deleteProjectWithPhotos(projectId) }
 }

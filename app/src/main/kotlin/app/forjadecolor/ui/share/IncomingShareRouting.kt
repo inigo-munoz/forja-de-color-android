@@ -20,6 +20,7 @@ import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.domain.storage.deletePhotosIfUnused
 import app.forjadecolor.platform.IncomingShare
 import app.forjadecolor.platform.resizeToJpeg
 import kotlinx.coroutines.Dispatchers
@@ -58,6 +59,8 @@ suspend fun routeShare(container: AppContainer, context: Context, share: Incomin
             val blobId = container.repository.putBlob(StoredBlob("image/jpeg", readSharedImage(context, share.uri)))
             val project = container.repository.getProject(projectId) ?: return
             container.repository.saveProject(project.copy(targetImageBlobId = blobId))
+            // The painted image it replaces must not keep filling storage.
+            container.repository.deletePhotosIfUnused(listOf(project.targetImageBlobId))
         }
     }
 }

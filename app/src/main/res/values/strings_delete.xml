@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Deleting things, always after a confirmation (T12). -->
+<resources>
+    <string name="action_delete">Delete</string>
+    <string name="action_remove">Remove</string>
+    <string name="project_delete">Delete project</string>
+    <string name="project_delete_photo">Delete</string>
+    <string name="project_remove_target">Remove target image</string>
+    <string name="confirm_delete_advice">Delete this advice? This cannot be undone.</string>
+    <string name="confirm_delete_project">Delete this project and its photos? This cannot be undone.</string>
+    <string name="confirm_delete_progress">Delete this progress photo? This cannot be undone.</string>
+    <string name="confirm_remove_target">Remove the target image? This cannot be undone.</string>
+</resources>

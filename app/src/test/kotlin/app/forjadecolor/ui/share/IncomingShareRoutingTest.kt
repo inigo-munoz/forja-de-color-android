@@ -13,6 +13,7 @@ import app.forjadecolor.platform.IncomingShare
 import app.forjadecolor.ui.navigation.AppNavHost
 import app.forjadecolor.ui.project.TestApp
 import app.forjadecolor.ui.project.readFixture
+import app.forjadecolor.domain.storage.StoredBlob
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -34,9 +35,9 @@ class IncomingShareRoutingTest {
     @get:Rule val compose = createComposeRule()
     private val app = TestApp()
 
-    private fun showApp() {
+    private fun showApp(p1Target: String? = null) {
         runBlocking {
-            app.repository.saveProject(createProject("Druida", app.now, "p1"))
+            app.repository.saveProject(createProject("Druida", app.now, "p1").copy(targetImageBlobId = p1Target))
             app.repository.saveProject(createProject("Bárbara", app.now, "p2"))
         }
         app.setContent(compose) { AppNavHost(app.container) }
@@ -74,6 +75,22 @@ class IncomingShareRoutingTest {
         assertNotNull(runBlocking { app.repository.getBlob(app.project("p1")!!.targetImageBlobId!!) })
         assertNull(app.container.incomingShares.current.value)
         app.waitFor(compose) { compose.onAllNodesWithTag("screen_project").fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @Test
+    fun `a shared painted image replacing the target deletes the old one`() {
+        val old = runBlocking { app.repository.putBlob(StoredBlob("image/jpeg", "old".toByteArray())) }
+        val uri = Uri.parse("content://test.share/painted.png")
+        val png = ByteArrayOutputStream().also { Bitmap.createBitmap(40, 30, Bitmap.Config.ARGB_8888).compress(Bitmap.CompressFormat.PNG, 100, it) }.toByteArray()
+        shadowOf(app.context.contentResolver).registerInputStream(uri, ByteArrayInputStream(png))
+        app.container.incomingShares.offer(IncomingShare.Image(uri))
+        showApp(p1Target = old)
+
+        app.waitFor(compose) { compose.onAllNodesWithTag("share_target_p1").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("share_target_p1").performScrollTo().performClick()
+
+        app.waitFor(compose) { app.project("p1")!!.targetImageBlobId.let { it != null && it != old } }
+        app.waitFor(compose) { runBlocking { app.repository.getBlob(old) } == null }
     }
 
     @Test

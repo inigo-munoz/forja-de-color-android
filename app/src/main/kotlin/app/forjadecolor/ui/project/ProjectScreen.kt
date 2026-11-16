@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,6 +63,8 @@ import app.forjadecolor.domain.projects.markDone
 import app.forjadecolor.domain.projects.reopen
 import app.forjadecolor.domain.projects.setNotes
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.ui.components.ConfirmDialog
+import app.forjadecolor.ui.components.Confirmation
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -97,6 +100,11 @@ fun ProjectScreen(
     val update: (suspend (Project) -> Project) -> Unit = { change ->
         scope.launch { store.update(change)?.let { project = it } }
     }
+    val updateDroppingPhotos: (suspend (Project) -> Pair<Project, List<String?>>) -> Unit = { change ->
+        scope.launch { store.updateDroppingPhotos(change)?.let { project = it } }
+    }
+    // Every deletion waits here for the user to confirm it.
+    var confirmation by remember { mutableStateOf<Confirmation?>(null) }
 
     val current = project
     if (current == null) {
@@ -119,7 +127,9 @@ fun ProjectScreen(
     }
     val setTarget: (ByteArray) -> Unit = { bytes ->
         targetError = false
-        update { p -> p.copy(targetImageBlobId = repository.putBlob(StoredBlob("image/jpeg", bytes))) }
+        updateDroppingPhotos { p ->
+            p.copy(targetImageBlobId = repository.putBlob(StoredBlob("image/jpeg", bytes))) to listOf(p.targetImageBlobId)
+        }
     }
     val pickProgress = sources.picker({ progressError = true }, addProgress)
     val shootProgress = sources.camera({ progressError = true }, addProgress)
@@ -143,7 +153,11 @@ fun ProjectScreen(
             AdviceCard(
                 entry,
                 inventory,
-                onDelete = { update { p -> p.copy(advice = p.advice.filter { it.id != entry.id }) } },
+                onDelete = {
+                    confirmation = Confirmation(R.string.confirm_delete_advice, R.string.action_delete) {
+                        update { p -> p.copy(advice = p.advice.filter { it.id != entry.id }) }
+                    }
+                },
                 onAssign = { unknown, owned ->
                     update { p -> p.copy(advice = p.advice.map { if (it.id == entry.id) assignUnknownPaint(it, unknown, owned) else it }) }
                 },
@@ -169,6 +183,14 @@ fun ProjectScreen(
                         Column(Modifier.testTag("progress_photo")) {
                             BlobImage(repository, photo.blobId, Modifier.size(96.dp))
                             Text(photo.takenAt.take(10), style = MaterialTheme.typography.labelSmall)
+                            TextButton(
+                                onClick = {
+                                    confirmation = Confirmation(R.string.confirm_delete_progress, R.string.action_delete) {
+                                        updateDroppingPhotos { p -> p.copy(progress = p.progress.filter { it.id != photo.id }) to listOf(photo.blobId) }
+                                    }
+                                },
+                                modifier = Modifier.testTag("delete_progress_photo"),
+                            ) { Text(stringResource(R.string.project_delete_photo)) }
                         }
                     }
                 }
@@ -184,11 +206,35 @@ fun ProjectScreen(
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.project_target), style = MaterialTheme.typography.titleMedium)
                 current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.fillMaxWidth().aspectRatio(1f)) }
+                if (current.targetImageBlobId != null) {
+                    TextButton(
+                        onClick = {
+                            confirmation = Confirmation(R.string.confirm_remove_target, R.string.action_remove) {
+                                updateDroppingPhotos { p -> p.copy(targetImageBlobId = null) to listOf(p.targetImageBlobId) }
+                            }
+                        },
+                        modifier = Modifier.testTag("remove_target"),
+                    ) { Text(stringResource(R.string.project_remove_target)) }
+                }
                 OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) { Text(stringResource(R.string.project_set_target)) }
                 if (targetError) PhotoErrorText("target_photo_error")
             }
         }
+
+        TextButton(
+            onClick = {
+                confirmation = Confirmation(R.string.confirm_delete_project, R.string.action_delete) {
+                    scope.launch {
+                        store.delete()
+                        onMain(onBack)
+                    }
+                }
+            },
+            modifier = Modifier.testTag("delete_project"),
+        ) { Text(stringResource(R.string.project_delete), color = MaterialTheme.colorScheme.error) }
     }
+
+    confirmation?.let { ConfirmDialog(it, onDismiss = { confirmation = null }) }
 }
 
 @Composable

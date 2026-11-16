@@ -12,6 +12,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performSemanticsAction
@@ -44,6 +45,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -88,6 +90,7 @@ class ProjectScreenTest {
     private val app = TestApp()
     private val techniques = mutableListOf<TechniqueCardId>()
     private var asked = 0
+    private var backs = 0
 
     private fun show(withPhoto: Boolean = false, withTarget: Boolean = false) {
         runBlocking {
@@ -97,7 +100,7 @@ class ProjectScreenTest {
             app.repository.saveProject(p.copy(initialPhotoBlobId = photo, targetImageBlobId = target))
         }
         app.setContent(compose) {
-            ProjectScreen(app.container, "p1", onAsk = { asked++ }, onOpenTechnique = { techniques += it }, onBack = {})
+            ProjectScreen(app.container, "p1", onAsk = { asked++ }, onOpenTechnique = { techniques += it }, onBack = { backs++ })
         }
         app.waitFor(compose) { compose.onAllNodesWithTag("notes").fetchSemanticsNodes().isNotEmpty() }
     }
@@ -273,10 +276,82 @@ class ProjectScreenTest {
     }
 
     @Test
-    fun `deletes an advice entry`() {
+    fun `deletes an advice entry after confirming`() {
         show()
         inEntry("e1", "delete_advice").performScrollTo().performClick()
+        compose.onNodeWithText("Delete this advice? This cannot be undone.").assertIsDisplayed()
+        compose.onNodeWithTag("confirm_delete").performClick()
         app.waitFor(compose) { app.project("p1")?.advice?.map { it.id } == listOf("e2") }
+    }
+
+    @Test
+    fun `keeps an advice entry when the deletion is cancelled`() {
+        show()
+        inEntry("e1", "delete_advice").performScrollTo().performClick()
+        compose.onNodeWithTag("cancel_delete").performClick()
+
+        compose.onAllNodesWithTag("confirm_delete").assertCountEquals(0)
+        assertEquals(listOf("e1", "e2"), app.project("p1")!!.advice.map { it.id })
+    }
+
+    @Test
+    fun `deletes the project with its photos after confirming, then goes back`() {
+        show(withPhoto = true, withTarget = true)
+        val photos = app.project("p1")!!.let { listOf(it.initialPhotoBlobId!!, it.targetImageBlobId!!) }
+        compose.onNodeWithTag("delete_project").performScrollTo().performClick()
+        compose.onNodeWithText("Delete this project and its photos? This cannot be undone.").assertIsDisplayed()
+        compose.onNodeWithTag("confirm_delete").performClick()
+
+        app.waitFor(compose) { backs == 1 }
+        assertNull(app.project("p1"))
+        photos.forEach { assertNull(runBlocking { app.repository.getBlob(it) }) }
+    }
+
+    @Test
+    fun `keeps the project when its deletion is cancelled`() {
+        show(withPhoto = true)
+        compose.onNodeWithTag("delete_project").performScrollTo().performClick()
+        compose.onNodeWithTag("cancel_delete").performClick()
+
+        assertEquals("Bárbara", app.project("p1")!!.name)
+        assertEquals(0, backs)
+    }
+
+    @Test
+    fun `deletes a progress photo and its file after confirming`() {
+        show()
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+        app.waitFor(compose) { compose.onAllNodesWithTag("delete_progress_photo").fetchSemanticsNodes().size == 1 }
+        val blobId = app.project("p1")!!.progress.single().blobId
+        // Inside the horizontally scrolled row the test window's tap lands outside the button: use its click action.
+        compose.onNodeWithTag("delete_progress_photo").performScrollTo().performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithText("Delete this progress photo? This cannot be undone.").assertIsDisplayed()
+        compose.onNodeWithTag("confirm_delete").performClick()
+
+        app.waitFor(compose) { app.project("p1")?.progress?.isEmpty() == true }
+        app.waitFor(compose) { runBlocking { app.repository.getBlob(blobId) } == null }
+    }
+
+    @Test
+    fun `removes the target image and its file after confirming`() {
+        show(withTarget = true)
+        val blobId = app.project("p1")!!.targetImageBlobId!!
+        compose.onNodeWithTag("remove_target").performScrollTo().performClick()
+        compose.onNodeWithText("Remove the target image? This cannot be undone.").assertIsDisplayed()
+        compose.onNodeWithTag("confirm_delete").performClick()
+
+        app.waitFor(compose) { app.project("p1")?.targetImageBlobId == null }
+        app.waitFor(compose) { runBlocking { app.repository.getBlob(blobId) } == null }
+    }
+
+    @Test
+    fun `replacing the target image deletes the old one`() {
+        show(withTarget = true)
+        val old = app.project("p1")!!.targetImageBlobId!!
+        compose.onNodeWithTag("set_target").performScrollTo().performClick()
+
+        app.waitFor(compose) { app.project("p1")?.targetImageBlobId.let { it != null && it != old } }
+        app.waitFor(compose) { runBlocking { app.repository.getBlob(old) } == null }
     }
 
     @Test
