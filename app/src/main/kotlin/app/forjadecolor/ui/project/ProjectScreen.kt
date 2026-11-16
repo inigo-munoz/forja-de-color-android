@@ -29,6 +29,7 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -37,8 +38,10 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -104,18 +107,23 @@ fun ProjectScreen(
     }
 
     val sources = LocalPhotoSources.current
+    // A photo that cannot be read says so next to its buttons, instead of the tap seeming to do nothing.
+    var progressError by rememberSaveable { mutableStateOf(false) }
+    var targetError by rememberSaveable { mutableStateOf(false) }
     val addProgress: (ByteArray) -> Unit = { bytes ->
+        progressError = false
         update { p ->
             val blobId = repository.putBlob(StoredBlob("image/jpeg", bytes))
             p.addProgressPhoto(ProgressPhoto(UUID.randomUUID().toString(), isoString(container.now()), blobId))
         }
     }
     val setTarget: (ByteArray) -> Unit = { bytes ->
+        targetError = false
         update { p -> p.copy(targetImageBlobId = repository.putBlob(StoredBlob("image/jpeg", bytes))) }
     }
-    val pickProgress = sources.picker({}, addProgress)
-    val shootProgress = sources.camera({}, addProgress)
-    val pickTarget = sources.picker({}, setTarget)
+    val pickProgress = sources.picker({ progressError = true }, addProgress)
+    val shootProgress = sources.camera({ progressError = true }, addProgress)
+    val pickTarget = sources.picker({ targetError = true }, setTarget)
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_project"),
@@ -168,6 +176,7 @@ fun ProjectScreen(
                     OutlinedButton(onClick = pickProgress, modifier = Modifier.testTag("add_progress")) { Text(stringResource(R.string.project_add_progress)) }
                     OutlinedButton(onClick = shootProgress, modifier = Modifier.testTag("add_progress_camera")) { Text(stringResource(R.string.t8_take_photo)) }
                 }
+                if (progressError) PhotoErrorText("progress_photo_error")
             }
         }
 
@@ -176,9 +185,19 @@ fun ProjectScreen(
                 Text(stringResource(R.string.project_target), style = MaterialTheme.typography.titleMedium)
                 current.targetImageBlobId?.let { BlobImage(repository, it, Modifier.fillMaxWidth().aspectRatio(1f)) }
                 OutlinedButton(onClick = pickTarget, modifier = Modifier.testTag("set_target")) { Text(stringResource(R.string.project_set_target)) }
+                if (targetError) PhotoErrorText("target_photo_error")
             }
         }
     }
+}
+
+@Composable
+private fun PhotoErrorText(tag: String) {
+    Text(
+        stringResource(R.string.t8_photo_error),
+        color = MaterialTheme.colorScheme.error,
+        modifier = Modifier.testTag(tag).semantics { liveRegion = LiveRegionMode.Polite },
+    )
 }
 
 /** Before/after when both the photo and the painted image exist; otherwise the photo alone, if any. */

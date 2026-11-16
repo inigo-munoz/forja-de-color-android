@@ -145,6 +145,49 @@ class ProjectScreenTest {
     }
 
     @Test
+    fun `says so when a progress photo cannot be read, and adds nothing`() {
+        show()
+        app.photos.failure = IllegalArgumentException("not an image")
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+
+        compose.onNodeWithTag("progress_photo_error").performScrollTo().assertIsDisplayed()
+        assertEquals(0, app.project("p1")!!.progress.size)
+    }
+
+    @Test
+    fun `says so when a progress photo from the camera cannot be read`() {
+        show()
+        app.photos.failure = IllegalArgumentException("not an image")
+        compose.onNodeWithTag("add_progress_camera").performScrollTo().performClick()
+
+        compose.onNodeWithTag("progress_photo_error").performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun `clears the progress photo error once a photo works`() {
+        show()
+        app.photos.failure = IllegalArgumentException("not an image")
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+        compose.onNodeWithTag("progress_photo_error").performScrollTo().assertIsDisplayed()
+
+        app.photos.failure = null
+        compose.onNodeWithTag("add_progress").performScrollTo().performClick()
+
+        app.waitFor(compose) { app.project("p1")?.progress?.size == 1 }
+        compose.onAllNodesWithTag("progress_photo_error").assertCountEquals(0)
+    }
+
+    @Test
+    fun `says so when the target image cannot be read, and keeps none`() {
+        show()
+        app.photos.failure = IllegalArgumentException("not an image")
+        compose.onNodeWithTag("set_target").performScrollTo().performClick()
+
+        compose.onNodeWithTag("target_photo_error").performScrollTo().assertIsDisplayed()
+        assertEquals(null, app.project("p1")!!.targetImageBlobId)
+    }
+
+    @Test
     fun `marks done and reopens`() {
         show()
         compose.onNodeWithTag("toggle_done").performScrollTo().performClick()

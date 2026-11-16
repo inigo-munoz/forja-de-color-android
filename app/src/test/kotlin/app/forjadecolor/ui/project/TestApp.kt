@@ -34,11 +34,13 @@ class FakeBridge(var answer: String? = null, var result: SendResult = SendResult
     override fun readAnswer(): String? = answer
 }
 
-/** Picker and camera that hand back fixed bytes at once. */
-class FakePhotoSources(var nextPhoto: ByteArray = byteArrayOf(9, 9, 9)) : PhotoSources {
-    @Composable override fun picker(onError: (Throwable) -> Unit, onPhoto: (ByteArray) -> Unit): () -> Unit = { onPhoto(nextPhoto) }
+/** Picker and camera that hand back fixed bytes at once, or fail with [failure] when it is set. */
+class FakePhotoSources(var nextPhoto: ByteArray = byteArrayOf(9, 9, 9), var failure: Throwable? = null) : PhotoSources {
+    @Composable override fun picker(onError: (Throwable) -> Unit, onPhoto: (ByteArray) -> Unit): () -> Unit = { deliver(onError, onPhoto) }
 
-    @Composable override fun camera(onError: (Throwable) -> Unit, onPhoto: (ByteArray) -> Unit): () -> Unit = { onPhoto(nextPhoto) }
+    @Composable override fun camera(onError: (Throwable) -> Unit, onPhoto: (ByteArray) -> Unit): () -> Unit = { deliver(onError, onPhoto) }
+
+    private fun deliver(onError: (Throwable) -> Unit, onPhoto: (ByteArray) -> Unit) = failure?.let(onError) ?: onPhoto(nextPhoto)
 }
 
 /** An app over an in-memory Room database with a fixed clock, a fake bridge and fake photo inputs. */
