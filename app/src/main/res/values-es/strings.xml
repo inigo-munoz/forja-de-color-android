@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish interface copy. Same names as values/strings.xml; app_name is the brand and is not repeated here. -->
+<resources>
+    <!-- nav -->
+    <string name="nav_projects">Proyectos</string>
+    <string name="nav_inventory">Mis pinturas</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- inventory -->
+    <string name="inventory_title">Mis pinturas</string>
+    <string name="inventory_brushes">Pinceles</string>
+    <string name="inventory_other_paints">Otras pinturas</string>
+    <string name="inventory_add_title">Añadir o actualizar una pintura</string>
+    <string name="inventory_brand">Marca</string>
+    <string name="inventory_code">Código</string>
+    <string name="inventory_name">Nombre</string>
+    <string name="inventory_range">Gama</string>
+    <string name="inventory_type">Tipo</string>
+    <string name="inventory_hex">Color</string>
+    <string name="inventory_add">Guardar pintura</string>
+
+    <!-- settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_backup_reminder">Hace tiempo que no exportas una copia de seguridad. Exporta una para no perder tus proyectos.</string>
+    <string name="settings_export">Exportar copia de seguridad</string>
+    <string name="settings_import">Importar copia de seguridad</string>
+    <string name="settings_import_ok">Copia de seguridad importada.</string>
+    <string name="settings_export_ok">Copia de seguridad exportada.</string>
+    <string name="settings_import_confirm">Importar sustituye TODOS tus proyectos, fotos y pinturas actuales por los de la copia de seguridad. ¿Continuar?</string>
+    <string name="settings_brain">Instrucciones para la IA</string>
+    <string name="settings_brain_help">Pégalas en tu proyecto de Claude o en tu GPT personalizado para que conozca tu método y tus pinturas.</string>
+    <string name="settings_copy_brain">Copiar instrucciones para la IA</string>
+    <string name="settings_copied">Copiado.</string>
+    <string name="ai_instructions_never">¿Usas un proyecto de Claude o un GPT personalizado? Copia las instrucciones para la IA.</string>
+    <string name="ai_instructions_stale">Las instrucciones para la IA cambiaron desde la última vez que las copiaste: cópialas de nuevo.</string>
+    <string name="ai_instructions_copy">Copiar</string>
+
+    <!-- projects -->
+    <string name="projects_title">Proyectos</string>
+    <string name="projects_new">Nuevo proyecto</string>
+    <string name="projects_name">Nombre</string>
+    <string name="projects_photo">Foto</string>
+    <string name="projects_create">Crear</string>
+    <string name="projects_empty">Todavía no hay proyectos.</string>
+    <string name="projects_in_progress">En curso</string>
+    <string name="projects_done">Terminados</string>
+    <string name="projects_new_button">+ Nuevo proyecto</string>
+    <string name="projects_last_activity">Última actividad: %1$s</string>
+    <string name="projects_zone_progress">%1$d de %2$d zonas</string>
+
+    <!-- project -->
+    <string name="project_notes">Notas</string>
+    <string name="project_progress">Fotos de progreso</string>
+    <string name="project_add_progress">Añadir foto de progreso</string>
+    <string name="project_target">Imagen objetivo</string>
+    <string name="project_set_target">Poner imagen objetivo</string>
+    <string name="project_change_target">Cambiar imagen objetivo</string>
+    <string name="project_mark_done">Marcar como terminado</string>
+    <string name="project_reopen">Reabrir</string>
+    <string name="project_ask">Consultar al asesor</string>
+    <string name="project_tab_recipe">Receta</string>
+    <string name="project_tab_diary">Diario</string>
+    <string name="project_tab_photos">Fotos</string>
+    <string name="project_advice_empty">Todavía no hay consejos: toca Consultar al asesor.</string>
+    <string name="project_advice">Consejo</string>
+    <string name="project_prep">Preparación</string>
+    <string name="project_tips">Consejos</string>
+    <string name="project_complements">Colores complementarios</string>
+    <string name="project_remaining">Pasos pendientes</string>
+    <string name="project_needed">Pinturas que necesitas</string>
+    <string name="project_unknown">No está entre tus pinturas</string>
+    <string name="project_assign">Asignar una de las mías</string>
+    <string name="project_unknown_brush">Pincel que no está en tu inventario</string>
+    <string name="project_already_painted">ya pintado</string>
+    <string name="project_zone_done">Pintada</string>
+    <string name="project_zone_progress">%1$d de %2$d zonas</string>
+    <string name="project_technique">Técnica</string>
+    <string name="project_see_technique">Ver ficha de técnica</string>
+    <string name="project_delete_advice">Eliminar este consejo</string>
+    <string name="project_paint_image">Pintarla con ChatGPT</string>
+    <string name="project_paint_image_sent">Guarda la imagen que genere ChatGPT y luego añádela en la pestaña Fotos con \"Poner imagen objetivo\".</string>
+    <string name="project_paint_image_fallback">Prompt copiado y foto descargada: pega ambos en ChatGPT, guarda la imagen que genere y luego añádela en la pestaña Fotos con \"Poner imagen objetivo\".</string>
+    <string name="project_compare">Antes / después</string>
+    <string name="project_compare_help">Arrastra para comparar</string>
+
+    <!-- ask -->
+    <string name="ask_title">Consultar al asesor</string>
+    <string name="ask_moment_start">Inicio</string>
+    <string name="ask_moment_primed">Imprimada y con pincel seco</string>
+    <string name="ask_moment_half_painted">A medio pintar</string>
+    <string name="ask_moment_during">Mientras pinto</string>
+    <string name="ask_zone">Zona</string>
+    <string name="ask_question">¿Qué necesitas?</string>
+    <string name="ask_question_apply_layer">Cómo aplicar una capa</string>
+    <string name="ask_question_light">Cómo añadir luces</string>
+    <string name="ask_question_shadow">Cómo añadir sombras</string>
+    <string name="ask_question_highlight">Cómo hacer que destaque</string>
+    <string name="ask_question_which_technique">Qué técnica usar</string>
+    <string name="ask_question_free">Otra cosa</string>
+    <string name="ask_details">Detalles</string>
+    <string name="ask_photo">Foto</string>
+    <string name="ask_send">Enviar a Claude / ChatGPT</string>
+    <string name="ask_fallback">Prompt copiado e imagen descargada: pega ambos en tu chat.</string>
+    <string name="ask_prompt_box">Si el prompt no se copió, cópialo desde aquí:</string>
+    <string name="ask_copy_prompt">Copiar prompt</string>
+    <string name="ask_paste">Pegar respuesta</string>
+    <string name="ask_paste_here">Pega aquí la respuesta</string>
+    <string name="ask_save">Guardar respuesta</string>
+    <string name="ask_errors">No se pudo usar la respuesta:</string>
+    <string name="ask_step_moment">1. Elige el momento</string>
+    <string name="ask_step_send">2. Envíalo a tu IA</string>
+    <string name="ask_step_paste">3. Vuelve y pega la respuesta</string>
+    <string name="ask_moment_start_help">Miniatura sin pintar: paleta completa desde la imprimación.</string>
+    <string name="ask_moment_primed_help">Ya imprimada en negro y con pincel seco: receta desde el color.</string>
+    <string name="ask_moment_half_painted_help">Ya hay zonas pintadas: qué falta y colores que combinan.</string>
+    <string name="ask_moment_during_help">Una duda concreta sobre una zona.</string>
+    <string name="ask_default_photo">Se enviará la foto del proyecto.</string>
+    <string name="ask_no_photo">Elige o haz una foto para enviar.</string>
+    <string name="ask_paste_help">Copia la respuesta en Claude o ChatGPT, o compártela con Forja de Color.</string>
+    <string name="settings_backup_too_big">Este archivo es demasiado grande para ser una copia de seguridad de Forja de Color.</string>
+    <string name="project_progress_empty">Todavía no hay fotos de progreso: saca una al terminar cada sesión de pintura para ver cómo avanza.</string>
+    <string name="settings_last_backup">Última copia: %1$s</string>
+    <string name="settings_no_backup_yet">Todavía no has exportado ninguna copia.</string>
+</resources>

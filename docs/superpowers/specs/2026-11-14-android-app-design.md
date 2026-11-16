@@ -76,15 +76,16 @@ Screens (Navigation Compose): Projects · Project · Ask · Inventory · Setting
 | What | Where | Why |
 |---|---|---|
 | Source code | `/media/inigo/Loki/Mis Repos/forja-de-color-android`, branch `main`. GitHub remote only when the owner authorizes it. | Separate repo like Dive App; the PWA repo keeps its Pages deploy untouched. |
-| Inventory, projects, advice, progress-photo metadata | Room database `forja.db` in the app's internal storage. Tables: `paints`, `brushes`, `projects`, `progress_photos`, `advice_entries` (the AI response kept as its JSON text). | Same as Dive App; queryable; migrations under test. |
-| Photos and painted images | JPEG files in `filesDir/photos/<blobId>.jpg`, referenced by id from Room. Resized to 1600 px on the long side, quality 85, as in the PWA. | Keeps images out of SQLite; ids map 1:1 to the backup's `blobs`. |
-| Small settings (`lastExportAt`) | DataStore Preferences. | Same as Dive App. |
+| Inventory, projects, advice, progress-photo metadata, small state (`lastExportAt`) | Room database `forja.db` in the app's internal storage. Tables: `paints`, `brushes`, `projects`, `progress_photos`, `advice_entries` (the AI response kept as its JSON text), `blobs` (photo id → MIME type and file name), `app_state`. | Same as Dive App; queryable; one transaction covers data and state. |
+| Photos and painted images | Files in `filesDir/photos/` with random names, mapped from the photo id by the `blobs` table. Resized to 1600 px on the long side, JPEG quality 85, as in the PWA. | Keeps images out of SQLite. Photo ids come from backups, which are untrusted, so an id is never used as a path. |
 | Full backup (data + photos) | A JSON file in the PWA format, written where the user chooses with the system file picker (Downloads, Google Drive…), named `forja-de-color-YYYY-MM-DD.json`. Reminder after 7 days without exporting. | The shared contract with the PWA, and the only backup that always includes photos. |
-| Android automatic backup | On, for the database and settings only; photos are excluded. | Android stops backing up an app that exceeds 25 MB, and photos would reach that quickly. A restore without photos still shows every project; missing images show a placeholder. |
+| Android automatic backup | Cloud backup: database and settings only, photos excluded. Phone-to-phone transfer: everything, photos included (it has no quota). | Android stops backing up an app that exceeds 25 MB, and photos would reach that quickly. A restore without photos still shows every project; missing images show a placeholder. |
 | Seed inventory and technique cards | Bundled in the app (`:domain` seed, card Markdown in `assets/cards/`). | Read-only content. |
 
-Import replaces everything in one Room transaction plus a staged photo directory that is swapped
-in only after the transaction commits; a file that fails validation changes nothing.
+Import writes the new photo files first under fresh names, then replaces every row in one Room
+transaction, then deletes the files no row points to. If the transaction fails, the new files are
+deleted and the old data stays; orphan files left by a crash are cleaned on the next start. A file
+that fails validation changes nothing.
 
 ## 7. Behaviour carried over exactly
 

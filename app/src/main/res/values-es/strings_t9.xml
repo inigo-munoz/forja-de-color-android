@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish copy for the inventory, settings and technique screens that the PWA does not have as text. -->
+<resources>
+    <string name="technique_back">Volver</string>
+    <string name="settings_export_failed">No se pudo escribir el archivo de copia de seguridad.</string>
+    <string name="bsl_role_base">base</string>
+    <string name="bsl_role_shadow">sombra</string>
+    <string name="bsl_role_light">luz</string>
+    <string name="bsl_role_fourth">luz extra</string>
+    <string name="inventory_add_button">+ Añadir pintura</string>
+    <string name="inventory_cancel">Cancelar</string>
+    <string name="inventory_hue">Tono</string>
+    <string name="inventory_lightness">Luminosidad</string>
+    <string name="family_warm_flesh">BSL Piel pálida</string>
+    <string name="family_flesh">BSL Piel</string>
+    <string name="family_yellow">BSL Amarillo</string>
+    <string name="family_orange">BSL Naranja</string>
+    <string name="family_magenta">BSL Magenta</string>
+    <string name="family_violet">BSL Violeta</string>
+    <string name="family_blue">BSL Azul</string>
+    <string name="family_turquoise">BSL Turquesa</string>
+    <string name="family_cold_green">BSL Verde frío</string>
+    <string name="family_green">BSL Verde</string>
+    <string name="family_black">BSL Negro</string>
+    <string name="family_multipurpose">BSL Multiuso</string>
+    <string name="paint_type_opaque">opaca</string>
+    <string name="paint_type_wash">lavado</string>
+    <string name="paint_type_metallic">metálica</string>
+    <string name="paint_type_medium">médium</string>
+    <string name="paint_type_primer">imprimación</string>
+    <string name="paint_type_other">otra</string>
+</resources>

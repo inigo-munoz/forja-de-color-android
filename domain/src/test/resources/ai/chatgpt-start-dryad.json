@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "kind": "recipe",
+  "moment": "start",
+  "prep": [
+    "Retira las telarañas y restos de polvo con el pincel Detail núm. 2 (B02002), limpio y seco. Revisa especialmente las astas, los brazos y las uniones de las ramas.",
+    "Aplica imprimación negra sobre toda la miniatura. La pintura Vallejo 72.051 Negro puede servir como capa base, pero no sustituye necesariamente a una imprimación específica. Deja secar completamente.",
+    "Con el pincel Dry Brush Small (B07001), realiza un pincel seco generoso con Vallejo 72.155 Gris Carbón. Insiste en las ramas, los pliegues del vestido y la musculatura. Conserva el negro en las cavidades profundas.",
+    "Con el mismo pincel, aplica Vallejo 72.049 Gris Muralla mediante pincel seco más ligero, concentrándolo en las superficies elevadas.",
+    "Termina con Vallejo 72.001 Blanco Calavera, usando muy poca pintura. Ilumina los bordes superiores de las ramas, el rostro, los hombros, el pecho, las astas y los pliegues más prominentes.",
+    "Prepara las pinturas translúcidas con las diluciones indicadas. Las proporciones son orientativas y deben ajustarse según la cobertura real de cada pintura. Busca que el color tiña la superficie sin ocultar las luces del pincel seco.",
+    "Aplica primero los colores Slapchop de las superficies grandes y deja para el final el rostro, la piel y los pequeños detalles."
+  ],
+  "zones": [
+    {
+      "name": "Arco de raíces y ramas principales",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.124"
+      },
+      "dilution": "1:3",
+      "steps": [
+        "Aplica Marrón Gargona sobre todo el arco de ramas que rodea a la figura.",
+        "Trabaja por secciones para controlar la acumulación de pintura en las hendiduras.",
+        "Deja que el negro y el gris del pincel seco definan las grietas y la textura de la corteza.",
+        "Si necesitas más intensidad, aplica una segunda capa fina cuando haya secado la primera."
+      ],
+      "brush": "B02002"
+    },
+    {
+      "name": "Musgo y vegetación de las raíces",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.032"
+      },
+      "dilution": "1:3",
+      "steps": [
+        "Aplica Verde Escorpena de manera irregular sobre algunas zonas rugosas de las ramas.",
+        "Concéntralo en las uniones, las grietas y las partes inferiores donde podría crecer el musgo.",
+        "No cubras toda la madera: el marrón debe seguir siendo el color dominante.",
+        "Aprovecha las zonas más claras del pincel seco para conseguir variación natural sin añadir otro color."
+      ],
+      "brush": "B02001"
+    },
+    {
+      "name": "Vestido y falda",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.026"
+      },
+      "dilution": "1:3",
+      "steps": [
+        "Aplica Verde Jade sobre toda la falda larga y la tela que cubre la cintura.",
+        "Distribuye el color desde las zonas elevadas hacia los pliegues, evitando que se formen charcos.",
+        "Conserva los negros en las separaciones más profundas del vestido.",
+        "Aplica una segunda capa fina solamente donde quieras intensificar el verde."
+      ],
+      "brush": "B02002"
+    },
+    {
+      "name": "Cabello y mechones alrededor del rostro",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.011"
+      },
+      "dilution": "1:2",
+      "steps": [
+        "Aplica Rojo Visceral sobre los mechones que rodean la cabeza y descienden hacia los hombros.",
+        "Deja visibles las zonas oscuras entre los mechones.",
+        "Evita invadir las astas y la cara.",
+        "Refuerza el color únicamente en los mechones más iluminados."
+      ],
+      "brush": "B02001"
+    },
+    {
+      "name": "Piel del rostro, pecho y brazos",
+      "technique": "bsl",
+      "bsl": {
+        "base": {
+          "brand": "Vallejo",
+          "code": "72.099"
+        },
+        "shadow": {
+          "brand": "Vallejo",
+          "code": "72.071"
+        },
+        "light": {
+          "brand": "Vallejo",
+          "code": "72.098"
+        }
+      },
+      "steps": [
+        "Aplica una capa base fina de Vallejo 72.099 Piel sobre el rostro, el cuello, el pecho y los brazos.",
+        "Utiliza Vallejo 72.071 Piel de Bárbaro para marcar las sombras bajo los pómulos, la mandíbula, el cabello, el pecho y la parte inferior de los brazos.",
+        "Ilumina con Vallejo 72.098 Carne Élfica la frente, el puente de la nariz, los pómulos, los hombros, las clavículas y las superficies superiores de los brazos.",
+        "Conserva las transiciones suaves usando poca pintura y evitando líneas gruesas.",
+        "Dedica especial atención al rostro, porque será el principal punto de interés visual."
+      ]
+    },
+    {
+      "name": "Astas y cuernos de la cabeza",
+      "technique": "bsl",
+      "bsl": {
+        "base": {
+          "brand": "Vallejo",
+          "code": "72.042"
+        },
+        "shadow": {
+          "brand": "Vallejo",
+          "code": "72.045"
+        },
+        "light": {
+          "brand": "Vallejo",
+          "code": "72.001"
+        }
+      },
+      "steps": [
+        "Aplica Vallejo 72.042 Piel de Parásitos como color base sobre las astas.",
+        "Oscurece los nacimientos y las separaciones con Vallejo 72.045 Marrón Carbonizado.",
+        "Ilumina las puntas y los relieves superiores con pequeñas cantidades de Vallejo 72.001 Blanco Calavera.",
+        "Mantén las raíces de las astas más oscuras que las puntas para crear profundidad.",
+        "No ilumines todos los cuernos por igual: destaca especialmente los que reciben luz desde arriba."
+      ]
+    },
+    {
+      "name": "Cinturón y adornos de la cintura",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.007"
+      },
+      "dilution": "1:2",
+      "steps": [
+        "Aplica Amarillo Dorado sobre el cinturón y los pequeños adornos de la cintura.",
+        "Procura que las separaciones y los grabados conserven el negro del preiluminado.",
+        "Si el amarillo queda demasiado apagado, aplica otra capa fina sobre los relieves.",
+        "Evita extender este color a la falda para mantener una separación clara entre materiales."
+      ],
+      "brush": "B02001"
+    },
+    {
+      "name": "Detalles oscuros de la cara y cavidades",
+      "technique": "slapchop",
+      "paint": {
+        "brand": "Vallejo",
+        "code": "72.045"
+      },
+      "dilution": "1:2",
+      "steps": [
+        "Aplica Marrón Carbonizado con mucho control en las cavidades más profundas del rostro y bajo el cabello.",
+        "Refuerza únicamente las separaciones que hayan perdido definición durante la pintura de la piel.",
+        "Mantén los ojos oscuros para conseguir una expresión misteriosa.",
+        "Evita cubrir los puntos de luz del rostro."
+      ],
+      "brush": "B02001"
+    }
+  ],
+  "tips": [
+    "Es una miniatura con temática de espíritu del bosque. La combinación de madera marrón, vestido verde jade, cabello rojo y piel clara permitirá distinguir bien la figura del arco de raíces.",
+    "La zona más importante es el rostro. Dedica más precisión a los ojos, la nariz y los pómulos que al resto de la miniatura.",
+    "Las ramas ocupan gran parte de la composición. No inviertas demasiado tiempo en cada una: el pincel seco inicial hará buena parte del trabajo.",
+    "Para las diluciones Slapchop, empieza con las proporciones indicadas y prueba sobre una zona poco visible. El agua puede funcionar, pero demasiada cantidad provoca cercos y pérdida de adherencia.",
+    "Si la pintura se acumula en un hueco, retira el exceso inmediatamente con el pincel limpio y ligeramente húmedo.",
+    "Utiliza el pincel B07001 exclusivamente para el pincel seco. El B02002 será el principal para aplicar colores y el B02001 para los detalles.",
+    "Trabaja de dentro hacia fuera: piel y vestido antes de retocar las ramas cercanas. Así reduces el riesgo de manchar zonas terminadas.",
+    "Evita añadir demasiados colores al arco. El musgo verde debe ocupar pequeñas zonas y no competir con el vestido.",
+    "Para un resultado rápido, reserva las transiciones BSL exclusivamente para la piel y las astas. El resto debe aprovechar las luces y sombras creadas mediante Slapchop.",
+    "La fotografía muestra zonas donde el cabello, la corteza y los elementos de la cabeza se superponen. Comprueba los volúmenes con luz lateral antes de pintar para no confundir materiales."
+  ]
+}

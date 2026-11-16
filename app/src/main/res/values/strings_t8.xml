@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copy for the native-only parts of the project screens (T8): camera, missing photos, incoming shares. -->
+<resources>
+    <string name="t8_choose_photo">Choose photo</string>
+    <string name="t8_take_photo">Take photo</string>
+    <string name="t8_photo_ready">Photo added</string>
+    <string name="t8_remove_photo">Remove photo</string>
+    <string name="t8_photo_missing">Photo not found</string>
+    <string name="t8_photo_error">The photo could not be read.</string>
+    <string name="t8_not_found">Project not found.</string>
+    <string name="t8_bsl_base">base</string>
+    <string name="t8_bsl_shadow">shadow</string>
+    <string name="t8_bsl_light">light</string>
+    <string name="t8_share_text">You shared an answer from your AI chat.</string>
+    <string name="t8_share_image">You shared a painted image; it becomes the target image.</string>
+    <string name="t8_share_which">Which project is it for?</string>
+    <string name="t8_share_no_projects">Create a project below, then pick it here.</string>
+    <string name="t8_share_dismiss">Dismiss</string>
+    <string name="t8_share_image_failed">The shared image could not be read.</string>
+</resources>

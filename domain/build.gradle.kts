@@ -13,6 +13,7 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.kotlinx.coroutines.core)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 

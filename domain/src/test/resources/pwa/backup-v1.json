@@ -1,0 +1,300 @@
+{
+  "app": "forja-de-color",
+  "version": 1,
+  "exportedAt": "2026-11-14T12:00:00.000Z",
+  "inventory": {
+    "paints": [
+      {
+        "brand": "Vallejo",
+        "code": "72.003",
+        "name": "Carne Pálida",
+        "range": "Game Color",
+        "type": "opaque",
+        "hex": "#c9a47f",
+        "family": {
+          "name": "BSL Warm Flesh",
+          "order": 1,
+          "role": "fourth"
+        }
+      },
+      {
+        "brand": "Vallejo",
+        "code": "72.100",
+        "name": "Carne Rosada",
+        "range": "Game Color",
+        "type": "opaque",
+        "hex": "#e58a6b",
+        "family": {
+          "name": "BSL Warm Flesh",
+          "order": 2,
+          "role": "light"
+        }
+      },
+      {
+        "brand": "Citadel",
+        "code": "Abaddon Black",
+        "name": "Abaddon Black",
+        "range": "Base",
+        "type": "opaque",
+        "hex": "#231f20",
+        "family": {
+          "name": "Custom",
+          "order": 4,
+          "role": "shadow"
+        }
+      },
+      {
+        "brand": "Vallejo",
+        "code": "73.200",
+        "name": "Sepia Wash",
+        "range": "Wash",
+        "type": "wash",
+        "hex": "#5a3d2b"
+      }
+    ],
+    "brushes": [
+      {
+        "code": "B02001",
+        "name": "Detail núm. 1"
+      },
+      {
+        "code": "B02002",
+        "name": "Detail núm. 2"
+      },
+      {
+        "code": "B07001",
+        "name": "Dry Brush Small"
+      }
+    ]
+  },
+  "projects": [
+    {
+      "id": "project-1",
+      "name": "Paladín",
+      "createdAt": "2026-11-10T09:00:00.000Z",
+      "status": "in-progress",
+      "notes": "Capa verde",
+      "progress": [
+        {
+          "id": "pp-1",
+          "takenAt": "2026-11-11T10:00:00.000Z",
+          "blobId": "photo-progress"
+        }
+      ],
+      "advice": [
+        {
+          "id": "adv-1",
+          "receivedAt": "2026-11-10T09:30:00.000Z",
+          "response": {
+            "version": 1,
+            "kind": "recipe",
+            "moment": "start",
+            "prep": [
+              "Imprimar en negro"
+            ],
+            "tips": [
+              "Capas finas"
+            ],
+            "zones": [
+              {
+                "name": "túnica",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Vallejo",
+                  "code": "72.032"
+                },
+                "dilution": "1:3",
+                "steps": [
+                  "Aplicar"
+                ],
+                "brush": "B02001"
+              },
+              {
+                "name": "cara",
+                "technique": "bsl",
+                "bsl": {
+                  "base": {
+                    "brand": "Vallejo",
+                    "code": "72.099"
+                  },
+                  "shadow": {
+                    "brand": "Vallejo",
+                    "code": "72.071"
+                  },
+                  "light": {
+                    "brand": "Vallejo",
+                    "code": "72.098"
+                  }
+                },
+                "steps": []
+              },
+              {
+                "name": "peana",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Citadel",
+                  "code": "Abaddon Black"
+                },
+                "dilution": "1:1",
+                "steps": []
+              }
+            ]
+          },
+          "unknownPaints": [
+            {
+              "brand": "Vallejo",
+              "code": "72.032"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.099"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.071"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.098"
+            }
+          ],
+          "unknownBrushes": [],
+          "doneZones": [
+            0,
+            2
+          ]
+        },
+        {
+          "id": "adv-2",
+          "receivedAt": "2026-11-11T11:00:00.000Z",
+          "response": {
+            "version": 1,
+            "kind": "consultation",
+            "zone": "capa",
+            "question": "highlight",
+            "technique": "Luz de filo",
+            "steps": [
+              "Pincel seco"
+            ],
+            "paints": [
+              {
+                "paint": {
+                  "brand": "Vallejo",
+                  "code": "72.003"
+                },
+                "dilution": "1:2"
+              }
+            ],
+            "brush": "X999",
+            "techniqueCard": "drybrush"
+          },
+          "unknownPaints": [],
+          "unknownBrushes": [
+            "X999"
+          ]
+        },
+        {
+          "id": "adv-3",
+          "receivedAt": "2026-11-11T12:00:00.000Z",
+          "response": {
+            "version": 1,
+            "kind": "recipe",
+            "moment": "primed",
+            "prep": [],
+            "tips": [
+              "Capas finas"
+            ],
+            "zones": [
+              {
+                "name": "túnica",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Vallejo",
+                  "code": "72.032"
+                },
+                "dilution": "1:3",
+                "steps": [
+                  "Aplicar"
+                ],
+                "brush": "B02001"
+              },
+              {
+                "name": "cara",
+                "technique": "bsl",
+                "bsl": {
+                  "base": {
+                    "brand": "Vallejo",
+                    "code": "72.099"
+                  },
+                  "shadow": {
+                    "brand": "Vallejo",
+                    "code": "72.071"
+                  },
+                  "light": {
+                    "brand": "Vallejo",
+                    "code": "72.098"
+                  }
+                },
+                "steps": []
+              },
+              {
+                "name": "peana",
+                "technique": "slapchop",
+                "paint": {
+                  "brand": "Citadel",
+                  "code": "Abaddon Black"
+                },
+                "dilution": "1:1",
+                "steps": []
+              }
+            ]
+          },
+          "unknownPaints": [
+            {
+              "brand": "Vallejo",
+              "code": "72.032"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.099"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.071"
+            },
+            {
+              "brand": "Vallejo",
+              "code": "72.098"
+            }
+          ],
+          "unknownBrushes": []
+        }
+      ],
+      "initialPhotoBlobId": "photo-initial",
+      "targetImageBlobId": "photo-target"
+    },
+    {
+      "id": "project-2",
+      "name": "Goblin",
+      "createdAt": "2026-11-12T08:00:00.000Z",
+      "status": "done",
+      "notes": "",
+      "progress": [],
+      "advice": []
+    }
+  ],
+  "blobs": {
+    "photo-initial": {
+      "type": "image/jpeg",
+      "base64": "/9j/AAH+"
+    },
+    "photo-target": {
+      "type": "image/png",
+      "base64": "AQID"
+    },
+    "photo-progress": {
+      "type": "image/jpeg",
+      "base64": "CQgHBg=="
+    }
+  }
+}
