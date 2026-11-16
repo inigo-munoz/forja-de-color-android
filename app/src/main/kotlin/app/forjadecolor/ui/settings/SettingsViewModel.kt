@@ -36,6 +36,8 @@ data class SettingsState(
     /** A valid backup waiting for the user to confirm it replaces everything. */
     val pendingImport: JsonElement? = null,
     val copied: Boolean = false,
+    /** When the last backup was exported (ISO instant), null if never. */
+    val lastExportAt: String? = null,
 )
 
 /** Backup export and import, the backup reminder and the AI instructions, for [SettingsScreen]. */
@@ -51,8 +53,9 @@ class SettingsViewModel(
     suspend fun load() = refreshReminder()
 
     private suspend fun refreshReminder() {
-        val remind = shouldRemindBackup(repo.getMeta(MetaKey.LAST_EXPORT_AT), container.now())
-        _state.update { it.copy(remind = remind) }
+        val last = repo.getMeta(MetaKey.LAST_EXPORT_AT)
+        val remind = shouldRemindBackup(last, container.now())
+        _state.update { it.copy(remind = remind, lastExportAt = last) }
     }
 
     /** Writes the backup to the file the user picked. */

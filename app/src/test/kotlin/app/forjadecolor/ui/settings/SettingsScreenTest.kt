@@ -9,6 +9,8 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -166,6 +168,21 @@ class SettingsScreenTest {
         picker.result = uri
         compose.onNodeWithTag("export").performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("backup_reminder").fetchSemanticsNodes().isEmpty() }
+    }
+
+    @Test
+    fun `shows when the last backup was exported, or that there is none yet`() {
+        show()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("last_backup").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("last_backup").assert(hasText("No backup exported yet", substring = true))
+    }
+
+    @Test
+    fun `shows the date of the last exported backup`() {
+        runBlocking { repo.setMeta(MetaKey.LAST_EXPORT_AT, "2026-11-10T10:00:00Z") }
+        show()
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag("last_backup").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("last_backup").assert(hasText("Last backup:", substring = true)).assert(hasText("2026", substring = true))
     }
 
     @Test

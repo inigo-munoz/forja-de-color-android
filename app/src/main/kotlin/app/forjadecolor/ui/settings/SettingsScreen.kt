@@ -1,5 +1,4 @@
 package app.forjadecolor.ui.settings
-
 import android.content.ClipData
 import android.content.ClipboardManager
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -35,7 +34,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.platform.MAX_BACKUP_BYTES
-
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 /** Backup export/import through the system file picker, the backup reminder and the AI instructions; state lives in [SettingsViewModel]. */
 @Composable
 fun SettingsScreen(
@@ -48,14 +50,12 @@ fun SettingsScreen(
     val vm = viewModel { SettingsViewModel(container, maxBackupBytes) }
     LaunchedEffect(Unit) { vm.load() }
     val state by vm.state.collectAsState()
-
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) vm.export(resolver, uri)
     }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) vm.pickedForImport(resolver, uri)
     }
-
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_settings"),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -73,6 +73,12 @@ fun SettingsScreen(
                 Button(onClick = { exportLauncher.launch(suggestedBackupName(container.now())) }, modifier = Modifier.fillMaxWidth().testTag("export")) {
                     Text(stringResource(R.string.settings_export))
                 }
+                Text(
+                    lastBackupText(state.lastExportAt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("last_backup"),
+                )
                 OutlinedButton(
                     onClick = { importLauncher.launch(arrayOf("application/json", "*/*")) },
                     modifier = Modifier.fillMaxWidth().testTag("import"),
@@ -127,4 +133,13 @@ private fun StatusText(status: BackupStatus) {
         BackupStatus.TooBig -> Text(stringResource(R.string.settings_backup_too_big), live, color = MaterialTheme.colorScheme.error)
         is BackupStatus.Error -> Text(status.message, live, color = MaterialTheme.colorScheme.error)
     }
+}
+
+/** "Last backup: <local date>", or that none was exported yet; an unreadable date counts as none. */
+@Composable
+private fun lastBackupText(lastExportAt: String?): String {
+    val date = lastExportAt?.let { runCatching { Instant.parse(it) }.getOrNull() }
+        ?: return stringResource(R.string.settings_no_backup_yet)
+    val formatted = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withZone(ZoneId.systemDefault()).format(date)
+    return stringResource(R.string.settings_last_backup, formatted)
 }
