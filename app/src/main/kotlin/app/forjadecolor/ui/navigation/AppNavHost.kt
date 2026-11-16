@@ -1,11 +1,10 @@
 package app.forjadecolor.ui.navigation
 
 import android.net.Uri
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -14,13 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -56,15 +51,10 @@ object Routes {
     fun techniqueId(wire: String?): TechniqueCardId? = TechniqueCardId.entries.firstOrNull { it.wire == wire }
 }
 
-private enum class Tab(val route: String, @StringRes val label: Int, val tag: String, val glyph: DrawScope.(Color) -> Unit) {
-    PROJECTS(Routes.PROJECTS, R.string.nav_projects, "nav_projects", { c ->
-        drawRoundRect(c, cornerRadius = CornerRadius(4.dp.toPx()), style = Stroke(2.dp.toPx()))
-    }),
-    INVENTORY(Routes.INVENTORY, R.string.nav_inventory, "nav_inventory", { c -> drawCircle(c) }),
-    SETTINGS(Routes.SETTINGS, R.string.nav_settings, "nav_settings", { c ->
-        drawCircle(c, style = Stroke(2.dp.toPx()))
-        drawCircle(c, radius = size.minDimension / 6)
-    }),
+private enum class Tab(val route: String, @StringRes val label: Int, val tag: String, @DrawableRes val icon: Int) {
+    PROJECTS(Routes.PROJECTS, R.string.nav_projects, "nav_projects", R.drawable.ic_nav_projects),
+    INVENTORY(Routes.INVENTORY, R.string.nav_inventory, "nav_inventory", R.drawable.ic_nav_paints),
+    SETTINGS(Routes.SETTINGS, R.string.nav_settings, "nav_settings", R.drawable.ic_nav_settings),
 }
 
 @Composable
@@ -113,11 +103,10 @@ private fun BottomNav(navController: NavHostController) {
     NavigationBar {
         Tab.entries.forEach { tab ->
             val selected = current == tab.route
-            val tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
             NavigationBarItem(
                 selected = selected,
                 onClick = { if (!selected) navController.navigateToTab(tab.route) },
-                icon = { Canvas(Modifier.size(20.dp)) { tab.glyph(this, tint) } },
+                icon = { Icon(painterResource(tab.icon), contentDescription = null) },
                 label = { Text(stringResource(tab.label)) },
                 modifier = Modifier.testTag(tab.tag),
             )
