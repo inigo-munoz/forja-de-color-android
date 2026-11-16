@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import app.forjadecolor.platform.fileAuthority
 import app.forjadecolor.platform.parseIncomingShare
 import app.forjadecolor.ui.navigation.AppNavHost
 import app.forjadecolor.ui.theme.ForgeTheme
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
         )
         super.onCreate(savedInstanceState)
         // A recreated activity (rotation) still holds the launch intent: it was already handled.
-        if (savedInstanceState == null) container.incomingShares.offer(parseIncomingShare(intent))
+        if (savedInstanceState == null) container.incomingShares.offer(parseIncomingShare(intent, fileAuthority(this)))
         setContent {
             ForgeTheme {
                 AppNavHost(container)
@@ -33,6 +34,6 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        container.incomingShares.offer(parseIncomingShare(intent))
+        container.incomingShares.offer(parseIncomingShare(intent, fileAuthority(this)))
     }
 }

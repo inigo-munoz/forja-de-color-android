@@ -43,6 +43,8 @@ import app.forjadecolor.domain.storage.importAll
 import app.forjadecolor.domain.storage.parseBackupText
 import app.forjadecolor.domain.storage.shouldRemindBackup
 import app.forjadecolor.domain.storage.validateBackup
+import app.forjadecolor.platform.FileTooLargeException
+import app.forjadecolor.platform.MAX_BACKUP_BYTES
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
 
@@ -57,6 +59,8 @@ private sealed interface Status {
 @Composable
 fun SettingsScreen(
     container: AppContainer,
+    /** Largest backup accepted; tests lower it instead of building a 100 MB file. */
+    maxBackupBytes: Long = MAX_BACKUP_BYTES,
 ) {
     val context = LocalContext.current
     val resolver = context.contentResolver
@@ -81,7 +85,13 @@ fun SettingsScreen(
         if (uri != null) {
             scope.launch {
                 // Validate before asking, as the PWA does: an invalid file never reaches the confirmation.
-                val parsed = parseBackupText(readBackupText(resolver, uri).orEmpty())
+                val text = try {
+                    readBackupText(resolver, uri, maxBackupBytes)
+                } catch (e: FileTooLargeException) {
+                    status = Status.Error(context.getString(R.string.settings_backup_too_big))
+                    return@launch
+                }
+                val parsed = parseBackupText(text.orEmpty())
                 val invalid = validateBackup(parsed)
                 if (invalid != null) status = Status.Error(invalid) else pendingImport = parsed
             }

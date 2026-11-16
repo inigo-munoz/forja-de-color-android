@@ -31,6 +31,7 @@ import app.forjadecolor.domain.storage.MetaKey
 import app.forjadecolor.domain.storage.parseBackupText
 import app.forjadecolor.domain.storage.validateBackup
 import app.forjadecolor.ui.theme.ForgeTheme
+import app.forjadecolor.platform.MAX_BACKUP_BYTES
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -84,13 +85,13 @@ class SettingsScreenTest {
         photoDir.deleteRecursively()
     }
 
-    private fun show() {
+    private fun show(maxBackupBytes: Long = MAX_BACKUP_BYTES) {
         val container = AppContainer(context, repository = repo, now = { now })
         val owner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry: ActivityResultRegistry = picker
         }
         compose.setContent {
-            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) { ForgeTheme { SettingsScreen(container) } }
+            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) { ForgeTheme { SettingsScreen(container, maxBackupBytes) } }
         }
         compose.waitUntil(5_000) { compose.onAllNodesWithTag("export").fetchSemanticsNodes().isNotEmpty() }
     }
@@ -184,6 +185,18 @@ class SettingsScreenTest {
 
         compose.onNodeWithTag("import_confirm").assertDoesNotExist()
         compose.onNodeWithText("Importing replaces", substring = true).assertDoesNotExist()
+        assertEquals(listOf("Bárbara"), runBlocking { repo.listProjects() }.map { it.name })
+    }
+
+    @Test
+    fun `importing a file over the size limit says it is too big, asks nothing and changes nothing`() {
+        pickToRead("""{"app":"forja-de-color","version":1}""")
+        show(maxBackupBytes = 10)
+
+        compose.onNodeWithTag("import").performClick()
+        waitForText("This file is too big to be a Forja de Color backup.")
+
+        compose.onNodeWithTag("import_confirm").assertDoesNotExist()
         assertEquals(listOf("Bárbara"), runBlocking { repo.listProjects() }.map { it.name })
     }
 

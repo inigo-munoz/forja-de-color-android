@@ -16,7 +16,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.FileProvider
+import app.forjadecolor.platform.MAX_PHOTO_BYTES
 import app.forjadecolor.platform.fileAuthority
+import app.forjadecolor.platform.readAtMost
 import app.forjadecolor.platform.resizeToJpeg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -79,7 +81,7 @@ fun rememberCameraCapture(onError: (Throwable) -> Unit = {}, onPhoto: (ByteArray
 private suspend fun deliver(context: Context, uri: Uri, onPhoto: (ByteArray) -> Unit, onError: (Throwable) -> Unit) {
     val result = withContext(Dispatchers.IO) {
         runCatching {
-            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("photo unavailable")
+            val bytes = context.contentResolver.openInputStream(uri)?.use { it.readAtMost(MAX_PHOTO_BYTES) } ?: error("photo unavailable")
             resizeToJpeg(bytes)
         }
     }

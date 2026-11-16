@@ -1,5 +1,6 @@
 package app.forjadecolor.platform
 
+import android.content.ContentResolver
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.IntentCompat
@@ -14,8 +15,12 @@ sealed interface IncomingShare {
     data class Image(val uri: Uri) : IncomingShare
 }
 
-/** Reads an `ACTION_SEND` of text or an image; anything else is null. */
-fun parseIncomingShare(intent: Intent?): IncomingShare? {
+/**
+ * Reads an `ACTION_SEND` of text or an image; anything else is null. An image must be a `content://`
+ * URI from another app: a `file://` path, or one of our own FileProvider URIs ([ownAuthority]), could
+ * make the app read its own private files on another app's behalf.
+ */
+fun parseIncomingShare(intent: Intent?, ownAuthority: String): IncomingShare? {
     if (intent?.action != Intent.ACTION_SEND) return null
     val type = intent.type.orEmpty()
     return when {
@@ -23,6 +28,8 @@ fun parseIncomingShare(intent: Intent?): IncomingShare? {
             intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()?.takeIf { it.isNotBlank() }?.let { IncomingShare.Text(it) }
         type.startsWith("image/") ->
             (IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, Uri::class.java) ?: intent.clipData?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.uri)
+                // The resolver drops a "<userId>@" prefix from the authority, so compare without it.
+                ?.takeIf { it.scheme == ContentResolver.SCHEME_CONTENT && it.authority?.substringAfterLast('@') != ownAuthority }
                 ?.let { IncomingShare.Image(it) }
         else -> null
     }

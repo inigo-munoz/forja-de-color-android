@@ -95,4 +95,5 @@
     <string name="ask_paste_here">Paste the answer here</string>
     <string name="ask_save">Save answer</string>
     <string name="ask_errors">The answer could not be used:</string>
+    <string name="settings_backup_too_big">This file is too big to be a Forja de Color backup.</string>
 </resources>

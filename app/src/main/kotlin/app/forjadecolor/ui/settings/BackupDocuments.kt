@@ -9,6 +9,9 @@ import app.forjadecolor.domain.storage.Repository
 import app.forjadecolor.domain.storage.backupFileName
 import app.forjadecolor.domain.storage.encodeBackup
 import app.forjadecolor.domain.storage.exportAll
+import app.forjadecolor.platform.FileTooLargeException
+import app.forjadecolor.platform.MAX_BACKUP_BYTES
+import app.forjadecolor.platform.readAtMost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -37,10 +40,15 @@ suspend fun exportBackup(resolver: ContentResolver, uri: Uri, repo: Repository, 
     }
 }
 
-/** The picked file's text, or null when it cannot be read (validation then says "not a backup file"). */
-suspend fun readBackupText(resolver: ContentResolver, uri: Uri): String? = withContext(Dispatchers.IO) {
+/**
+ * The picked file's text, or null when it cannot be read (validation then says "not a backup file").
+ * A file over [maxBytes] throws [FileTooLargeException] instead, so the screen can say so.
+ */
+suspend fun readBackupText(resolver: ContentResolver, uri: Uri, maxBytes: Long = MAX_BACKUP_BYTES): String? = withContext(Dispatchers.IO) {
     try {
-        resolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+        resolver.openInputStream(uri)?.use { it.readAtMost(maxBytes).toString(Charsets.UTF_8) }
+    } catch (e: FileTooLargeException) {
+        throw e
     } catch (e: IOException) {
         null
     } catch (e: SecurityException) {

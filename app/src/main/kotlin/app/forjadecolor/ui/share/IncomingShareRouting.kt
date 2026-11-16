@@ -20,6 +20,8 @@ import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.StoredBlob
+import app.forjadecolor.platform.MAX_PHOTO_BYTES
+import app.forjadecolor.platform.readAtMost
 import app.forjadecolor.domain.storage.deletePhotosIfUnused
 import app.forjadecolor.platform.IncomingShare
 import app.forjadecolor.platform.resizeToJpeg
@@ -44,7 +46,7 @@ class SharedAnswerInbox {
 
 /** Reads a shared image and shrinks it like every other photo the app stores. */
 suspend fun readSharedImage(context: Context, uri: Uri): ByteArray = withContext(Dispatchers.IO) {
-    val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: error("image unavailable")
+    val bytes = context.contentResolver.openInputStream(uri)?.use { it.readAtMost(MAX_PHOTO_BYTES) } ?: error("image unavailable")
     resizeToJpeg(bytes)
 }
 
