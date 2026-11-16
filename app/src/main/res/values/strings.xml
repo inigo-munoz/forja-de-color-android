@@ -123,4 +123,9 @@
     <string name="project_progress_empty">No progress photos yet: take one at the end of each painting session to see how it grows.</string>
     <string name="settings_last_backup">Last backup: %1$s</string>
     <string name="settings_no_backup_yet">No backup exported yet.</string>
+    <string name="dilution_hint">%1$s of paint, %2$d of water or medium</string>
+    <plurals name="paint_drops">
+        <item quantity="one">%d drop</item>
+        <item quantity="other">%d drops</item>
+    </plurals>
 </resources>

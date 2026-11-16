@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
@@ -191,6 +192,7 @@ private fun ZoneView(
                 label(z.paint!!)
                 z.dilution?.let { Text(" · $it", fontWeight = FontWeight.Bold) }
             }
+            z.dilution?.let { DilutionHint(it) }
         }
         z.brush?.let { Text("🖌 ${steps.brush(it)}", style = MaterialTheme.typography.labelMedium) }
         NumberedList(z.steps, steps)
@@ -211,6 +213,7 @@ private fun ConsultationView(
             label(p.paint)
             p.dilution?.let { Text(" · $it", fontWeight = FontWeight.Bold) }
         }
+        p.dilution?.let { DilutionHint(it) }
     }
     c.brush?.let { Text("🖌 ${steps.brush(it)}", style = MaterialTheme.typography.labelMedium) }
     c.techniqueCard?.let { card ->
@@ -286,3 +289,16 @@ private fun NumberedList(items: List<String>, steps: StepText? = null) {
     }
 }
 
+private val RATIO = Regex("""^\s*(\d+)\s*:\s*(\d+)\s*$""")
+
+/** "1:3" read as drops: 1 of paint, 3 of water or medium. Anything that is not N:M shows nothing. */
+@Composable
+private fun DilutionHint(ratio: String) {
+    val (paint, thinner) = RATIO.matchEntire(ratio)?.destructured?.let { (a, b) -> a.toInt() to b.toInt() } ?: return
+    Text(
+        stringResource(R.string.dilution_hint, pluralStringResource(R.plurals.paint_drops, paint, paint), thinner),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.testTag("dilution_hint"),
+    )
+}

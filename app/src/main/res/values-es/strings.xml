@@ -121,4 +121,9 @@
     <string name="project_progress_empty">Todavía no hay fotos de progreso: saca una al terminar cada sesión de pintura para ver cómo avanza.</string>
     <string name="settings_last_backup">Última copia: %1$s</string>
     <string name="settings_no_backup_yet">Todavía no has exportado ninguna copia.</string>
+    <string name="dilution_hint">%1$s de pintura y %2$d de agua o medium</string>
+    <plurals name="paint_drops">
+        <item quantity="one">%d gota</item>
+        <item quantity="other">%d gotas</item>
+    </plurals>
 </resources>

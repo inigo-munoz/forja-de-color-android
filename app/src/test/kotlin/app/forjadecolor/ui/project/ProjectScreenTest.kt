@@ -14,6 +14,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onRoot
@@ -465,6 +466,13 @@ class ProjectScreenTest {
 
         app.waitFor(compose) { compose.onAllNodesWithTag("progress_photo").fetchSemanticsNodes().size == 1 }
         compose.onAllNodesWithTag("progress_empty").assertCountEquals(0)
+    }
+
+    @Test
+    fun `a dilution ratio is explained in drops under the paint`() {
+        show()
+        compose.onAllNodesWithTag("dilution_hint", useUnmergedTree = true).onFirst()
+            .assert(hasText("1 drop of paint, 3 of water or medium"))
     }
 
     @Test
