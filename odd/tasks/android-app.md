@@ -13,6 +13,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 - S7 — Review finding 2, owner chose confirmation (2026-11-16, "si"): ask "cannot be undone" before deleting an advice, a project, a progress photo or the target image; deleting removes the photos nobody else uses, so they stop filling storage and backups.
 - S8 — (user, 2026-11-16) "si traduce": the app's UI in Spanish when the phone is in Spanish, English kept as the fallback; technique cards too. Prompts sent to the AI stay byte-identical (S5). Neutral Spanish.
 - S9 — (user, 2026-11-16) "y haz el paso a ViewModels": move each screen's state and logic out of the composables into ViewModels (container/presentational), with no visible behaviour change; every existing test keeps passing.
+- S10 — (user, 2026-11-16) "si avanza con las dos": (1) send each paint's BSL role to the AI in the prompt, (2) show the role next to each paint in My paints. Roles from the BSL book table in the vault (Hallazgos/papeles-bsl-inventario.md); stored inventories without roles get them from the seed by brand+code when the family matches. PWA and Android together, prompts byte-identical (S5); the owner re-copies the AI instructions.
 
 ## Tasks
 
@@ -33,6 +34,7 @@ Design: `docs/superpowers/specs/2026-11-14-android-app-design.md`.
 | T13 | S8 | Spanish translation: values-es for every string file, locale-aware technique cards | delegated (parallel with T14, disjoint surfaces, isolated worktree: Gradle runs collide in one tree) | done (RED: 4 of 10 new tests; parity test guards future strings) | ee896ba |
 | T14 | S9 | ViewModels for projects, project, ask, inventory and settings screens; declare lifecycle-viewmodel-compose 2.11.0 (already resolved transitively) | delegated (parallel with T13, disjoint surfaces) | done (all existing tests unchanged but one wait; 6 new VM tests; independent verifier PASS) | f14ba90 |
 | T15 | — | App launcher icon, designed with ChatGPT (owner, 2026-11-16: "Apunta para crear un icono con Chatgpt más tarde.") | inline | todo (later) | |
+| T16 | S10, S5 | BSL roles: seed roles, role in the AI prompt and in My paints, PWA + Android, fixtures regenerated | delegated (context backstop) | in progress | |
 
 Route evidence: T1–T6 inline. T7 delegated for the long-session context backstop (parent context heavy after the browser check). T8 and T9 are independent units with disjoint screen files, each several files, launched together once T7 lands the shell and all strings.
 Risk notes: T6 is the first schema (no stored data to migrate yet), so item 1 does not fire; from v2 on every schema change needs a migration test. T6 got its own commit.
