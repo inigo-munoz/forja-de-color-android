@@ -69,12 +69,13 @@ class AskScreenTest {
 
     private var restoration: StateRestorationTester? = null
 
-    private fun show(readAnswer: String? = ANSWER, sendResult: SendResult = SendResult.SHARED, restorable: Boolean = false) {
+    private fun show(readAnswer: String? = ANSWER, sendResult: SendResult = SendResult.SHARED, restorable: Boolean = false, withPhoto: Boolean = true) {
         app.bridge.answer = readAnswer
         app.bridge.result = sendResult
         runBlocking {
             photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
-            app.repository.saveProject(createProject("Bárbara", app.now, "p1").addAdvice(PRIOR).copy(initialPhotoBlobId = photoId))
+            val project = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR)
+            app.repository.saveProject(if (withPhoto) project.copy(initialPhotoBlobId = photoId) else project)
         }
         val screen = @Composable { AskScreen(app.container, "p1", onDone = { done++ }) }
         if (restorable) restoration = app.setRestorableContent(compose, screen) else app.setContent(compose, screen)
@@ -280,6 +281,66 @@ class AskScreenTest {
         app.waitFor(compose) { compose.onAllNodesWithTag("answer_errors").fetchSemanticsNodes().isNotEmpty() }
         compose.onNode(hasText("disk full", substring = true)).assertExists()
         assertEquals(0, done)
+    }
+
+    @Test
+    fun `numbers the three steps in order`() {
+        show()
+        val texts = listOf("1. Choose the moment", "2. Send it to your AI", "3. Come back and paste the answer")
+        val tops = (1..3).map { i ->
+            compose.onNodeWithTag("ask_step_$i").assert(hasText(texts[i - 1])).fetchSemanticsNode().positionInRoot.y
+        }
+        assertEquals(tops.sorted(), tops)
+        assertEquals(3, tops.distinct().size)
+    }
+
+    @Test
+    fun `explains each moment under its option`() {
+        show()
+        mapOf(
+            "start" to "Unpainted miniature: full palette from the primer.",
+            "primed" to "Already black-primed and drybrushed: recipe from the colour layers.",
+            "half-painted" to "Some zones are painted: what is left and matching colours.",
+            "during" to "A specific question about one zone.",
+        ).forEach { (wire, help) ->
+            compose.onNodeWithTag("moment_help_$wire", useUnmergedTree = true).assert(hasText(help))
+        }
+    }
+
+    @Test
+    @GraphicsMode(GraphicsMode.Mode.NATIVE)
+    fun `says the project photo will be sent until a photo is taken`() {
+        show()
+        compose.onNodeWithTag("ask_default_photo").performScrollTo().assert(hasText("The project photo will be sent.", substring = true))
+        compose.onNodeWithTag("ask_default_photo_thumb", useUnmergedTree = true).assertExists()
+
+        app.photos.nextPhoto = jpeg()
+        click("ask_take_photo")
+
+        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
+        compose.onAllNodesWithTag("ask_default_photo").assertCountEquals(0)
+    }
+
+    @Test
+    fun `asks to choose or take a photo when the project has none`() {
+        show(withPhoto = false)
+        compose.onNodeWithTag("ask_default_photo").assert(hasText("Choose or take a photo to send.", substring = true))
+        compose.onAllNodesWithTag("ask_default_photo_thumb", useUnmergedTree = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun `explains where to copy the answer from`() {
+        show()
+        compose.onNodeWithTag("ask_paste_help")
+            .assert(hasText("Copy the answer in Claude or ChatGPT, or share it to Forja de Color."))
+    }
+
+    @Test
+    @Config(qualifiers = "es")
+    fun `explains the steps and moments in Spanish`() {
+        show()
+        compose.onNodeWithTag("ask_step_1").assert(hasText("1. Elige el momento"))
+        compose.onNodeWithTag("moment_help_start", useUnmergedTree = true).assert(hasText("Miniatura sin pintar: paleta completa desde la imprimación."))
     }
 }
 

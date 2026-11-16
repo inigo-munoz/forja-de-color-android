@@ -78,7 +78,6 @@
 
     <!-- ask -->
     <string name="ask_title">Consultar al asesor</string>
-    <string name="ask_moment">Momento</string>
     <string name="ask_moment_start">Inicio</string>
     <string name="ask_moment_primed">Imprimada y con pincel seco</string>
     <string name="ask_moment_half_painted">A medio pintar</string>
@@ -101,5 +100,15 @@
     <string name="ask_paste_here">Pega aquí la respuesta</string>
     <string name="ask_save">Guardar respuesta</string>
     <string name="ask_errors">No se pudo usar la respuesta:</string>
+    <string name="ask_step_moment">1. Elige el momento</string>
+    <string name="ask_step_send">2. Envíalo a tu IA</string>
+    <string name="ask_step_paste">3. Vuelve y pega la respuesta</string>
+    <string name="ask_moment_start_help">Miniatura sin pintar: paleta completa desde la imprimación.</string>
+    <string name="ask_moment_primed_help">Ya imprimada en negro y con pincel seco: receta desde el color.</string>
+    <string name="ask_moment_half_painted_help">Ya hay zonas pintadas: qué falta y colores que combinan.</string>
+    <string name="ask_moment_during_help">Una duda concreta sobre una zona.</string>
+    <string name="ask_default_photo">Se enviará la foto del proyecto.</string>
+    <string name="ask_no_photo">Elige o haz una foto para enviar.</string>
+    <string name="ask_paste_help">Copia la respuesta en Claude o ChatGPT, o compártela con Forja de Color.</string>
     <string name="settings_backup_too_big">Este archivo es demasiado grande para ser una copia de seguridad de Forja de Color.</string>
 </resources>

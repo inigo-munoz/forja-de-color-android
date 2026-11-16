@@ -80,7 +80,6 @@
 
     <!-- ask -->
     <string name="ask_title">Ask the advisor</string>
-    <string name="ask_moment">Moment</string>
     <string name="ask_moment_start">Start</string>
     <string name="ask_moment_primed">Primed and drybrushed</string>
     <string name="ask_moment_half_painted">Half-painted</string>
@@ -103,5 +102,15 @@
     <string name="ask_paste_here">Paste the answer here</string>
     <string name="ask_save">Save answer</string>
     <string name="ask_errors">The answer could not be used:</string>
+    <string name="ask_step_moment">1. Choose the moment</string>
+    <string name="ask_step_send">2. Send it to your AI</string>
+    <string name="ask_step_paste">3. Come back and paste the answer</string>
+    <string name="ask_moment_start_help">Unpainted miniature: full palette from the primer.</string>
+    <string name="ask_moment_primed_help">Already black-primed and drybrushed: recipe from the colour layers.</string>
+    <string name="ask_moment_half_painted_help">Some zones are painted: what is left and matching colours.</string>
+    <string name="ask_moment_during_help">A specific question about one zone.</string>
+    <string name="ask_default_photo">The project photo will be sent.</string>
+    <string name="ask_no_photo">Choose or take a photo to send.</string>
+    <string name="ask_paste_help">Copy the answer in Claude or ChatGPT, or share it to Forja de Color.</string>
     <string name="settings_backup_too_big">This file is too big to be a Forja de Color backup.</string>
 </resources>

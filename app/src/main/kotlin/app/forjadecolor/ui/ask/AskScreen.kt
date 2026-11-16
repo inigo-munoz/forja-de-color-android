@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -39,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
@@ -53,6 +55,7 @@ import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
 import app.forjadecolor.ui.components.PhotoPreview
+import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.components.rememberPendingPhoto
 import app.forjadecolor.ui.project.LocalPhotoSources
 import java.util.UUID
@@ -87,11 +90,12 @@ suspend fun saveAnswer(container: AppContainer, projectId: String, raw: String):
     }
 }
 
+/** Each moment with its label and the one-line help shown under it. */
 private val MOMENT_LABELS = listOf(
-    Moment.START to R.string.ask_moment_start,
-    Moment.PRIMED to R.string.ask_moment_primed,
-    Moment.HALF_PAINTED to R.string.ask_moment_half_painted,
-    Moment.DURING to R.string.ask_moment_during,
+    Triple(Moment.START, R.string.ask_moment_start, R.string.ask_moment_start_help),
+    Triple(Moment.PRIMED, R.string.ask_moment_primed, R.string.ask_moment_primed_help),
+    Triple(Moment.HALF_PAINTED, R.string.ask_moment_half_painted, R.string.ask_moment_half_painted_help),
+    Triple(Moment.DURING, R.string.ask_moment_during, R.string.ask_moment_during_help),
 )
 
 private val QUESTION_LABELS = listOf(
@@ -170,15 +174,23 @@ fun AskScreen(
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.ask_moment), style = MaterialTheme.typography.titleMedium)
-                MOMENT_LABELS.forEach { (m, label) ->
+                StepHeading(1, R.string.ask_step_moment)
+                MOMENT_LABELS.forEach { (m, label, help) ->
                     Row(
                         Modifier.fillMaxWidth().selectable(selected = moment == m, onClick = { moment = m }, role = Role.RadioButton)
                             .testTag("moment_${m.wire}"),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = moment == m, onClick = null)
-                        Text(stringResource(label), Modifier.padding(start = 8.dp))
+                        Column(Modifier.padding(start = 8.dp)) {
+                            Text(stringResource(label))
+                            Text(
+                                stringResource(help),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.testTag("moment_help_${m.wire}"),
+                            )
+                        }
                     }
                 }
 
@@ -219,13 +231,23 @@ fun AskScreen(
                         )
                     }
                 }
+            }
+        }
 
+        Card(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                StepHeading(2, R.string.ask_step_send)
                 Text(stringResource(R.string.ask_photo), style = MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = pick, modifier = Modifier.testTag("ask_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                     OutlinedButton(onClick = shoot, modifier = Modifier.testTag("ask_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
                 }
-                photo?.let { PhotoPreview(it, tag = "ask_photo_preview", onRemove = { photo = null }) }
+                val picked = photo
+                if (picked != null) {
+                    PhotoPreview(picked, tag = "ask_photo_preview", onRemove = { photo = null })
+                } else {
+                    DefaultPhoto(container, defaultPhotoId(current))
+                }
 
                 Button(onClick = send, modifier = Modifier.testTag("send")) { Text(stringResource(R.string.ask_send)) }
                 if (sendStatus.isNotEmpty()) Text(sendStatus, modifier = Modifier.testTag("send_status"))
@@ -242,6 +264,13 @@ fun AskScreen(
 
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                StepHeading(3, R.string.ask_step_paste)
+                Text(
+                    stringResource(R.string.ask_paste_help),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.testTag("ask_paste_help"),
+                )
                 Button(onClick = paste, modifier = Modifier.testTag("paste")) { Text(stringResource(R.string.ask_paste)) }
                 if (showAnswer) {
                     OutlinedTextField(
@@ -258,6 +287,25 @@ fun AskScreen(
 
     // A modal, not a line above the answer: with a long answer that line was off screen and saving seemed to do nothing.
     if (errors.isNotEmpty()) AnswerErrorsDialog(errors, onClose = vm::clearErrors)
+}
+
+@Composable
+private fun StepHeading(number: Int, text: Int) {
+    Text(stringResource(text), style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag("ask_step_$number"))
+}
+
+/** With no photo picked: the project photo that will be sent, or a nudge to pick one when there is none. */
+@Composable
+private fun DefaultPhoto(container: AppContainer, photoId: String?) {
+    // Merged so the thumbnail and its sentence read as one item.
+    Row(Modifier.semantics(mergeDescendants = true) {}.testTag("ask_default_photo"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (photoId != null) {
+            BlobImage(container.repository, photoId, Modifier.size(56.dp).testTag("ask_default_photo_thumb"))
+            Text(stringResource(R.string.ask_default_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            Text(stringResource(R.string.ask_no_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
 
 @Composable
