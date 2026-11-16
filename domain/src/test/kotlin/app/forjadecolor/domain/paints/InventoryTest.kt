@@ -52,4 +52,14 @@ class InventoryTest {
     fun `returns null for a paint not in the inventory`() {
         assertNull(base.findPaintLoose("Citadel Abaddon Black"))
     }
+    @Test
+    fun `finds the owned paints mentioned in a sentence, distinct and in order of appearance`() {
+        val text = "Añade un punto de Vallejo 72.051 en 2 capas a 1:3, luego 72003, remata con Vallejo 72.051 y 72.999"
+        assertEquals(listOf("Negro", "Carne Pálida"), base.paintsMentionedIn(text).map { it.name })
+    }
+
+    @Test
+    fun `finds no paints in a sentence without owned codes`() {
+        assertEquals(emptyList(), base.paintsMentionedIn("Diluye 1:3 y aplica 2 capas de Citadel Abaddon Black"))
+    }
 }

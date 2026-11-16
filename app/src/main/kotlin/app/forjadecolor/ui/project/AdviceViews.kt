@@ -46,6 +46,7 @@ import app.forjadecolor.domain.advice.TechniqueCardId
 import app.forjadecolor.domain.advice.ZoneRecipe
 import app.forjadecolor.domain.advice.neededPaints
 import app.forjadecolor.domain.paints.Inventory
+import app.forjadecolor.domain.paints.paintsMentionedIn
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.paints.paintKey
@@ -75,6 +76,7 @@ internal fun AdviceCard(
 ) {
     val unknown = remember(entry) { entry.unknownPaints.map(::paintKey).toSet() }
     val label: @Composable (PaintRef) -> Unit = { PaintLabel(inventory, it, unknown) }
+    val steps = StepText(inventory, label)
     val scope = rememberCoroutineScope()
     var imageStatus by remember { mutableStateOf<Int?>(null) }
 
@@ -84,14 +86,14 @@ internal fun AdviceCard(
 
             when (val r = entry.response) {
                 is RecipeResponse -> {
-                    RecipeView(r, entry.doneZones.toSet(), onZoneDone, label)
+                    RecipeView(r, entry.doneZones.toSet(), onZoneDone, label, steps)
                     Button(
                         onClick = { scope.launch { onPaintImage(r)?.let { imageStatus = paintImageMessage(it) } } },
                         modifier = Modifier.testTag("paint_image"),
                     ) { Text(stringResource(R.string.project_paint_image)) }
                     imageStatus?.let { Text(stringResource(it), modifier = Modifier.testTag("paint_image_status")) }
                 }
-                is ConsultationResponse -> ConsultationView(r, label, onOpenTechnique)
+                is ConsultationResponse -> ConsultationView(r, label, steps, onOpenTechnique)
             }
 
             Column(Modifier.testTag("needed")) {
@@ -120,7 +122,13 @@ internal fun paintImageMessage(result: SendResult): Int =
     if (result == SendResult.FALLBACK) R.string.project_paint_image_fallback else R.string.project_paint_image_sent
 
 @Composable
-private fun RecipeView(r: RecipeResponse, done: Set<Int>, onZoneDone: (Int, Boolean) -> Unit, label: @Composable (PaintRef) -> Unit) {
+private fun RecipeView(
+    r: RecipeResponse,
+    done: Set<Int>,
+    onZoneDone: (Int, Boolean) -> Unit,
+    label: @Composable (PaintRef) -> Unit,
+    steps: StepText,
+) {
     Heading(stringResource(R.string.project_prep))
     NumberedList(r.prep)
     Text(
@@ -128,21 +136,28 @@ private fun RecipeView(r: RecipeResponse, done: Set<Int>, onZoneDone: (Int, Bool
         style = MaterialTheme.typography.labelLarge,
         modifier = Modifier.testTag("zone_progress"),
     )
-    r.zones.forEachIndexed { i, z -> ZoneView(z, i, i in done, { onZoneDone(i, it) }, label) }
+    r.zones.forEachIndexed { i, z -> ZoneView(z, i, i in done, { onZoneDone(i, it) }, label, steps) }
     r.complements?.takeIf { it.isNotEmpty() }?.let { complements ->
         Heading(stringResource(R.string.project_complements))
         complements.forEach { label(it) }
     }
     r.remainingSteps?.takeIf { it.isNotEmpty() }?.let {
         Heading(stringResource(R.string.project_remaining))
-        NumberedList(it)
+        NumberedList(it, steps)
     }
     Heading(stringResource(R.string.project_tips))
     NumberedList(r.tips)
 }
 
 @Composable
-private fun ZoneView(z: ZoneRecipe, index: Int, done: Boolean, onDone: (Boolean) -> Unit, label: @Composable (PaintRef) -> Unit) {
+private fun ZoneView(
+    z: ZoneRecipe,
+    index: Int,
+    done: Boolean,
+    onDone: (Boolean) -> Unit,
+    label: @Composable (PaintRef) -> Unit,
+    steps: StepText,
+) {
     // A done zone is dimmed but stays readable.
     val zoneModifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).alpha(if (done) DONE_ALPHA else 1f)
         .semantics { this[ZoneDoneKey] = done }.testTag("zone_${z.name}")
@@ -172,22 +187,27 @@ private fun ZoneView(z: ZoneRecipe, index: Int, done: Boolean, onDone: (Boolean)
                 z.dilution?.let { Text(" · $it", fontWeight = FontWeight.Bold) }
             }
         }
-        z.brush?.let { Text("🖌 $it", style = MaterialTheme.typography.labelMedium) }
-        NumberedList(z.steps)
+        z.brush?.let { Text("🖌 ${steps.brush(it)}", style = MaterialTheme.typography.labelMedium) }
+        NumberedList(z.steps, steps)
     }
 }
 
 @Composable
-private fun ConsultationView(c: ConsultationResponse, label: @Composable (PaintRef) -> Unit, onOpenTechnique: (TechniqueCardId) -> Unit) {
+private fun ConsultationView(
+    c: ConsultationResponse,
+    label: @Composable (PaintRef) -> Unit,
+    steps: StepText,
+    onOpenTechnique: (TechniqueCardId) -> Unit,
+) {
     Text("${c.zone} · ${stringResource(R.string.project_technique)}: ${c.technique}", fontWeight = FontWeight.SemiBold)
-    NumberedList(c.steps)
+    NumberedList(c.steps, steps)
     c.paints.forEach { p ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             label(p.paint)
             p.dilution?.let { Text(" · $it", fontWeight = FontWeight.Bold) }
         }
     }
-    c.brush?.let { Text("🖌 $it", style = MaterialTheme.typography.labelMedium) }
+    c.brush?.let { Text("🖌 ${steps.brush(it)}", style = MaterialTheme.typography.labelMedium) }
     c.techniqueCard?.let { card ->
         TextButton(onClick = { onOpenTechnique(card) }, modifier = Modifier.testTag("see_technique")) { Text(stringResource(R.string.project_see_technique)) }
     }
@@ -231,12 +251,32 @@ private fun AssignPicker(inventory: Inventory, unknown: PaintRef, onPick: (Paint
 @Composable
 private fun Heading(text: String) = Text(text, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 4.dp))
 
+/** Resolves what the AI wrote in steps against the inventory: brush names and the paints a step mentions. */
+private class StepText(private val inventory: Inventory, val label: @Composable (PaintRef) -> Unit) {
+    /** "<code> <name>" for an owned brush; the code as written otherwise. */
+    fun brush(code: String): String =
+        inventory.brushes.find { it.code.trim().equals(code.trim(), ignoreCase = true) }?.let { "${it.code} ${it.name}" } ?: code
+
+    fun paints(step: String): List<PaintRef> = inventory.paintsMentionedIn(step).map { it.ref }
+}
+
+/** Numbered steps; with [steps], each is followed by the owned paints it mentions (the text itself stays as written). */
 @Composable
-private fun NumberedList(items: List<String>) {
+private fun NumberedList(items: List<String>, steps: StepText? = null) {
     items.forEachIndexed { i, s ->
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("${i + 1}.")
-            Text(s)
+        Column {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("${i + 1}.")
+                Text(s)
+            }
+            val mentioned = steps?.paints(s).orEmpty()
+            if (steps != null && mentioned.isNotEmpty()) {
+                Row(Modifier.padding(start = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    mentioned.forEach { ref ->
+                        Box(Modifier.semantics(mergeDescendants = true) {}.testTag("step_paint")) { steps.label(ref) }
+                    }
+                }
+            }
         }
     }
 }

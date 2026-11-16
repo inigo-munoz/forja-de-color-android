@@ -69,7 +69,10 @@ private val RECIPE = AdviceEntry(
             ZoneRecipe("capa", Technique.SLAPCHOP, paint = v("72.021"), dilution = "1:3", steps = listOf("Veladura"), brush = "X999"),
             ZoneRecipe("cara", Technique.BSL, bsl = Bsl(v("72.099"), v("72.071"), v("72.098")), steps = listOf("Base")),
             ZoneRecipe("peana", Technique.SLAPCHOP, paint = PaintRef("Citadel", "Abaddon Black"), dilution = "1:1", steps = emptyList()),
-            ZoneRecipe("botas", Technique.SLAPCHOP, paint = v("72.021"), dilution = "1:2", steps = emptyList(), alreadyPainted = true),
+            ZoneRecipe(
+                "botas", Technique.SLAPCHOP, paint = v("72.021"), dilution = "1:2",
+                steps = listOf("Remata con un punto de Vallejo 72.001 en 2 capas"), brush = "B02002", alreadyPainted = true,
+            ),
         ),
         complements = listOf(v("72.008")),
         remainingSteps = listOf("Barnizar"),
@@ -366,6 +369,22 @@ class ProjectScreenTest {
         compose.onNode(hasText("Blanco Calavera", substring = true) and hasAnyAncestor(hasTestTag("advice_e2")) and !hasAnyAncestor(hasTestTag("needed"))).assertExists()
         inEntry("e2", "see_technique").performScrollTo().performClick()
         assertEquals(listOf(TechniqueCardId.DRYBRUSH), techniques)
+    }
+
+    @Test
+    fun `shows a brush by code and name from the inventory, and an unknown brush code as before`() {
+        show()
+        compose.onNode(hasText("🖌 B02002 Detail núm. 2") and hasAnyAncestor(hasTestTag("zone_botas"))).assertExists()
+        compose.onNode(hasText("🖌 X999") and hasAnyAncestor(hasTestTag("zone_capa"))).assertExists()
+    }
+
+    @Test
+    fun `shows the owned paints a step mentions under it, keeping the step text`() {
+        show()
+        compose.onNodeWithText("Remata con un punto de Vallejo 72.001 en 2 capas").assertExists()
+        compose.onAllNodes(hasTestTag("step_paint") and hasAnyAncestor(hasTestTag("zone_botas")))
+            .assertCountEquals(1)[0].assert(hasText("72.001 Blanco Calavera", substring = true))
+        compose.onAllNodes(hasTestTag("step_paint") and hasAnyAncestor(hasTestTag("zone_capa"))).assertCountEquals(0)
     }
 
     @Test

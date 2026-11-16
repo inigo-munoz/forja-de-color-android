@@ -26,3 +26,10 @@ fun Inventory.findPaintLoose(text: String): Paint? {
     val token = LOOSE_CODE.find(text)?.value ?: text.trim()
     return paints.map { it.brand }.distinct().firstNotNullOfOrNull { brand -> findPaint(PaintRef(brand, token)) }
 }
+
+/**
+ * Owned paints whose code appears in [text] ("Vallejo 72.109", "72109"), distinct and in order of
+ * appearance. Every code token is resolved with [findPaintLoose]; tokens not in the inventory are skipped.
+ */
+fun Inventory.paintsMentionedIn(text: String): List<Paint> =
+    LOOSE_CODE.findAll(text).mapNotNull { findPaintLoose(it.value) }.distinctBy { paintKey(it) }.toList()
