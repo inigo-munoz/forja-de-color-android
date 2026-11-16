@@ -50,8 +50,19 @@ class SeedTest {
     }
 
     @Test
-    fun `leaves the BSL role unset until confirmed from the book`() {
-        paints.forEach { assertNull(it.family?.role) }
+    fun `gives each BSL family its roles from the book, lightest first`() {
+        fun roles(name: String) = byFamily(name).map { it.family!!.role }
+        val usual = listOf(BslRole.FOURTH, BslRole.LIGHT, BslRole.BASE, BslRole.SHADOW)
+        listOf(
+            "BSL Warm Flesh", "BSL Flesh", "BSL Yellow", "BSL Orange", "BSL Magenta", "BSL Violet",
+            "BSL Blue", "BSL Turquoise", "BSL Cold Green", "BSL Black",
+        ).forEach { assertEquals(usual, roles(it), it) }
+        assertEquals(listOf("72.118", "72.021", "72.020", "72.019"), byFamily("BSL Blue").map { it.code })
+        assertEquals(
+            listOf("72.122" to BslRole.FOURTH, "72.032" to BslRole.LIGHT, "72.123" to BslRole.LIGHT, "72.028" to BslRole.BASE),
+            byFamily("BSL Green").map { it.code to it.family!!.role },
+        )
+        roles("BSL Multipurpose").forEach { assertNull(it) }
     }
 
     @Test

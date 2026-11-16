@@ -13,7 +13,8 @@
         "hex": "#c9a47f",
         "family": {
           "name": "BSL Warm Flesh",
-          "order": 1
+          "order": 1,
+          "role": "fourth"
         }
       },
       {
@@ -25,7 +26,8 @@
         "hex": "#e58a6b",
         "family": {
           "name": "BSL Warm Flesh",
-          "order": 2
+          "order": 2,
+          "role": "light"
         }
       },
       {

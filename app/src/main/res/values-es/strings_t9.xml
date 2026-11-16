@@ -3,4 +3,8 @@
 <resources>
     <string name="technique_back">Volver</string>
     <string name="settings_export_failed">No se pudo escribir el archivo de copia de seguridad.</string>
+    <string name="bsl_role_base">base</string>
+    <string name="bsl_role_shadow">sombra</string>
+    <string name="bsl_role_light">luz</string>
+    <string name="bsl_role_fourth">luz extra</string>
 </resources>

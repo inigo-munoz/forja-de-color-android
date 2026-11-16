@@ -3,4 +3,8 @@
 <resources>
     <string name="technique_back">Back</string>
     <string name="settings_export_failed">Could not write the backup file.</string>
+    <string name="bsl_role_base">base</string>
+    <string name="bsl_role_shadow">shadow</string>
+    <string name="bsl_role_light">light</string>
+    <string name="bsl_role_fourth">extra light</string>
 </resources>

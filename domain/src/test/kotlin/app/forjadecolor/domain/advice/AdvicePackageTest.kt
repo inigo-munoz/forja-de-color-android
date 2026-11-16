@@ -54,6 +54,12 @@ class AdvicePackageTest {
     }
 
     @Test
+    fun `fills the BSL roles from the seed for a stored inventory without roles`() {
+        val bare = SEED_INVENTORY.copy(paints = SEED_INVENTORY.paints.map { p -> p.copy(family = p.family?.copy(role = null)) })
+        assertEquals(pwaFixture("prompt-start.txt"), buildAdvicePackage(AdviceRequest(Moment.START), bare, "p").text)
+    }
+
+    @Test
     fun `carries the photo as the image`() {
         assertEquals("photo-1", start.imageId)
     }

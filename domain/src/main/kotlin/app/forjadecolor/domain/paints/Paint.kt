@@ -30,7 +30,7 @@ data class PaintFamily(
     val name: String,
     /** 1 = lightest … 4 = darkest, as printed on the BSL set. */
     val order: Int,
-    /** Pending: confirmed from the user's BSL book, may be absent. */
+    /** From the user's BSL book; absent for families without roles. Read it through [bslRole]. */
     val role: BslRole? = null,
 )
 

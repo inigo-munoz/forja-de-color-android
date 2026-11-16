@@ -1,6 +1,8 @@
 package app.forjadecolor.domain.advice
 
+import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
+import app.forjadecolor.domain.paints.bslRole
 
 // Prompt text must stay identical to the PWA's (src/advice/package.ts): the user's Claude Project /
 // custom GPT is set up with it. Pinned by AdvicePackageTest against fixtures generated from the PWA.
@@ -10,6 +12,7 @@ METHOD
 - Default technique is Slapchop: black primer, then a heavy grey drybrush and a lighter white drybrush to sketch light and shadow, then translucent colour on top.
 - I have no translucent paints: make them by thinning my opaque paints. Every Slapchop zone needs a dilution ratio "N:M" (paint:medium or water), e.g. "1:3".
 - Use BSL (base, shadow, light) triads only on detail zones: faces, skin, focal points. Prefer the BSL families listed below; each family is ordered 1 (lightest) to 4 (darkest).
+- For a BSL zone use the family's base, shadow and light paints by their role (extra light for final highlights); a family without a shadow paint is shaded by glazing its base.
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish."""
 
@@ -49,12 +52,15 @@ private val CONSULTATION_FORMAT = """ANSWER FORMAT: reply with JSON only, in one
   "techniqueCard": "slapchop | dilution | bsl | drybrush"
 }"""
 
+private val ROLE_WORDS = mapOf(BslRole.BASE to "base", BslRole.SHADOW to "shadow", BslRole.LIGHT to "light", BslRole.FOURTH to "extra light")
+
 private fun inventoryLines(inv: Inventory): String {
     val paints = inv.paints.map { p ->
-        listOf(p.brand, p.code, p.name, p.family?.name ?: p.range, p.family?.order?.toString() ?: "").joinToString("|")
+        val role = bslRole(p)?.let { ROLE_WORDS.getValue(it) } ?: ""
+        listOf(p.brand, p.code, p.name, p.family?.name ?: p.range, p.family?.order?.toString() ?: "", role).joinToString("|")
     }
     val brushes = inv.brushes.map { "brush|${it.code}|${it.name}" }
-    return (listOf("INVENTORY (brand|code|name|family|order)") + paints + brushes).joinToString("\n")
+    return (listOf("INVENTORY (brand|code|name|family|order|role)") + paints + brushes).joinToString("\n")
 }
 
 private fun momentRequest(req: AdviceRequest): String = when (req.moment) {

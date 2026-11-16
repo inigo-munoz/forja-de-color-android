@@ -2,7 +2,7 @@ package app.forjadecolor.domain.paints
 
 // The Vallejo Game Color BSL set the user owns: 12 families × 4, each listed lightest → darkest as
 // printed on the box. Same data as the PWA (`src/paints/seed.ts`); display colours are approximate.
-// BSL roles (base / shadow / light / fourth) stay unset until confirmed from the user's book.
+// BSL roles (base / shadow / light / fourth) come from the user's BSL book.
 private val FAMILIES: List<Pair<String, List<Triple<String, String, String>>>> = listOf(
     "BSL Warm Flesh" to listOf(Triple("72.003", "Carne Pálida", "#c9a47f"), Triple("72.100", "Carne Rosada", "#e58a6b"), Triple("72.107", "Piel de Atenea", "#c85c53"), Triple("72.108", "Piel de Súcubo", "#923d45")),
     "BSL Flesh" to listOf(Triple("72.098", "Carne Élfica", "#ebd7b9"), Triple("72.099", "Piel", "#e3ac86"), Triple("72.004", "Piel de Elfo", "#cb8854"), Triple("72.071", "Piel de Bárbaro", "#926640")),
@@ -18,6 +18,13 @@ private val FAMILIES: List<Pair<String, List<Triple<String, String, String>>>> =
     "BSL Multipurpose" to listOf(Triple("72.011", "Rojo Visceral", "#7d201f"), Triple("72.042", "Piel de Parásitos", "#a35e1c"), Triple("72.124", "Marrón Gargona", "#592f22"), Triple("72.045", "Marrón Carbonizado", "#442b26")),
 )
 
+// Roles by position (lightest → darkest). BSL Green has no shadow paint; BSL Multipurpose has no roles.
+private val USUAL_ROLES = listOf(BslRole.FOURTH, BslRole.LIGHT, BslRole.BASE, BslRole.SHADOW)
+private val ROLES: Map<String, List<BslRole>> = mapOf(
+    "BSL Green" to listOf(BslRole.FOURTH, BslRole.LIGHT, BslRole.LIGHT, BslRole.BASE),
+    "BSL Multipurpose" to emptyList(),
+)
+
 val SEED_INVENTORY: Inventory = Inventory(
     paints = FAMILIES.flatMap { (family, entries) ->
         entries.mapIndexed { i, (code, name, hex) ->
@@ -28,7 +35,7 @@ val SEED_INVENTORY: Inventory = Inventory(
                 range = "Game Color",
                 type = PaintType.OPAQUE,
                 hex = hex,
-                family = PaintFamily(name = family, order = i + 1),
+                family = PaintFamily(name = family, order = i + 1, role = (ROLES[family] ?: USUAL_ROLES).getOrNull(i)),
             )
         }
     },

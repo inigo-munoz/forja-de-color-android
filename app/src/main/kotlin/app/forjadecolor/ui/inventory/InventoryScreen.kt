@@ -40,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
+import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.addPaint
+import app.forjadecolor.domain.paints.bslRole
 import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.storage.Repository
 
@@ -118,9 +120,19 @@ private fun PaintSection(title: String, tag: String, paints: List<Paint>) {
                 Swatch(p.hex)
                 Text(p.code, fontFamily = FontFamily.Monospace)
                 Text(p.name)
+                bslRole(p)?.let { role ->
+                    Text(stringResource(roleLabel(role)), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("role"))
+                }
             }
         }
     }
+}
+
+private fun roleLabel(role: BslRole): Int = when (role) {
+    BslRole.BASE -> R.string.bsl_role_base
+    BslRole.SHADOW -> R.string.bsl_role_shadow
+    BslRole.LIGHT -> R.string.bsl_role_light
+    BslRole.FOURTH -> R.string.bsl_role_fourth
 }
 
 @Composable

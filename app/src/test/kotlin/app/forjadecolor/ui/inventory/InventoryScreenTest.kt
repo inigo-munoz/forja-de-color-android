@@ -21,6 +21,8 @@ import app.forjadecolor.AppContainer
 import app.forjadecolor.data.ForjaDatabase
 import app.forjadecolor.data.PhotoFiles
 import app.forjadecolor.data.RoomRepository
+import app.forjadecolor.domain.paints.BslRole
+import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintFamily
 import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.SEED_INVENTORY
@@ -84,6 +86,28 @@ class InventoryScreenTest {
     }
 
     @Test
+    fun `shows the BSL role next to each paint in a family, filled from the seed for stored paints without roles`() {
+        runBlocking {
+            val bare = SEED_INVENTORY.paints.map { p: Paint -> p.copy(family = p.family?.copy(role = null)) }
+            repo.saveInventory(SEED_INVENTORY.copy(paints = bare))
+        }
+        show()
+
+        val blue = compose.onNodeWithTag("family_BSL Blue").onChildren().filter(hasTestTag("paint"))
+        listOf("extra light", "light", "base", "shadow").forEachIndexed { i, role -> blue[i].assert(hasText(role)) }
+        compose.onAllNodesWithTag("role", useUnmergedTree = true).assertCountEquals(44)
+    }
+
+    @Test
+    @Config(qualifiers = "es")
+    fun `shows the BSL roles in Spanish`() {
+        show()
+
+        val blue = compose.onNodeWithTag("family_BSL Blue").onChildren().filter(hasTestTag("paint"))
+        listOf("luz extra", "luz", "base", "sombra").forEachIndexed { i, role -> blue[i].assert(hasText(role)) }
+    }
+
+    @Test
     fun `adding Vallejo 72003 replaces the stored paint with code 72_003 and keeps its family`() {
         show()
 
@@ -98,7 +122,7 @@ class InventoryScreenTest {
         val paint = inv.paints.single { it.code == "72.003" }
         assertEquals("Carne Pálida (renombrada)", paint.name)
         assertEquals("#c9a47f", paint.hex)
-        assertEquals(PaintFamily("BSL Warm Flesh", 1), paint.family)
+        assertEquals(PaintFamily("BSL Warm Flesh", 1, BslRole.FOURTH), paint.family)
         assertEquals(SEED_INVENTORY.brushes, inv.brushes)
     }
 
