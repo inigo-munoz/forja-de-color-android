@@ -3,6 +3,8 @@ package app.forjadecolor.ui.ask
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
@@ -238,6 +240,21 @@ class AskScreenTest {
         compose.onNodeWithTag("answer").assert(hasText(bad))
         assertEquals(1, app.project("p1")!!.advice.size)
         assertEquals(0, done)
+    }
+
+    @Test
+    fun `an unusable answer opens a blocking dialog with the errors, closed with OK`() {
+        val bad = """{"version":1,"kind":"recipe","moment":"start","prep":[],"tips":[],"zones":[{"name":"capa","technique":"slapchop","steps":[]}]}"""
+        show(readAnswer = bad)
+        click("paste")
+        app.waitFor(compose) { compose.onAllNodesWithTag("answer_errors").fetchSemanticsNodes().isNotEmpty() }
+
+        compose.onNode(isDialog()).assertExists()
+        compose.onNode(hasAnyAncestor(isDialog()) and hasText(Regex("capa.*dilution"))).assertExists()
+        compose.onNodeWithTag("errors_ok").performClick()
+
+        compose.onAllNodes(isDialog()).assertCountEquals(0)
+        compose.onNodeWithTag("answer").assert(hasText(bad))
     }
 
     @Test

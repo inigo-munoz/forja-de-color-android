@@ -81,6 +81,11 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
         }
     }
 
+    /** The user read the errors and closed them. */
+    fun clearErrors() {
+        _state.update { it.copy(errors = emptyList()) }
+    }
+
     /** The answer on the clipboard, if any. */
     fun readAnswer(): String? = container.advisorBridge.readAnswer()
 }

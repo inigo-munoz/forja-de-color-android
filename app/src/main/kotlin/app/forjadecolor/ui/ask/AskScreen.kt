@@ -16,6 +16,8 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -241,12 +243,6 @@ fun AskScreen(
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(onClick = paste, modifier = Modifier.testTag("paste")) { Text(stringResource(R.string.ask_paste)) }
-                if (errors.isNotEmpty()) {
-                    Column(Modifier.testTag("answer_errors")) {
-                        Text(stringResource(R.string.ask_errors), color = MaterialTheme.colorScheme.error)
-                        errors.forEach { Text("• $it", color = MaterialTheme.colorScheme.error) }
-                    }
-                }
                 if (showAnswer) {
                     OutlinedTextField(
                         answer, { answer = it },
@@ -259,6 +255,25 @@ fun AskScreen(
             }
         }
     }
+
+    // A modal, not a line above the answer: with a long answer that line was off screen and saving seemed to do nothing.
+    if (errors.isNotEmpty()) AnswerErrorsDialog(errors, onClose = vm::clearErrors)
+}
+
+@Composable
+private fun AnswerErrorsDialog(errors: List<String>, onClose: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text(stringResource(R.string.ask_errors)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()).testTag("answer_errors"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                errors.forEach { Text("• $it", color = MaterialTheme.colorScheme.error) }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onClose, modifier = Modifier.testTag("errors_ok")) { Text(stringResource(android.R.string.ok)) }
+        },
+    )
 }
 
 private fun copyToClipboard(context: Context, text: String) {
