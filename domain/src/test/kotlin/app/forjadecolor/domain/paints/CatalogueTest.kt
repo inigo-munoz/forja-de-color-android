@@ -33,7 +33,10 @@ class CatalogueTest {
         assertEquals(PaintType.OTHER, type("Vallejo", "72.103"))
         assertEquals(PaintType.OTHER, type("Vallejo", "72.131"))
         assertEquals(PaintType.METALLIC, type("Vallejo", "70.800"))
-        assertEquals(PaintType.OTHER, type("Vallejo", "70.934"))
+        assertEquals(PaintType.INK, type("Vallejo", "70.934")) // transparents count as ink
+        assertEquals(PaintType.METALLIC, type("Citadel", "Golden Griffon"))
+        assertEquals(PaintType.MEDIUM, type("Citadel", "Munitorum Varnish"))
+        assertEquals(PaintType.OTHER, type("Vallejo", "62.031")) // fluorescent
         assertEquals(PaintType.WASH, type("Vallejo", "70.831"))
         assertEquals(PaintType.METALLIC, type("Citadel", "Leadbelcher"))
         assertEquals(PaintType.OPAQUE, type("Citadel", "Steel Legion Drab"))
