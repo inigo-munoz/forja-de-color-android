@@ -161,4 +161,21 @@
     <string name="inventory_brush_code">Size or code</string>
     <string name="inventory_brush_name">Description</string>
     <string name="inventory_brush_save">Save brush</string>
+    <string name="inventory_scan">Add from a photo</string>
+    <string name="scan_title">Add from a photo</string>
+    <string name="scan_step_photo">1. Photo of your paints or brushes</string>
+    <string name="scan_photo_help">Labels facing the camera, in good light. Several bottles fit in one photo.</string>
+    <string name="scan_step_send">2. Send it to your AI</string>
+    <string name="scan_step_paste">3. Come back and paste the answer</string>
+    <string name="scan_read">Read the list</string>
+    <string name="scan_confirm_help">Check the list before saving. Tap an item to correct it; untick what you do not want.</string>
+    <string name="scan_paints">Paints</string>
+    <string name="scan_new">New</string>
+    <string name="scan_updates">Updates the one you have</string>
+    <string name="scan_incomplete">Missing code or name: tap to complete it</string>
+    <string name="scan_discard">Discard</string>
+    <plurals name="scan_save">
+        <item quantity="one">Add %d to my paints</item>
+        <item quantity="other">Add %d to my paints</item>
+    </plurals>
 </resources>

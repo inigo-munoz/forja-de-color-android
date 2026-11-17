@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -149,12 +150,14 @@ internal fun hslToHex(h: Float, s: Float, l: Float): String {
 }
 
 /**
- * The paints and brushes the user owns. "+ Add paint" or tapping a paint opens the add/update form
+ * The paints and brushes the user owns. "+ Add paint" or tapping a paint opens the add/update form;
+ * "Add from a photo" opens the scan ([onScan]);
  * in a dialog; the inventory lives in [InventoryViewModel], the open form in saveable state.
  */
 @Composable
 fun InventoryScreen(
     container: AppContainer,
+    onScan: () -> Unit = {},
 ) {
     val vm = viewModel { InventoryViewModel(container) }
     LaunchedEffect(Unit) { vm.load() }
@@ -167,8 +170,13 @@ fun InventoryScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.inventory_title), style = MaterialTheme.typography.headlineSmall)
-        Button(onClick = { draft = PaintDraft.NEW }, modifier = Modifier.testTag("add_paint")) {
-            Text(stringResource(R.string.inventory_add_button))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { draft = PaintDraft.NEW }, modifier = Modifier.testTag("add_paint")) {
+                Text(stringResource(R.string.inventory_add_button))
+            }
+            OutlinedButton(onClick = onScan, modifier = Modifier.testTag("scan_paints")) {
+                Text(stringResource(R.string.inventory_scan))
+            }
         }
         inventory?.let { inv ->
             val edit = { p: Paint -> draft = PaintDraft.of(p) }

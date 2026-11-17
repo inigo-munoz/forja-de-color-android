@@ -33,15 +33,17 @@ import app.forjadecolor.ui.project.ProjectScreen
 import app.forjadecolor.ui.projects.ProjectsScreen
 import app.forjadecolor.ui.settings.SettingsScreen
 import app.forjadecolor.ui.technique.TechniqueScreen
+import app.forjadecolor.ui.scan.ScanScreen
 import app.forjadecolor.ui.wheel.ColourWheelScreen
 
-/** Routes mirror the PWA hash router: #/projects, #/project/:id, #/ask/:id, #/inventory, #/wheel, #/settings, #/technique/:id. */
+/** Routes mirror the PWA hash router: #/projects, #/project/:id, #/ask/:id, #/inventory, #/scan, #/wheel, #/settings, #/technique/:id. */
 object Routes {
     const val PROJECTS = "projects"
     const val PROJECT = "project/{id}"
     const val ASK = "ask/{id}"
     const val INVENTORY = "inventory"
     const val WHEEL = "wheel"
+    const val SCAN = "scan"
     const val SETTINGS = "settings"
     const val TECHNIQUE = "technique/{id}"
 
@@ -85,7 +87,8 @@ fun AppNavHost(container: AppContainer, navController: NavHostController = remem
                     onDone = { navController.popBackStack() },
                 )
             }
-            composable(Routes.INVENTORY) { InventoryScreen(container) }
+            composable(Routes.INVENTORY) { InventoryScreen(container, onScan = { navController.navigate(Routes.SCAN) }) }
+            composable(Routes.SCAN) { ScanScreen(container, onDone = { navController.popBackStack() }) }
             composable(Routes.WHEEL) { ColourWheelScreen(container) }
             composable(Routes.SETTINGS) { SettingsScreen(container) }
             composable(Routes.TECHNIQUE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->

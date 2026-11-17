@@ -104,4 +104,13 @@ class InventoryBrushTest {
         compose.waitForIdle()
         assertEquals(3, brushes().size)
     }
+
+    @Test
+    fun `Add from a photo opens the scan`() {
+        var opened = 0
+        val c = AppContainer(context, repository = repo)
+        compose.setContent { ForgeTheme { InventoryScreen(c, onScan = { opened++ }) } }
+        compose.onNodeWithTag("scan_paints").performClick()
+        assertEquals(1, opened)
+    }
 }
