@@ -33,3 +33,23 @@ fun Inventory.findPaintLoose(text: String): Paint? {
  */
 fun Inventory.paintsMentionedIn(text: String): List<Paint> =
     LOOSE_CODE.findAll(text).mapNotNull { findPaintLoose(it.value) }.distinctBy { paintKey(it) }.toList()
+
+/**
+ * Saves the paint through [addPaint]. Like the PWA, a paint that replaces one in a BSL family keeps
+ * that family, so updating "72003" by hand or from a scan does not drop it from its set.
+ */
+fun Inventory.savePaintKeepingFamily(paint: Paint): Inventory {
+    val prior = findPaint(PaintRef(paint.brand, paint.code))
+    return addPaint(if (prior?.family != null) paint.copy(family = prior.family) else paint)
+}
+
+/** The owned brush with this code (trimmed, case-insensitive), if any. */
+fun Inventory.findBrush(code: String): Brush? = brushes.find { it.code.equals(code.trim(), ignoreCase = true) }
+
+/** Adds the brush, or replaces the one with the same code (trimmed, case-insensitive). */
+fun Inventory.addBrush(brush: Brush): Inventory {
+    val clean = Brush(brush.code.trim(), brush.name.trim())
+    val exists = findBrush(clean.code) != null
+    val updated = if (exists) brushes.map { if (it.code.equals(clean.code, ignoreCase = true)) clean else it } else brushes + clean
+    return copy(brushes = updated)
+}

@@ -31,7 +31,8 @@ private val CARDS = TechniqueCardId.entries.map { it.wire }
 private val PROMPT_MARKERS = listOf("ANSWER FORMAT", "INVENTORY (brand|code")
 private val FENCE = Regex("```(?:json)?\\s*([\\s\\S]*?)```", RegexOption.IGNORE_CASE)
 
-private fun extractJson(raw: String): String? {
+/** The JSON in an AI answer: a fenced block, or from the first { to the last }. Shared with the scan parser. */
+internal fun extractJson(raw: String): String? {
     FENCE.find(raw)?.let { return it.groupValues[1].trim() }
     val start = raw.indexOf('{')
     val end = raw.lastIndexOf('}')

@@ -52,11 +52,9 @@ import app.forjadecolor.R
 import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Paint
-import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.PaintType
-import app.forjadecolor.domain.paints.addPaint
 import app.forjadecolor.domain.paints.bslRole
-import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.savePaintKeepingFamily
 import app.forjadecolor.domain.storage.Repository
 import app.forjadecolor.ui.components.Swatch
 import app.forjadecolor.ui.components.parseHex
@@ -78,14 +76,9 @@ internal fun groupPaints(inv: Inventory): PaintGroups {
     return PaintGroups(families.map { (name, paints) -> name to paints.sortedBy { it.family!!.order } }, others)
 }
 
-/**
- * Saves the paint through [addPaint] (add or replace by brand + normalized code). Like the PWA, a paint
- * that replaces one in a BSL family keeps that family.
- */
+/** Saves the paint through [savePaintKeepingFamily]: add or replace, keeping a BSL family. */
 internal suspend fun savePaint(repo: Repository, paint: Paint) {
-    val current = repo.getInventory()
-    val prior = current.findPaint(PaintRef(paint.brand, paint.code))
-    repo.saveInventory(current.addPaint(if (prior?.family != null) paint.copy(family = prior.family) else paint))
+    repo.saveInventory(repo.getInventory().savePaintKeepingFamily(paint))
 }
 
 /** The fields of the add/update form while it is open; saved across recreation by [DraftSaver]. */
