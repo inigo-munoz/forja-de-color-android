@@ -21,7 +21,7 @@ Branch: feat/painting-styles (from feat/photo-inventory, Android; from main, PWA
 | T2 | S5, S6 | inline | done — Android storage (Room migration if needed) + backup round-trip | 22f04e0 |
 | T3 | S3–S5 | inline | done — Android UI: choose style/setting in the project and in Ask | e5981c6 |
 | T4 | S3–S7 | inline | done — PWA: same model, prompts, backup, UI | PWA fac32b1 |
-| T5 | S1–S7 | inline | todo — independent verifier (storage + contract), device check, release | |
+| T5 | S1–S7 | delegated (verifier) | partly done — verifier PASS all S#, release 1.3.0 installed; owner's device check pending | see L7 |
 
 ## Log
 
@@ -31,3 +31,4 @@ Branch: feat/painting-styles (from feat/photo-inventory, Android; from main, PWA
 - L4 (2026-11-17): T2 done in 22f04e0. Risk: item 1 (Room migration). ProjectEntity style/baseSetting TEXT NULL, ForjaDatabase v3 with MIGRATION_2_3 (two ADD COLUMN), schema 3.json exported, unknown names read as null. RED: migration tests expected v3 (got 2), RoomRepository PWA backup re-export lost the style → GREEN: new 2→3 test (rows kept, my method, style saved and read back), 1→3 chain, backup round-trip. Independent verifier pending at T5.
 - L5 (2026-11-17): T3 done in e5981c6. ui/components/LookPicker.kt (LookLine summary + Change → LookDialog with radio lists and a beginner line each; nothing saved until Save), in the project header (ProjectViewModel.setLook) and Ask step 1 (AskViewModel.setLook reads the project fresh); Ask send and Paint it with ChatGPT use the saved look. LookTest 7/7 (tests written before the code but RED not run on its own); full suite 309 tests, 0 failures.
 - L6 (2026-11-17): T4 done in PWA fac32b1: src/ui/look-fields.ts (two selects + beginner line), in the project view (update → setLook) and Ask (saved fresh; send reads the saved look), paint image uses lookOf(project). look.test.ts RED 4/4 → GREEN; 198 tests, tsc, build green.
+- L7 (2026-11-17): independent verifier (items 1 and 3): no blockers, S1–S7 PASS. Probes: fixtures regenerated at baseline and branch (existing prompts/AI instructions identical), unstyled export byte-identical vs baseline, 1→3 and 2→3 migrations keep rows, unknown Room names read as my method, both apps reject null/wrong-case/unknown looks with the same message and leave data untouched. Advisories: KDoc misplaced in Backup.kt (fixed); a hand-edited backup with "my-method" is kept as a value (harmless); a Send in the same instant as Save may use the previous look (accepted). Probes committed as regression tests (Android Room + Backup, PWA backup). Scratch worktrees removed. Full Android suite 312 tests, 0 failures; PWA 199. Release 1.3.0 (versionCode 6) installed on the Pixel.
