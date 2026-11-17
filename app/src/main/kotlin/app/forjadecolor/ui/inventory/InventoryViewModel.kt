@@ -6,7 +6,9 @@ import app.forjadecolor.AppContainer
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Brush
 import app.forjadecolor.domain.paints.Paint
+import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.addBrush
+import app.forjadecolor.domain.paints.removePaint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,6 +29,15 @@ class InventoryViewModel(private val container: AppContainer) : ViewModel() {
     fun save(paint: Paint) {
         viewModelScope.launch {
             savePaint(container.repository, paint)
+            load()
+        }
+    }
+
+    /** Removes the paint (after the user confirmed), then shows the inventory again. */
+    fun delete(ref: PaintRef) {
+        viewModelScope.launch {
+            val repo = container.repository
+            repo.saveInventory(repo.getInventory().removePaint(ref))
             load()
         }
     }

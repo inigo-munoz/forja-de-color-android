@@ -140,6 +140,43 @@ class InventoryFormTest {
     }
 
     @Test
+    fun `a paint you own can be deleted after confirming, and cancelling keeps it`() {
+        show()
+        compose.onNodeWithTag("add_paint").performClick()
+        compose.onNodeWithTag("delete_paint").assertDoesNotExist()
+        compose.onNodeWithTag("cancel_paint").performScrollTo().performClick()
+
+        compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()
+        compose.onNodeWithTag("delete_paint").performScrollTo().performClick()
+        compose.onNodeWithTag("cancel_delete").performClick()
+        compose.waitForIdle()
+        assertEquals(48, runBlocking { repo.getInventory() }.paints.size)
+
+        compose.onNodeWithTag("delete_paint").performScrollTo().performClick()
+        compose.onNodeWithTag("confirm_delete").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).fetchSemanticsNodes().isEmpty() }
+
+        val inv = runBlocking { repo.getInventory() }
+        assertEquals(47, inv.paints.size)
+        assertTrue(inv.paints.none { it.code == "72.003" })
+        compose.onNodeWithTag("paint_form").assertDoesNotExist()
+    }
+
+    @Test
+    fun `deleting removes the paint that was opened, even after its code was edited`() {
+        show()
+        compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()
+        compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("72.001")
+        compose.onNodeWithTag("delete_paint").performScrollTo().performClick()
+        compose.onNodeWithTag("confirm_delete").performClick()
+        compose.waitUntil(5_000) { compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).fetchSemanticsNodes().isEmpty() }
+
+        val codes = runBlocking { repo.getInventory() }.paints.map { it.code }
+        assertTrue("72.001" in codes)
+        assertTrue("72.003" !in codes)
+    }
+
+    @Test
     fun `the catalogue search is only offered when adding`() {
         show()
         compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()
