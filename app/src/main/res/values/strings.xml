@@ -156,4 +156,9 @@
     <string name="wheel_blue_violet">Blue-violet</string>
     <string name="wheel_violet">Violet</string>
     <string name="wheel_red_violet">Red-violet</string>
+    <string name="inventory_add_brush">+ Add brush</string>
+    <string name="inventory_brush_title">Add or update a brush</string>
+    <string name="inventory_brush_code">Size or code</string>
+    <string name="inventory_brush_name">Description</string>
+    <string name="inventory_brush_save">Save brush</string>
 </resources>

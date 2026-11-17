@@ -154,4 +154,9 @@
     <string name="wheel_blue_violet">Azul violáceo</string>
     <string name="wheel_violet">Violeta</string>
     <string name="wheel_red_violet">Rojo violáceo</string>
+    <string name="inventory_add_brush">+ Añadir pincel</string>
+    <string name="inventory_brush_title">Añadir o actualizar un pincel</string>
+    <string name="inventory_brush_code">Tamaño o código</string>
+    <string name="inventory_brush_name">Descripción</string>
+    <string name="inventory_brush_save">Guardar pincel</string>
 </resources>

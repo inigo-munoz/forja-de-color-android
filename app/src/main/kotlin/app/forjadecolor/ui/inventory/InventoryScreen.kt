@@ -99,7 +99,7 @@ internal data class PaintDraft(
 }
 
 /** Null (form closed) saves nothing, so it restores closed. */
-private val DraftSaver = Saver<PaintDraft?, List<String>>(
+internal val DraftSaver = Saver<PaintDraft?, List<String>>(
     save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex) } },
     restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5]) },
 )
@@ -160,6 +160,7 @@ fun InventoryScreen(
     LaunchedEffect(Unit) { vm.load() }
     val inventory by vm.inventory.collectAsState()
     var draft by rememberSaveable(stateSaver = DraftSaver) { mutableStateOf<PaintDraft?>(null) }
+    var brushDraft by rememberSaveable(stateSaver = BrushDraftSaver) { mutableStateOf<BrushDraft?>(null) }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_inventory"),
@@ -177,13 +178,28 @@ fun InventoryScreen(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.inventory_brushes), style = MaterialTheme.typography.titleMedium)
                 inv.brushes.forEach { b ->
-                    Row(Modifier.testTag("brush").semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().clickable { brushDraft = BrushDraft.of(b) }.testTag("brush").semantics(mergeDescendants = true) {},
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(b.code, fontFamily = FontFamily.Monospace)
                         Text(b.name)
                     }
                 }
+                TextButton(onClick = { brushDraft = BrushDraft.NEW }, modifier = Modifier.testTag("add_brush")) {
+                    Text(stringResource(R.string.inventory_add_brush))
+                }
             }
         }
+    }
+
+    brushDraft?.let { d ->
+        BrushFormDialog(
+            draft = d,
+            onChange = { brushDraft = it },
+            onSave = { vm.saveBrush(it); brushDraft = null },
+            onCancel = { brushDraft = null },
+        )
     }
 
     draft?.let { d ->
@@ -227,7 +243,7 @@ private fun roleLabel(role: BslRole): Int = when (role) {
 /** The add/update form; saving goes through [onSave] (the ViewModel and [savePaint]). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, onSave: (Paint) -> Unit, onCancel: () -> Unit) {
+internal fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, onSave: (Paint) -> Unit, onCancel: () -> Unit) {
     val fields = listOf(draft.brand, draft.code, draft.name, draft.range).map { it.trim() }
     val valid = fields.all { it.isNotEmpty() } && HEX.matches(draft.hex.trim())
 
@@ -314,7 +330,7 @@ private fun ColorPicker(hex: String, onChange: (String) -> Unit) {
 }
 
 @Composable
-private fun FormField(label: Int, value: String, tag: String, onChange: (String) -> Unit) {
+internal fun FormField(label: Int, value: String, tag: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
