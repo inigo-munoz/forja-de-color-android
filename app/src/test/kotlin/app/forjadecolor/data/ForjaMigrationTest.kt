@@ -149,6 +149,24 @@ class ForjaMigrationTest {
         }
     }
 
+    @Test
+    fun `paints survive from v1 and v2 with no English name`() = runBlocking {
+        for (v in 1..2) {
+            context.deleteDatabase(name)
+            createAt(v) { db ->
+                db.execSQL("INSERT INTO paints VALUES (0, 'Vallejo', '72.001', 'Blanco Calavera', 'Game Color', 'OPAQUE', '#ffffff', 'BSL Black', 1, 'FOURTH')")
+                db.execSQL("INSERT INTO app_state VALUES ('inventory.saved', '1')")
+            }
+            val db = ForjaDatabase.create(context, name)
+            try {
+                val p = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration"))).getInventory().paints.single()
+                assertEquals("Blanco Calavera" to null, p.name to p.nameEn, "from v$v")
+            } finally {
+                db.close()
+            }
+        }
+    }
+
     private companion object {
         const val RESPONSE =
             """{"version":1,"kind":"recipe","moment":"start","prep":["Imprimar"],"zones":[{"name":"capa","technique":"slapchop","paint":{"brand":"Vallejo","code":"72.021"},"dilution":"1:3","steps":["Aplicar"]}],"tips":[]}"""
