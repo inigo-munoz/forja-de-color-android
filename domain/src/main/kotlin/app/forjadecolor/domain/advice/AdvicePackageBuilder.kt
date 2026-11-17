@@ -1,5 +1,9 @@
 package app.forjadecolor.domain.advice
 
+import app.forjadecolor.domain.projects.Look
+import app.forjadecolor.domain.projects.PaintingStyle
+import app.forjadecolor.domain.projects.adviceLookLines
+
 import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.bslRole
@@ -80,7 +84,9 @@ fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): Adv
         Moment.HALF_PAINTED -> recipeFormat(RecipeMoment.HALF_PAINTED)
         Moment.DURING -> CONSULTATION_FORMAT
     }
-    val text = listOf(METHOD, inventoryLines(inv), momentRequest(req), format).joinToString("\n\n")
+    val look = adviceLookLines(Look(req.style ?: PaintingStyle.MY_METHOD, req.baseSetting))
+    val sections = listOf(METHOD, inventoryLines(inv), momentRequest(req)) + listOfNotNull(look.joinToString("\n").ifEmpty { null }) + format
+    val text = sections.joinToString("\n\n")
     return AdvicePackage(text, photoId)
 }
 

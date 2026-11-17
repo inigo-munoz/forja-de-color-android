@@ -10,7 +10,8 @@ import { buildImagePrompt } from '${PWA}/src/advice/image-prompt';
 import { parseAdviceResponse } from '${PWA}/src/advice/parse';
 import { openIndexedDbRepository } from '${PWA}/src/storage/indexeddb';
 import { exportAll } from '${PWA}/src/storage/backup';
-import { createProject, addProgressPhoto, addAdvice, setNotes, setZoneDone } from '${PWA}/src/projects/project';
+import { createProject, addProgressPhoto, addAdvice, setLook, setNotes, setZoneDone } from '${PWA}/src/projects/project';
+import { BASE_SETTINGS, PAINTING_STYLES } from '${PWA}/src/projects/style';
 
 const out = '${OUT}';
 const photo = new Blob(['x'], { type: 'image/jpeg' });
@@ -32,6 +33,12 @@ const recipe = {
   ],
 };
 w('image-prompt.txt', buildImagePrompt(recipe, SEED_INVENTORY));
+
+// Painting styles: every style and every base setting, one prompt each, separated by a line of dashes.
+const empty = { paints: [], brushes: [] };
+const looks = [...PAINTING_STYLES.map((style) => ({ style })), ...BASE_SETTINGS.map((baseSetting) => ({ baseSetting })), { style: 'osl' as const, baseSetting: 'winter' as const }];
+w('prompt-looks.txt', looks.map((look) => buildAdvicePackage({ moment: 'start', ...look }, empty, photo).text).join('\n-----\n'));
+w('image-prompt-looks.txt', looks.map((look) => buildImagePrompt(recipe, SEED_INVENTORY, look)).join('\n-----\n'));
 
 // Backup exported by the real PWA code, with every optional field exercised.
 const repo = await openIndexedDbRepository('fixture');
@@ -56,7 +63,8 @@ p = addAdvice(p, { id: 'adv-3', receivedAt: '2026-11-11T12:00:00.000Z', ...prime
 // Zones ticked off as painted on the first recipe; the other recipe has none (doneZones absent).
 p = setZoneDone(setZoneDone(p, 'adv-1', 2, true), 'adv-1', 0, true);
 await repo.saveProject(p);
-await repo.saveProject({ ...createProject('Goblin', new Date('2026-11-12T08:00:00.000Z'), 'project-2'), status: 'done' });
+// The second project has a painting style and a base setting; the first has none (both absent).
+await repo.saveProject(setLook({ ...createProject('Goblin', new Date('2026-11-12T08:00:00.000Z'), 'project-2'), status: 'done' }, { style: 'nmm', baseSetting: 'desert' }));
 const backup = await exportAll(repo, new Date('2026-11-14T12:00:00.000Z'));
 w('backup-v1.json', JSON.stringify(backup, null, 2));
 console.log('ok');

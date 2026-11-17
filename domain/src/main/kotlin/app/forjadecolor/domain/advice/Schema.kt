@@ -1,6 +1,8 @@
 package app.forjadecolor.domain.advice
 
 import app.forjadecolor.domain.paints.PaintRef
+import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.PaintingStyle
 import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
@@ -112,6 +114,8 @@ data class AdviceRequest(
     val zone: String? = null,
     val question: Question? = null,
     val freeText: String? = null,
+    val style: PaintingStyle? = null,
+    val baseSetting: BaseSetting? = null,
 )
 
 /** What is shared with the user's AI chat: the prompt and the id of the stored photo. */

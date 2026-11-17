@@ -1,5 +1,8 @@
 package app.forjadecolor.domain.storage
 
+import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.PaintingStyle
+
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.advice.ConsultationResponse
 import app.forjadecolor.domain.advice.RecipeMoment
@@ -149,6 +152,34 @@ class BackupTest {
     @Test
     fun `names the file after the export day`() = runBlocking {
         assertEquals("forja-de-color-2026-11-11.json", backupFileName(exportAll(populated(), now)))
+    }
+
+    // Painting styles: optional, same validation message as the PWA
+    private fun withLook(look: String) =
+        """{"app":"forja-de-color","version":1,"exportedAt":"","inventory":{"paints":[],"brushes":[]},"blobs":{},""" +
+            """"projects":[{"id":"p1","name":"B","createdAt":"","status":"in-progress","notes":"","progress":[],"advice":[]$look}]}"""
+
+    @Test
+    fun `accepts projects without a style and with a known style and base setting`() {
+        assertNull(validateBackup(parseBackupText(withLook(""))))
+        assertNull(validateBackup(parseBackupText(withLook(",\"style\":\"osl\",\"baseSetting\":\"desert\""))))
+    }
+
+    @Test
+    fun `rejects an unknown style or base setting with the PWA's message`() {
+        listOf(",\"style\":\"cel-shading\"", ",\"style\":3", ",\"baseSetting\":\"jungle\"").forEach {
+            assertEquals("project #1 has an unknown painting style or base setting", validateBackup(parseBackupText(withLook(it))), it)
+        }
+    }
+
+    @Test
+    fun `reads the style the PWA exported`() = runBlocking {
+        val repo = InMemoryRepository()
+        importAll(repo, parseBackupText(pwaFixture("backup-v1.json")))
+        val goblin = repo.getProject("project-2")!!
+        assertEquals(PaintingStyle.NMM, goblin.style)
+        assertEquals(BaseSetting.DESERT, goblin.baseSetting)
+        assertNull(repo.getProject("project-1")!!.style)
     }
 
     // Done zones (S11 item 3): optional, additive, same validation messages as the PWA
