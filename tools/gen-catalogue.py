@@ -31,6 +31,20 @@ METAL_BRAND_NAMES = {  # Citadel metallics whose names carry no metal word
 }
 
 
+# Checked one by one against Vallejo's official charts (Game Color CC266 Rev03 2025 and rev14 2014;
+# Model Color CC070 Rev18 and CC329 R00):
+# paints whose line (metallic, ink, fluo, special effects) the name alone does not reveal.
+TYPE_OVERRIDES = {
+    ("Vallejo", "72.060"): "metallic",  # Tinny Tin, Game Color Metallic
+    **{("Vallejo", c): "ink" for c in ("72.082", "72.083", "72.084")},  # Game Color Ink: White, Magenta, Dark Turquoise
+    **{("Vallejo", c): "other" for c in ("72.103", "72.104", "72.156", "72.157", "72.158", "72.159", "72.160", "72.161")},  # Fluo
+    **{("Vallejo", f"72.13{i}"): "other" for i in range(0, 7)},  # 2014 Special Effect colours (Rust, Fresh Blood…)
+    ("Vallejo", "70.800"): "metallic",  # Gunmetal Blue, Model Color Metallic
+    **{("Vallejo", c): "other" for c in ("70.730", "70.733", "70.735", "70.736", "70.737")},  # Model Color Fluo
+    **{("Vallejo", c): "other" for c in ("70.934", "70.935", "70.936", "70.937", "70.938", "70.834")},  # Transparent
+    **{("Vallejo", c): "wash" for c in ("70.831", "70.832", "70.853", "70.854", "70.855")},  # Glazes, like Citadel Glaze
+}
+
 # Vallejo's Game Color ink line (Yellow, Red, … Sepia, Black): the dataset names them without "Ink".
 GAME_INKS = {f"72.0{i}" for i in range(85, 95)}
 
@@ -70,7 +84,8 @@ def rows(brand: str, text: str):
         if not code or code.lower() == "null":
             code = name  # Citadel (and some Army Painter sets) sell by name, not by code
         rng = row.get("Set", "").strip()
-        yield [brand, code, name, rng, paint_type(rng, name, code if brand == "Vallejo" else ""), hex_match.group(1).lower()]
+        kind = TYPE_OVERRIDES.get((brand, code)) or paint_type(rng, name, code if brand == "Vallejo" else "")
+        yield [brand, code, name, rng, kind, hex_match.group(1).lower()]
 
 
 def main():

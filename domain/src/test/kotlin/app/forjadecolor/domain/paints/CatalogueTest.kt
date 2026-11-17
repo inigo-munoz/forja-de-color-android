@@ -27,6 +27,14 @@ class CatalogueTest {
         fun type(brand: String, code: String) = findInCatalogue(brand, code)?.type
         assertEquals(PaintType.INK, type("Vallejo", "70.939"))
         assertEquals(PaintType.INK, type("Vallejo", "72.091"))
+        // Checked against Vallejo's official charts: lines the name alone does not reveal.
+        assertEquals(PaintType.METALLIC, type("Vallejo", "72.060"))
+        assertEquals(PaintType.INK, type("Vallejo", "72.082"))
+        assertEquals(PaintType.OTHER, type("Vallejo", "72.103"))
+        assertEquals(PaintType.OTHER, type("Vallejo", "72.131"))
+        assertEquals(PaintType.METALLIC, type("Vallejo", "70.800"))
+        assertEquals(PaintType.OTHER, type("Vallejo", "70.934"))
+        assertEquals(PaintType.WASH, type("Vallejo", "70.831"))
         assertEquals(PaintType.METALLIC, type("Citadel", "Leadbelcher"))
         assertEquals(PaintType.OPAQUE, type("Citadel", "Steel Legion Drab"))
         assertEquals(PaintType.OPAQUE, type("Vallejo", "70.987"))
