@@ -5,6 +5,7 @@ import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintFamily
 import app.forjadecolor.domain.paints.PaintType
+import app.forjadecolor.domain.pwaFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -19,6 +20,11 @@ class InventoryScanTest {
 
     private fun success(raw: String): ScanResult.Success = assertIs<ScanResult.Success>(parseScanAnswer(raw, inv))
     private fun errors(raw: String): List<String> = assertIs<ScanResult.Failure>(parseScanAnswer(raw, inv)).errors
+
+    @Test
+    fun `the scan instructions are identical to the PWA's`() {
+        assertEquals(pwaFixture("scan-prompt.txt"), buildScanPrompt())
+    }
 
     @Test
     fun `the instructions ask for the scan JSON and say not to guess codes`() {
