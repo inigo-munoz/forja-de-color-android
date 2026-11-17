@@ -12,6 +12,7 @@ import { openIndexedDbRepository } from '${PWA}/src/storage/indexeddb';
 import { exportAll } from '${PWA}/src/storage/backup';
 import { createProject, addProgressPhoto, addAdvice, setLook, setNotes, setZoneDone } from '${PWA}/src/projects/project';
 import { BASE_SETTINGS, PAINTING_STYLES } from '${PWA}/src/projects/style';
+import { buildScanPrompt } from '${PWA}/src/scan/scan';
 
 const out = '${OUT}';
 const photo = new Blob(['x'], { type: 'image/jpeg' });
@@ -22,6 +23,7 @@ w('prompt-half-painted.txt', buildAdvicePackage({ moment: 'half-painted' }, SEED
 w('prompt-during.txt', buildAdvicePackage({ moment: 'during', zone: 'capa', question: 'highlight', freeText: 'borde dorado' }, SEED_INVENTORY, photo).text);
 w('prompt-during-bare.txt', buildAdvicePackage({ moment: 'during' }, SEED_INVENTORY, photo).text);
 w('brain-instructions.txt', buildBrainInstructions(SEED_INVENTORY));
+w('scan-prompt.txt', buildScanPrompt());
 
 const V = (code: string) => ({ brand: 'Vallejo', code });
 const recipe = {
