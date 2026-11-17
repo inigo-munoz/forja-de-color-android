@@ -1,7 +1,9 @@
 package app.forjadecolor.domain.storage
 
 import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.Look
 import app.forjadecolor.domain.projects.PaintingStyle
+import app.forjadecolor.domain.projects.setLook
 
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.advice.ConsultationResponse
@@ -170,6 +172,23 @@ class BackupTest {
         listOf(",\"style\":\"cel-shading\"", ",\"style\":3", ",\"baseSetting\":\"jungle\"").forEach {
             assertEquals("project #1 has an unknown painting style or base setting", validateBackup(parseBackupText(withLook(it))), it)
         }
+    }
+
+    @Test
+    fun `a null or wrong-case style is rejected like in the PWA`() {
+        listOf(",\"style\":null", ",\"baseSetting\":null", ",\"style\":\"NMM\"", ",\"baseSetting\":\"\"").forEach {
+            assertEquals("project #1 has an unknown painting style or base setting", validateBackup(parseBackupText(withLook(it))), it)
+        }
+    }
+
+    @Test
+    fun `a backup rejected for its style leaves the data unchanged`() = runBlocking {
+        val repo = InMemoryRepository()
+        repo.saveProject(createProject("Keep", now, "k1").setLook(Look(PaintingStyle.OSL, BaseSetting.WINTER)))
+        val before = exportAll(repo, now)
+        val result = importAll(repo, parseBackupText(withLook(",\"style\":\"cel\"")))
+        assertEquals(ImportResult.Failed("project #1 has an unknown painting style or base setting"), result)
+        assertEquals(before, exportAll(repo, now))
     }
 
     @Test

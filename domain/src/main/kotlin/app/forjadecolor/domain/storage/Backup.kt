@@ -1,12 +1,10 @@
 package app.forjadecolor.domain.storage
 
-import app.forjadecolor.domain.projects.BaseSetting
-import app.forjadecolor.domain.projects.PaintingStyle
-import kotlinx.serialization.json.jsonPrimitive
-
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.paints.Inventory
+import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.PaintingStyle
 import app.forjadecolor.domain.projects.Project
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
@@ -15,6 +13,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.time.format.DateTimeParseException
 import kotlin.io.encoding.Base64
@@ -85,7 +84,6 @@ private fun doneZonesProblem(project: JsonObject, projectIndex: Int): String? {
     return null
 }
 
-/** Why a file cannot be restored, or null when it is a valid backup. */
 // Wire names of the optional project look, as the PWA writes them.
 private val STYLE_WIRES = PaintingStyle.entries.map { ForjaJson.encodeToJsonElement(PaintingStyle.serializer(), it).jsonPrimitive.content }
 private val BASE_WIRES = BaseSetting.entries.map { ForjaJson.encodeToJsonElement(BaseSetting.serializer(), it).jsonPrimitive.content }
@@ -93,6 +91,7 @@ private val BASE_WIRES = BaseSetting.entries.map { ForjaJson.encodeToJsonElement
 /** A JSON string's text, or null for anything else. */
 private fun wire(e: JsonElement?): String? = (e as? JsonPrimitive)?.takeIf { it.isString }?.content
 
+/** Why a file cannot be restored, or null when it is a valid backup. */
 fun validateBackup(file: JsonElement?): String? {
     if (file !is JsonObject) return "not a backup file"
     if ((file["app"] as? JsonPrimitive)?.takeIf { it.isString }?.content != BackupFile.APP) return "this file is not a Forja de Color backup"
