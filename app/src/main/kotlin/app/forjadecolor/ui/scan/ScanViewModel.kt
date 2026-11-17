@@ -11,9 +11,12 @@ import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.findBrush
 import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.findSet
+import app.forjadecolor.domain.paints.setAsScan
 import app.forjadecolor.domain.scan.ScanResult
 import app.forjadecolor.domain.scan.applyScan
 import app.forjadecolor.domain.scan.buildScanPrompt
+import app.forjadecolor.domain.scan.checkInCatalogue
 import app.forjadecolor.domain.scan.isComplete
 import app.forjadecolor.domain.scan.parseScanAnswer
 import app.forjadecolor.domain.storage.StoredBlob
@@ -26,7 +29,7 @@ import kotlinx.coroutines.launch
 enum class ScanSendStatus { NONE, PHOTO_MISSING, FALLBACK }
 
 /** A paint read from the photo, waiting for the user: [existing] is the owned paint it would update. */
-data class PaintItem(val paint: Paint, val existing: Paint?, val included: Boolean) {
+data class PaintItem(val paint: Paint, val existing: Paint?, val included: Boolean, val fromCatalogue: Boolean = false) {
     val complete: Boolean get() = isComplete(paint)
     val updates: Boolean get() = existing != null
 }
@@ -83,17 +86,34 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
 
     fun readAnswer(): String? = container.advisorBridge.readAnswer()
 
+    private var setLoaded = false
+
+    /** Opens a paint set as the list to confirm, once: a recreated screen keeps the user's ticks and edits. */
+    fun loadSet(code: String) {
+        if (setLoaded) return
+        setLoaded = true
+        val set = findSet(code) ?: return
+        viewModelScope.launch {
+            val list = setAsScan(set, container.repository.getInventory())
+            _state.update {
+                it.copy(list = ScanList(list.paints.map { s -> PaintItem(s.paint, s.existing, isComplete(s.paint) && s.existing == null, s.fromCatalogue) }, emptyList()))
+            }
+        }
+    }
+
     /** Reads the answer into the list, every complete item ticked; an unusable answer leaves only errors. */
     fun read(raw: String) {
         viewModelScope.launch {
-            when (val result = parseScanAnswer(raw, container.repository.getInventory())) {
+            val inv = container.repository.getInventory()
+            // The catalogue is checked first; the AI's data is kept only for paints it does not list.
+            when (val result = parseScanAnswer(raw, inv).let { if (it is ScanResult.Success) checkInCatalogue(it, inv) else it }) {
                 is ScanResult.Failure -> _state.update { it.copy(errors = result.errors) }
                 is ScanResult.Success -> _state.update {
                     it.copy(
                         errors = emptyList(),
                         list = ScanList(
                             // A paint the user already owns comes unticked: ticking it updates the owned one.
-                            result.paints.map { s -> PaintItem(s.paint, s.existing, isComplete(s.paint) && s.existing == null) },
+                            result.paints.map { s -> PaintItem(s.paint, s.existing, isComplete(s.paint) && s.existing == null, s.fromCatalogue) },
                             result.brushes.map { s -> BrushItem(s.brush, s.existing != null, s.brush.code.isNotBlank() && s.brush.name.isNotBlank()) },
                         ),
                     )

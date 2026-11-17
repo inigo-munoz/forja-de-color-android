@@ -201,4 +201,7 @@
     <string name="inventory_mediums">Medium</string>
     <string name="already_owned">Ya la tienes: %1$s (%2$s)</string>
     <string name="inventory_name_en">Nombre en inglés</string>
+    <string name="catalogue_search">Buscar en el catálogo (código o nombre)</string>
+    <string name="scan_from_catalogue">Comprobada en el catálogo</string>
+    <string name="catalogue_set">Set %1$s · %2$s · %3$d pinturas</string>
 </resources>

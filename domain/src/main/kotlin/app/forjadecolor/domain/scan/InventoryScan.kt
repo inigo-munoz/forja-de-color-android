@@ -10,6 +10,7 @@ import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.addBrush
 import app.forjadecolor.domain.paints.findBrush
 import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.lookUpInCatalogue
 import app.forjadecolor.domain.paints.normalizeCode
 import app.forjadecolor.domain.paints.paintKey
 import app.forjadecolor.domain.paints.savePaintKeepingFamily
@@ -42,7 +43,7 @@ Rules:
 - Only list what you can see. If you cannot read a code, leave "code" empty instead of guessing.
 - For each paint, search the web (the maker's site or a colour chart) for its official name in Spanish ("nameEs") and in English ("nameEn") and its real colour ("hex", as #rrggbb). If you cannot confirm a name or the colour, leave it empty instead of inventing it.
 - "brand" is the maker (for example Vallejo, Citadel, Army Painter) and "range" the product line (for example Game Color, Model Color).
-- "type" is one of: opaque, wash, metallic, medium, primer, other.
+- "type" is one of: opaque, wash, ink, metallic, medium, primer, other.
 - For a brush, "code" is the size or model printed on it (for example 2, 0, 5/0) and "name" a short description.
 
 $PROMPT_MARKER (reply with this JSON only):
@@ -60,8 +61,11 @@ $PROMPT_MARKER (reply with this JSON only):
 ```
 """.trim()
 
-/** A paint read from the photo; [existing] is the owned paint it would update, if any. */
-data class ScannedPaint(val paint: Paint, val existing: Paint?)
+/**
+ * A paint read from the photo; [existing] is the owned paint it would update, if any; [fromCatalogue]
+ * when its data comes from the paint catalogue rather than the AI.
+ */
+data class ScannedPaint(val paint: Paint, val existing: Paint?, val fromCatalogue: Boolean = false)
 
 /** A brush read from the photo; [existing] is the owned brush it would update, if any. */
 data class ScannedBrush(val brush: Brush, val existing: Brush?)
@@ -146,4 +150,16 @@ private fun toBrush(e: JsonElement): Brush? {
     val code = o.text("code")
     val name = o.text("name")
     return if (code.isBlank() && name.isBlank()) null else Brush(code, name)
+}
+
+/**
+ * Looks every scanned paint up in the catalogue first ([lookUpInCatalogue]): found ones take the
+ * catalogue's data and are flagged; owned paints are found again with the corrected codes, and two rows
+ * that turn out to be the same paint are kept once. Same rule as the PWA.
+ */
+fun checkInCatalogue(result: ScanResult.Success, inv: Inventory): ScanResult.Success {
+    val paints = result.paints.map { lookUpInCatalogue(it.paint) }
+        .distinctBy { (p, _) -> if (p.code.isBlank()) "name:${p.brand}|${p.name}" else paintKey(p) }
+        .map { (p, fromCatalogue) -> ScannedPaint(p, if (p.code.isBlank()) null else inv.findPaint(PaintRef(p.brand, p.code)), fromCatalogue) }
+    return result.copy(paints = paints)
 }

@@ -24,6 +24,7 @@
     <string name="family_black">BSL Negro</string>
     <string name="family_multipurpose">BSL Multiuso</string>
     <string name="paint_type_opaque">opaca</string>
+    <string name="paint_type_ink">tinta</string>
     <string name="paint_type_wash">lavado</string>
     <string name="paint_type_metallic">metálica</string>
     <string name="paint_type_medium">médium</string>

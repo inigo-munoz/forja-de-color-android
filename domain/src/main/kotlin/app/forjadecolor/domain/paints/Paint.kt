@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 enum class PaintType {
     @SerialName("opaque") OPAQUE,
     @SerialName("wash") WASH,
+    @SerialName("ink") INK,
     @SerialName("metallic") METALLIC,
     @SerialName("medium") MEDIUM,
     @SerialName("primer") PRIMER,

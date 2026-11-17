@@ -29,7 +29,10 @@ class InventoryScanTest {
     @Test
     fun `the instructions ask to look up both names and the real colour, and not to invent`() {
         val prompt = buildScanPrompt()
-        listOf("search the web", "\"nameEs\"", "\"nameEn\"", "leave it empty instead of inventing it").forEach { assertTrue(it in prompt, it) }
+        listOf("search the web", "\"nameEs\"", "\"nameEn\"", "leave it empty instead of inventing it", "opaque, wash, ink, metallic, medium, primer, other")
+            .forEach { assertTrue(it in prompt, it) }
+        val ink = success("""{"version": 1, "kind": "inventory", "paints": [{"brand": "Vallejo", "code": "70.939", "name": "Smoke Ink", "type": "Ink"}]}""")
+        assertEquals(PaintType.INK, ink.paints[0].paint.type)
     }
 
     @Test

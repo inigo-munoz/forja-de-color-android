@@ -203,4 +203,7 @@
     <string name="inventory_mediums">Mediums</string>
     <string name="already_owned">You already have it: %1$s (%2$s)</string>
     <string name="inventory_name_en">English name</string>
+    <string name="catalogue_search">Search the catalogue (code or name)</string>
+    <string name="scan_from_catalogue">Checked in the catalogue</string>
+    <string name="catalogue_set">Set %1$s · %2$s · %3$d paints</string>
 </resources>

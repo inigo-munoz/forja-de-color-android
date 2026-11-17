@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,8 +57,10 @@ import app.forjadecolor.ui.project.LocalPhotoSources
  * only "Add to my paints" writes the inventory, then [onDone].
  */
 @Composable
-fun ScanScreen(container: AppContainer, onDone: () -> Unit) {
+fun ScanScreen(container: AppContainer, onDone: () -> Unit, setCode: String? = null) {
     val vm = viewModel { ScanViewModel(container) }
+    // A paint set (from the catalogue search) opens straight as the list to confirm.
+    LaunchedEffect(setCode) { setCode?.let(vm::loadSet) }
     val state by vm.state.collectAsState()
     val context = LocalContext.current
     var photo by rememberPendingPhoto()
@@ -164,6 +167,14 @@ private fun ConfirmList(list: ScanList, vm: ScanViewModel, onSaved: () -> Unit) 
                 Column(Modifier.weight(1f)) {
                     Text(listOf(item.paint.brand, item.paint.code).filter { it.isNotBlank() }.joinToString(" "), fontFamily = FontFamily.Monospace)
                     Text(displayName(item.paint))
+                    if (item.fromCatalogue) {
+                        Text(
+                            stringResource(R.string.scan_from_catalogue),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.testTag("scan_paint_catalogue_$i"),
+                        )
+                    }
                     val owned = item.existing
                     if (owned != null && item.complete) {
                         Text(
