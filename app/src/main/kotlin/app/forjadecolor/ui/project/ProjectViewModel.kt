@@ -11,6 +11,8 @@ import app.forjadecolor.domain.advice.buildImagePrompt
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.PaintRef
+import app.forjadecolor.domain.projects.Look
+import app.forjadecolor.domain.projects.setLook
 import app.forjadecolor.domain.projects.ProgressPhoto
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
@@ -102,11 +104,14 @@ class ProjectViewModel(private val container: AppContainer, private val projectI
         }
     }
 
+    /** Saves the project's painting style and base setting. */
+    fun setLook(look: Look) = update { it.setLook(look) }
+
     /** Sends the image prompt with the unpainted photo; null when there is no photo to paint. */
     suspend fun paintImage(recipe: RecipeResponse): SendResult? {
         val current = _state.value
         val photoId = current.project?.initialPhotoBlobId ?: return null
         if (repository.getBlob(photoId) == null) return null
-        return container.advisorBridge.send(AdvicePackage(buildImagePrompt(recipe, current.inventory), photoId))
+        return container.advisorBridge.send(AdvicePackage(buildImagePrompt(recipe, current.inventory, current.project?.look ?: Look()), photoId))
     }
 }

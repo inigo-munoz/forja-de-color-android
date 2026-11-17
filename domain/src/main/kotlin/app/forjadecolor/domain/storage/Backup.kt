@@ -3,6 +3,8 @@ package app.forjadecolor.domain.storage
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.paints.Inventory
+import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.PaintingStyle
 import app.forjadecolor.domain.projects.Project
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
@@ -11,6 +13,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import java.time.Instant
 import java.time.format.DateTimeParseException
 import kotlin.io.encoding.Base64
@@ -81,6 +84,13 @@ private fun doneZonesProblem(project: JsonObject, projectIndex: Int): String? {
     return null
 }
 
+// Wire names of the optional project look, as the PWA writes them.
+private val STYLE_WIRES = PaintingStyle.entries.map { ForjaJson.encodeToJsonElement(PaintingStyle.serializer(), it).jsonPrimitive.content }
+private val BASE_WIRES = BaseSetting.entries.map { ForjaJson.encodeToJsonElement(BaseSetting.serializer(), it).jsonPrimitive.content }
+
+/** A JSON string's text, or null for anything else. */
+private fun wire(e: JsonElement?): String? = (e as? JsonPrimitive)?.takeIf { it.isString }?.content
+
 /** Why a file cannot be restored, or null when it is a valid backup. */
 fun validateBackup(file: JsonElement?): String? {
     if (file !is JsonObject) return "not a backup file"
@@ -100,6 +110,11 @@ fun validateBackup(file: JsonElement?): String? {
         !(it is JsonObject && it.strings("id", "name", "createdAt", "status", "notes") && it["progress"] is JsonArray && it["advice"] is JsonArray)
     }
     if (badProject >= 0) return "project #${badProject + 1} is incomplete"
+    val badLook = projects.indexOfFirst { p ->
+        val o = p as JsonObject
+        ("style" in o && wire(o["style"]) !in STYLE_WIRES) || ("baseSetting" in o && wire(o["baseSetting"]) !in BASE_WIRES)
+    }
+    if (badLook >= 0) return "project #${badLook + 1} has an unknown painting style or base setting"
     projects.forEachIndexed { i, p -> doneZonesProblem(p as JsonObject, i)?.let { return it } }
     val blobs = file["blobs"] as? JsonObject ?: return "backup has no valid photos"
     if (blobs.values.any { !(it is JsonObject && it.strings("type", "base64")) }) return "backup has a damaged photo"

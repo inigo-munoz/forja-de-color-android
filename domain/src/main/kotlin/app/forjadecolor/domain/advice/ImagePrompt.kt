@@ -1,5 +1,8 @@
 package app.forjadecolor.domain.advice
 
+import app.forjadecolor.domain.projects.Look
+import app.forjadecolor.domain.projects.imageLookLines
+
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.findPaint
@@ -11,7 +14,7 @@ private fun describe(inv: Inventory, ref: PaintRef): String =
  * Prompt for an image model (ChatGPT) to paint the miniature in the attached photo with the colours
  * of a recipe. Image generation stays outside the app, like the recipe itself. Same text as the PWA.
  */
-fun buildImagePrompt(recipe: RecipeResponse, inv: Inventory): String {
+fun buildImagePrompt(recipe: RecipeResponse, inv: Inventory, look: Look = Look()): String {
     val zones = recipe.zones.map { z ->
         val bsl = z.bsl
         when {
@@ -25,7 +28,6 @@ fun buildImagePrompt(recipe: RecipeResponse, inv: Inventory): String {
         listOf(
             "Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.",
             "Style: tabletop-quality \"slapchop\" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.",
-            "Paint each zone with these colours:",
-        ) + zones + "Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only."
+        ) + imageLookLines(look) + "Paint each zone with these colours:" + zones + "Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only."
         ).joinToString("\n")
 }

@@ -280,7 +280,9 @@
       "status": "done",
       "notes": "",
       "progress": [],
-      "advice": []
+      "advice": [],
+      "style": "nmm",
+      "baseSetting": "desert"
     }
   ],
   "blobs": {

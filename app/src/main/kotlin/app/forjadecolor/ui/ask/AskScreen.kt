@@ -57,6 +57,7 @@ import app.forjadecolor.domain.advice.parseAdviceResponse
 import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.addAdvice
+import app.forjadecolor.ui.components.LookLine
 import app.forjadecolor.ui.components.PhotoPreview
 import app.forjadecolor.ui.components.clipboardCopier
 import app.forjadecolor.ui.project.BlobImage
@@ -179,6 +180,7 @@ fun AskScreen(
         Card(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 StepHeading(1, R.string.ask_step_moment)
+                LookLine(current.look, onChange = vm::setLook)
                 MOMENT_LABELS.forEach { (m, label, help) ->
                     Row(
                         Modifier.fillMaxWidth().selectable(selected = moment == m, onClick = { moment = m }, role = Role.RadioButton)

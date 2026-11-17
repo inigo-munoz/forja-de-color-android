@@ -1,5 +1,8 @@
 package app.forjadecolor.data
 
+import app.forjadecolor.domain.projects.Look
+import app.forjadecolor.domain.projects.PaintingStyle
+
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -213,5 +216,11 @@ class RoomRepositoryTest {
         val p = createProject("Ana", now, "p1").copy(advice = listOf(entry, entry.copy(id = "a2", doneZones = emptyList())))
         repo.saveProject(p)
         assertEquals(p, repo.getProject("p1"))
+    }
+
+    @Test
+    fun `an unknown style name in Room reads as my method instead of failing`() = runBlocking {
+        db.dao().insertProject(ProjectEntity("p", "N", "2026-11-11T10:00:00.000Z", "IN_PROGRESS", null, null, "", "HOLOGRAPHIC", "SWAMP"))
+        assertEquals(Look(PaintingStyle.MY_METHOD, null), repo.getProject("p")!!.look)
     }
 }

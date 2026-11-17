@@ -1,5 +1,8 @@
 package app.forjadecolor.data
 
+import app.forjadecolor.domain.projects.BaseSetting
+import app.forjadecolor.domain.projects.PaintingStyle
+
 import androidx.room.withTransaction
 import app.forjadecolor.domain.ForjaJson
 import app.forjadecolor.domain.advice.AdviceEntry
@@ -149,6 +152,9 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
         initialPhotoBlobId = row.initialPhotoBlobId,
         targetImageBlobId = row.targetImageBlobId,
         notes = row.notes,
+        // An unknown name (written by a newer app) reads as no choice rather than failing.
+        style = PaintingStyle.entries.firstOrNull { it.name == row.style },
+        baseSetting = BaseSetting.entries.firstOrNull { it.name == row.baseSetting },
         progress = dao.progress(row.id).map { ProgressPhoto(it.id, it.takenAt, it.blobId) },
         advice = dao.advice(row.id).map {
             AdviceEntry(
@@ -162,7 +168,8 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
     )
 }
 
-private fun Project.toEntity() = ProjectEntity(id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes)
+private fun Project.toEntity() =
+    ProjectEntity(id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes, style?.name, baseSetting?.name)
 
 private fun Paint.toEntity(position: Int) =
     PaintEntity(position, brand, code, name, range, type.name, hex, family?.name, family?.order, family?.role?.name)

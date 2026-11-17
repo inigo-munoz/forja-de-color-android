@@ -32,10 +32,21 @@ data class Project(
     val notes: String,
     val progress: List<ProgressPhoto>,
     val advice: List<AdviceEntry>,
+    /** Null: my method. Left out of the JSON when null, like in the PWA. */
+    val style: PaintingStyle? = null,
+    /** Null: no setting for the base. */
+    val baseSetting: BaseSetting? = null,
 ) {
     /** Every photo the project references, for backups and clean-up. */
     val blobIds: List<String> get() = listOfNotNull(initialPhotoBlobId, targetImageBlobId) + progress.map { it.blobId }
+
+    /** The look the prompts follow; a project saved before styles existed is painted with my method. */
+    val look: Look get() = Look(style ?: PaintingStyle.MY_METHOD, baseSetting)
 }
+
+/** Sets the look; my method is stored as null, like older projects and the PWA. */
+fun Project.setLook(look: Look): Project =
+    copy(style = look.style.takeIf { it != PaintingStyle.MY_METHOD }, baseSetting = look.baseSetting)
 
 fun createProject(name: String, now: Instant, id: String): Project =
     Project(id, name, isoString(now), ProjectStatus.IN_PROGRESS, notes = "", progress = emptyList(), advice = emptyList())
