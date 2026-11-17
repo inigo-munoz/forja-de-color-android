@@ -1,5 +1,7 @@
 package app.forjadecolor.data
 
+import app.forjadecolor.domain.paints.BslRole
+import app.forjadecolor.domain.paints.PaintFamily
 import app.forjadecolor.domain.projects.BaseSetting
 import app.forjadecolor.domain.projects.Look
 import app.forjadecolor.domain.projects.PaintingStyle
@@ -94,21 +96,21 @@ class ForjaMigrationTest {
             val advice = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration"))).getProject("p1")!!.advice.single()
             assertEquals(emptyList(), advice.doneZones)
             assertEquals(listOf("X999"), advice.unknownBrushes)
-            assertEquals(3, db.openHelper.readableDatabase.version)
+            assertEquals(4, db.openHelper.readableDatabase.version)
         } finally {
             db.close()
         }
     }
 
     @Test
-    fun `migrating 2 to 3 keeps every project, painted with my method until a style is chosen`() = runBlocking {
+    fun `migrating from 2 keeps every project, painted with my method until a style is chosen`() = runBlocking {
         createAt(2) { db ->
             db.execSQL("INSERT INTO projects VALUES ('p1', 'Paladín', '2026-11-10T09:00:00.000Z', 'DONE', NULL, 't', 'Capa verde')")
             db.execSQL("INSERT INTO advice_entries VALUES ('p1', 0, 'adv-1', '2026-11-10T09:30:00.000Z', ?, '[]', '[]', '[0]')", arrayOf(RESPONSE))
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(3, db.openHelper.readableDatabase.version)
+            assertEquals(4, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val p = repo.getProject("p1")!!
             assertEquals(listOf("Paladín", "t", "Capa verde"), listOf(p.name, p.targetImageBlobId, p.notes))
@@ -117,6 +119,31 @@ class ForjaMigrationTest {
 
             repo.saveProject(p.setLook(Look(PaintingStyle.GRIMDARK, BaseSetting.WINTER)))
             assertEquals(Look(PaintingStyle.GRIMDARK, BaseSetting.WINTER), repo.getProject("p1")!!.look)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun `migrating 3 to 4 keeps every paint, with no English name until one is saved`() = runBlocking {
+        createAt(3) { db ->
+            db.execSQL("INSERT INTO paints VALUES (0, 'Vallejo', '72.001', 'Blanco Calavera', 'Game Color', 'OPAQUE', '#ffffff', 'BSL Black', 1, 'FOURTH')")
+            db.execSQL("INSERT INTO paints VALUES (1, 'Citadel', 'Nuln Oil', 'Nuln Oil', 'Shade', 'WASH', '#1a1a1a', NULL, NULL, NULL)")
+            db.execSQL("INSERT INTO app_state VALUES ('inventory.saved', '1')")
+            db.execSQL("INSERT INTO projects VALUES ('p1', 'Paladín', '2026-11-10T09:00:00.000Z', 'DONE', NULL, NULL, 'Capa verde', 'NMM', 'WINTER')")
+        }
+        val db = ForjaDatabase.create(context, name)
+        try {
+            assertEquals(4, db.openHelper.readableDatabase.version)
+            val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
+            val inv = repo.getInventory()
+            assertEquals(listOf("Blanco Calavera", "Nuln Oil"), inv.paints.map { it.name })
+            assertEquals(listOf(null, null), inv.paints.map { it.nameEn })
+            assertEquals(PaintFamily("BSL Black", 1, BslRole.FOURTH), inv.paints[0].family)
+            assertEquals(Look(PaintingStyle.NMM, BaseSetting.WINTER), repo.getProject("p1")!!.look)
+
+            repo.saveInventory(inv.copy(paints = inv.paints.map { if (it.code == "Nuln Oil") it.copy(nameEn = "Nuln Oil Shade") else it }))
+            assertEquals(listOf(null, "Nuln Oil Shade"), repo.getInventory().paints.map { it.nameEn })
         } finally {
             db.close()
         }

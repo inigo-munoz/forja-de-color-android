@@ -8,7 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
- * Version history: 1 = first schema; 2 = advice_entries.doneZonesJson ([MIGRATION_1_2]); 3 = projects.style and baseSetting ([MIGRATION_2_3]). Every upgrade must keep existing rows (with a migration test);
+ * Version history: 1 = first schema; 2 = advice_entries.doneZonesJson ([MIGRATION_1_2]); 3 = projects.style and baseSetting ([MIGRATION_2_3]); 4 = paints.nameEn ([MIGRATION_3_4]). Every upgrade must keep existing rows (with a migration test);
  * never add a destructive fallback.
  */
 @Database(
@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PaintEntity::class, BrushEntity::class, ProjectEntity::class, ProgressPhotoEntity::class,
         AdviceEntity::class, BlobEntity::class, StateEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class ForjaDatabase : RoomDatabase() {
@@ -27,7 +27,7 @@ abstract class ForjaDatabase : RoomDatabase() {
 
         /** Stored in the default databases directory, which Android backup includes (`database` domain). */
         fun create(context: Context, name: String = NAME): ForjaDatabase =
-            Room.databaseBuilder(context.applicationContext, ForjaDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+            Room.databaseBuilder(context.applicationContext, ForjaDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
 
         /** v2: the zones ticked off on each advice entry; existing rows start with none done. */
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -41,6 +41,13 @@ abstract class ForjaDatabase : RoomDatabase() {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE `projects` ADD COLUMN `style` TEXT")
                 db.execSQL("ALTER TABLE `projects` ADD COLUMN `baseSetting` TEXT")
+            }
+        }
+
+        /** v4: each paint's English name; existing paints start without one (the seed's is shown instead). */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `paints` ADD COLUMN `nameEn` TEXT")
             }
         }
     }
