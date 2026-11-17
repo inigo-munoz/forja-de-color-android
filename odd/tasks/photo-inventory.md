@@ -20,7 +20,7 @@ Branch: feat/photo-inventory (both repos). Delivery: ask-on-risk. Tests: Gradle 
 | T1 | S3, S5 | inline | done — domain: scan prompt, answer parser, merge (addPaint / addBrush) | f97d838 |
 | T2 | S3 | inline | todo — Android: scan screen (photo, share, paste) | |
 | T3 | S2, S3 | inline | todo — Android: confirmation list (confirm / correct / discard), save | |
-| T4 | S4 | inline | todo — Android: add/edit brush form | |
+| T4 | S4 | inline | done — Android: add/edit brush form | bf3bdff |
 | T5 | S6 | inline | todo — PWA port, prompt fixtures shared | |
 | T6 | S1–S6 | inline | todo — device check on the Pixel, release | |
 
@@ -29,3 +29,4 @@ Branch: feat/photo-inventory (both repos). Delivery: ask-on-risk. Tests: Gradle 
 - L1 (2026-11-17, user): "alguna mejora que nos falte? Por ejemplo incluir pinturas y pinceles con la camara y la IA?" Verified: brushes cannot be added or edited (only the 3 seed brushes are listed); paints are added one by one with a form. Proposed the share-and-paste scan with confirmation; barcode reading discarded for now (no paint database).
 - L2 (2026-11-17, user): "si, con la confirmación por parte del usuario." Feature document created; Android first.
 - L3 (2026-11-17): T1 done in f97d838. domain/scan/InventoryScan.kt (buildScanPrompt, parseScanAnswer: 100k-char cap, prompt-paste detection, reuses advice extractJson, lenient items, dedupe, max 200; applyScan skips incomplete items), InventoryOps savePaintKeepingFamily (moved from the app's savePaint, now reused there), findBrush/addBrush. RED (unresolved refs) → GREEN: 8 tests; inventory UI tests still green.
+- L4 (2026-11-17): T4 done in bf3bdff: BrushForm.kt (BrushDraft, BrushFormDialog), '+ Add brush' and tap-to-edit in My paints, InventoryViewModel.saveBrush via addBrush. RED 3/3 failing → GREEN 3/3; PaintFormDialog/FormField/DraftSaver made internal for reuse in the scan confirmation.
