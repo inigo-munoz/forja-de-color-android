@@ -10,6 +10,7 @@ import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.addBrush
 import app.forjadecolor.domain.paints.findBrush
 import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.lookUpInCatalogue
 import app.forjadecolor.domain.paints.normalizeCode
 import app.forjadecolor.domain.paints.paintKey
 import app.forjadecolor.domain.paints.savePaintKeepingFamily
@@ -60,8 +61,11 @@ $PROMPT_MARKER (reply with this JSON only):
 ```
 """.trim()
 
-/** A paint read from the photo; [existing] is the owned paint it would update, if any. */
-data class ScannedPaint(val paint: Paint, val existing: Paint?)
+/**
+ * A paint read from the photo; [existing] is the owned paint it would update, if any; [fromCatalogue]
+ * when its data comes from the paint catalogue rather than the AI.
+ */
+data class ScannedPaint(val paint: Paint, val existing: Paint?, val fromCatalogue: Boolean = false)
 
 /** A brush read from the photo; [existing] is the owned brush it would update, if any. */
 data class ScannedBrush(val brush: Brush, val existing: Brush?)
@@ -146,4 +150,16 @@ private fun toBrush(e: JsonElement): Brush? {
     val code = o.text("code")
     val name = o.text("name")
     return if (code.isBlank() && name.isBlank()) null else Brush(code, name)
+}
+
+/**
+ * Looks every scanned paint up in the catalogue first ([lookUpInCatalogue]): found ones take the
+ * catalogue's data and are flagged; owned paints are found again with the corrected codes, and two rows
+ * that turn out to be the same paint are kept once. Same rule as the PWA.
+ */
+fun checkInCatalogue(result: ScanResult.Success, inv: Inventory): ScanResult.Success {
+    val paints = result.paints.map { lookUpInCatalogue(it.paint) }
+        .distinctBy { (p, _) -> if (p.code.isBlank()) "name:${p.brand}|${p.name}" else paintKey(p) }
+        .map { (p, fromCatalogue) -> ScannedPaint(p, if (p.code.isBlank()) null else inv.findPaint(PaintRef(p.brand, p.code)), fromCatalogue) }
+    return result.copy(paints = paints)
 }
