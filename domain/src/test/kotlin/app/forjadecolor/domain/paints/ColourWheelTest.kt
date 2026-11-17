@@ -60,4 +60,27 @@ class ColourWheelTest {
         assertEquals(emptyList(), wheel.paintsOf(WheelColour.BLUE))
         assertEquals(listOf(black, gold), wheel.neutrals)
     }
+
+    @Test
+    fun `groups paints by wheel colour in wheel order, then neutrals, then mediums, skipping empty groups`() {
+        val green = paint("70.890", "#2e6b2e")
+        val red = paint("70.926", "#b01c1c")
+        val black = paint("70.950", "#141414")
+        val medium = paint("70.470", "#ffffff", PaintType.MEDIUM)
+        val wash = paint("73.200", "#c81e1e", PaintType.WASH)
+        val gold = paint("70.996", "#d4af37", PaintType.METALLIC)
+
+        val groups = groupByColour(listOf(green, red, black, medium, wash, gold))
+
+        assertEquals(
+            listOf(
+                ColourGroup.Hue(WheelColour.RED) to listOf(red, wash),
+                ColourGroup.Hue(WheelColour.GREEN) to listOf(green),
+                ColourGroup.Neutrals to listOf(black, gold),
+                ColourGroup.Mediums to listOf(medium),
+            ),
+            groups,
+        )
+        assertEquals(emptyList(), groupByColour(emptyList()))
+    }
 }

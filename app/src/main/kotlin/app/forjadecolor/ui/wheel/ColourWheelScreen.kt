@@ -236,8 +236,9 @@ private fun wheelColor(colour: WheelColour): Color = Color(
     },
 )
 
+/** The colour's name; also the group titles in My paints. */
 @StringRes
-private fun colourName(colour: WheelColour): Int = when (colour) {
+internal fun colourName(colour: WheelColour): Int = when (colour) {
     WheelColour.RED -> R.string.wheel_red
     WheelColour.RED_ORANGE -> R.string.wheel_red_orange
     WheelColour.ORANGE -> R.string.wheel_orange

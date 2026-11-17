@@ -93,3 +93,22 @@ fun placeOnWheel(paints: List<Paint>): WheelPaints {
     }
     return WheelPaints(coloured, neutrals)
 }
+
+/** A group of paints in "My paints": one wheel colour, the neutrals, or the mediums. */
+sealed interface ColourGroup {
+    data class Hue(val colour: WheelColour) : ColourGroup
+    data object Neutrals : ColourGroup
+    data object Mediums : ColourGroup
+}
+
+/**
+ * Paints grouped by where they fall on the wheel ([wheelColourOf], the same rule as the colour wheel),
+ * in wheel order, then the neutrals (greys, black, white, metallics), then the mediums, which are not
+ * colours. Empty groups are left out and each group keeps the paints' order.
+ */
+fun groupByColour(paints: List<Paint>): List<Pair<ColourGroup, List<Paint>>> {
+    val wheel = placeOnWheel(paints)
+    val hues = WheelColour.entries.map { ColourGroup.Hue(it) to wheel.paintsOf(it) }
+    val all = hues + (ColourGroup.Neutrals to wheel.neutrals) + (ColourGroup.Mediums to paints.filter { it.type == PaintType.MEDIUM })
+    return all.filter { it.second.isNotEmpty() }
+}
