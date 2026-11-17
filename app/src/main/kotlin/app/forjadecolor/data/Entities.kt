@@ -34,6 +34,10 @@ data class ProjectEntity(
     val initialPhotoBlobId: String?,
     val targetImageBlobId: String?,
     val notes: String,
+    /** PaintingStyle name; null = my method (v3). */
+    val style: String? = null,
+    /** BaseSetting name; null = no setting (v3). */
+    val baseSetting: String? = null,
 )
 
 @Entity(
