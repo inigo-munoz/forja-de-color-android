@@ -9,12 +9,12 @@ METHOD
 
 INVENTORY (brand|code|name|family|order|role)
 Vallejo|72.003|Carne Pálida|BSL Warm Flesh|1|extra light
-Vallejo|72.100|Carne Rosada|BSL Warm Flesh|2|light
+Vallejo|72.100|Carne Rosa|BSL Warm Flesh|2|light
 Vallejo|72.107|Piel de Atenea|BSL Warm Flesh|3|base
 Vallejo|72.108|Piel de Súcubo|BSL Warm Flesh|4|shadow
 Vallejo|72.098|Carne Élfica|BSL Flesh|1|extra light
 Vallejo|72.099|Piel|BSL Flesh|2|light
-Vallejo|72.004|Piel de Elfo|BSL Flesh|3|base
+Vallejo|72.004|Piel de Elfos|BSL Flesh|3|base
 Vallejo|72.071|Piel de Bárbaro|BSL Flesh|4|shadow
 Vallejo|72.109|Amarillo Tóxico|BSL Yellow|1|extra light
 Vallejo|72.005|Amarillo Lunar|BSL Yellow|2|light
@@ -54,7 +54,7 @@ Vallejo|72.155|Gris Carbón|BSL Black|3|base
 Vallejo|72.051|Negro|BSL Black|4|shadow
 Vallejo|72.011|Rojo Visceral|BSL Multipurpose|1|
 Vallejo|72.042|Piel de Parásitos|BSL Multipurpose|2|
-Vallejo|72.124|Marrón Gargona|BSL Multipurpose|3|
+Vallejo|72.124|Marrón Gorgona|BSL Multipurpose|3|
 Vallejo|72.045|Marrón Carbonizado|BSL Multipurpose|4|
 brush|B02001|Detail núm. 1
 brush|B02002|Detail núm. 2
