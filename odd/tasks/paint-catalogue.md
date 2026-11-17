@@ -17,13 +17,14 @@ Branch: feat/paint-catalogue (from feat/paint-names, both repos). Delivery: ask-
 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
-| T1 | S3 | inline | todo — generator script + catalogue JSON in both apps, license notice | |
-| T2 | S3–S6 | inline | todo — domain both apps: load, search, find, enrich scanned paints | |
-| T3 | S4, S5 | inline | todo — Android UI: catalogue search in the add form, "checked in the catalogue" in the scan list | |
-| T4 | S4, S5 | inline | todo — PWA UI, same | |
-| T5 | S1–S6 | inline | todo — checks, device test, release | |
+| T1 | S3 | inline | done — generator script + catalogue JSON in both apps, license notice | b2c28b6; PWA 2fe1e92 |
+| T2 | S3–S6 | inline | done — domain both apps: load, search, find, enrich scanned paints | b2c28b6; PWA 2fe1e92 |
+| T3 | S4, S5 | inline | done — Android UI: catalogue search in the add form, "checked in the catalogue" in the scan list | b67858d |
+| T4 | S4, S5 | inline | done — PWA UI, same | PWA 54d3d9c |
+| T5 | S1–S6 | inline | partly — suites green, release 1.5.0 installed; on-device check pending (phone locked) | |
 
 ## Log
 
 - L1 (2026-11-17, user): request in S1. Owner's paints reviewed (see odd/tasks/paint-names.md L6, L8). Dataset found: Arcturus5404/miniature-paints (MIT, 35 brands, last push 2025-03), pinned commit 22791a682e1d155da388f4f856cd7196cd9f2677. Vallejo 1279 lines (Game Color 144, Model Color 222, …), Citadel 463 (no codes), Army Painter 715 (some codes "null"). English names only.
 - L2 (2026-11-17, user): "dale". Feature document created.
+- L3 (2026-11-17): T1–T4 done. tools/gen-catalogue.py builds catalogue.json (2424 paints: Vallejo 1268, Army Painter 704, Citadel 452; rows [brand, code, nameEn, range, type, hex]; Citadel/name-only codes use the name; airbrush versions get "(Air)" so the brush-on paint keeps the plain name) into domain/src/main/resources and the PWA src/paints, byte-identical, with catalogue-LICENSE.txt (MIT). Domain both apps: findInCatalogue (code any format, else name; brand aliases), searchCatalogue, paintFromCatalogue (Spanish: given, else seed, else English), lookUpInCatalogue, checkInCatalogue on scans. UI: catalogue search in the add form (Android only when adding), "Checked in the catalogue" in the scan list. Tests written first; RED observed for PWA domain and UI, not separately for the Android domain/UI and the scan check. Test examples changed because the catalogue now acts on them: invented code 72.090 "Black Wash" is really 72.090 Black Green (now 73.201 Black Wash); Army Painter "Dragon Red" gets its code from the catalogue (incomplete example moved to Scale75); owned "Dead White" keeps its Spanish name. ProjectScreenTest "the selected tab survives recreation" failed once in a full run and passed 3/3 alone: flaky, unrelated. Android 337 tests, PWA 239. Release 1.5.0 (versionCode 9, APK 1.9 MB, catalogue packaged) installed; on-device smoke not run (phone dozing). Known limits: catalogue colours approximate (e.g. Nuln Oil grey); a name shared by several ranges matches the first one.
