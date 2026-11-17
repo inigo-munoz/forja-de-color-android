@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -52,11 +53,9 @@ import app.forjadecolor.R
 import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Paint
-import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.PaintType
-import app.forjadecolor.domain.paints.addPaint
 import app.forjadecolor.domain.paints.bslRole
-import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.savePaintKeepingFamily
 import app.forjadecolor.domain.storage.Repository
 import app.forjadecolor.ui.components.Swatch
 import app.forjadecolor.ui.components.parseHex
@@ -78,14 +77,9 @@ internal fun groupPaints(inv: Inventory): PaintGroups {
     return PaintGroups(families.map { (name, paints) -> name to paints.sortedBy { it.family!!.order } }, others)
 }
 
-/**
- * Saves the paint through [addPaint] (add or replace by brand + normalized code). Like the PWA, a paint
- * that replaces one in a BSL family keeps that family.
- */
+/** Saves the paint through [savePaintKeepingFamily]: add or replace, keeping a BSL family. */
 internal suspend fun savePaint(repo: Repository, paint: Paint) {
-    val current = repo.getInventory()
-    val prior = current.findPaint(PaintRef(paint.brand, paint.code))
-    repo.saveInventory(current.addPaint(if (prior?.family != null) paint.copy(family = prior.family) else paint))
+    repo.saveInventory(repo.getInventory().savePaintKeepingFamily(paint))
 }
 
 /** The fields of the add/update form while it is open; saved across recreation by [DraftSaver]. */
@@ -106,7 +100,7 @@ internal data class PaintDraft(
 }
 
 /** Null (form closed) saves nothing, so it restores closed. */
-private val DraftSaver = Saver<PaintDraft?, List<String>>(
+internal val DraftSaver = Saver<PaintDraft?, List<String>>(
     save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex) } },
     restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5]) },
 )
@@ -156,25 +150,33 @@ internal fun hslToHex(h: Float, s: Float, l: Float): String {
 }
 
 /**
- * The paints and brushes the user owns. "+ Add paint" or tapping a paint opens the add/update form
+ * The paints and brushes the user owns. "+ Add paint" or tapping a paint opens the add/update form;
+ * "Add from a photo" opens the scan ([onScan]);
  * in a dialog; the inventory lives in [InventoryViewModel], the open form in saveable state.
  */
 @Composable
 fun InventoryScreen(
     container: AppContainer,
+    onScan: () -> Unit = {},
 ) {
     val vm = viewModel { InventoryViewModel(container) }
     LaunchedEffect(Unit) { vm.load() }
     val inventory by vm.inventory.collectAsState()
     var draft by rememberSaveable(stateSaver = DraftSaver) { mutableStateOf<PaintDraft?>(null) }
+    var brushDraft by rememberSaveable(stateSaver = BrushDraftSaver) { mutableStateOf<BrushDraft?>(null) }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_inventory"),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.inventory_title), style = MaterialTheme.typography.headlineSmall)
-        Button(onClick = { draft = PaintDraft.NEW }, modifier = Modifier.testTag("add_paint")) {
-            Text(stringResource(R.string.inventory_add_button))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { draft = PaintDraft.NEW }, modifier = Modifier.testTag("add_paint")) {
+                Text(stringResource(R.string.inventory_add_button))
+            }
+            OutlinedButton(onClick = onScan, modifier = Modifier.testTag("scan_paints")) {
+                Text(stringResource(R.string.inventory_scan))
+            }
         }
         inventory?.let { inv ->
             val edit = { p: Paint -> draft = PaintDraft.of(p) }
@@ -184,13 +186,28 @@ fun InventoryScreen(
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.inventory_brushes), style = MaterialTheme.typography.titleMedium)
                 inv.brushes.forEach { b ->
-                    Row(Modifier.testTag("brush").semantics(mergeDescendants = true) {}, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth().clickable { brushDraft = BrushDraft.of(b) }.testTag("brush").semantics(mergeDescendants = true) {},
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
                         Text(b.code, fontFamily = FontFamily.Monospace)
                         Text(b.name)
                     }
                 }
+                TextButton(onClick = { brushDraft = BrushDraft.NEW }, modifier = Modifier.testTag("add_brush")) {
+                    Text(stringResource(R.string.inventory_add_brush))
+                }
             }
         }
+    }
+
+    brushDraft?.let { d ->
+        BrushFormDialog(
+            draft = d,
+            onChange = { brushDraft = it },
+            onSave = { vm.saveBrush(it); brushDraft = null },
+            onCancel = { brushDraft = null },
+        )
     }
 
     draft?.let { d ->
@@ -234,7 +251,7 @@ private fun roleLabel(role: BslRole): Int = when (role) {
 /** The add/update form; saving goes through [onSave] (the ViewModel and [savePaint]). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, onSave: (Paint) -> Unit, onCancel: () -> Unit) {
+internal fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, onSave: (Paint) -> Unit, onCancel: () -> Unit) {
     val fields = listOf(draft.brand, draft.code, draft.name, draft.range).map { it.trim() }
     val valid = fields.all { it.isNotEmpty() } && HEX.matches(draft.hex.trim())
 
@@ -321,7 +338,7 @@ private fun ColorPicker(hex: String, onChange: (String) -> Unit) {
 }
 
 @Composable
-private fun FormField(label: Int, value: String, tag: String, onChange: (String) -> Unit) {
+internal fun FormField(label: Int, value: String, tag: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,

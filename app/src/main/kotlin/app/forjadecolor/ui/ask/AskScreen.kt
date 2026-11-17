@@ -342,7 +342,7 @@ private fun AiInstructionsLine(status: InstructionsStatus?, copied: Boolean, onC
 }
 
 @Composable
-private fun AnswerErrorsDialog(errors: List<String>, onClose: () -> Unit) {
+internal fun AnswerErrorsDialog(errors: List<String>, onClose: () -> Unit) {
     AlertDialog(
         onDismissRequest = onClose,
         title = { Text(stringResource(R.string.ask_errors)) },
@@ -357,7 +357,7 @@ private fun AnswerErrorsDialog(errors: List<String>, onClose: () -> Unit) {
     )
 }
 
-private fun copyToClipboard(context: Context, text: String) {
+internal fun copyToClipboard(context: Context, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     try {
         clipboard.setPrimaryClip(ClipData.newPlainText("Forja de Color prompt", text))

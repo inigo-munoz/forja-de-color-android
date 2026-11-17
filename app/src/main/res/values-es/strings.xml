@@ -154,4 +154,26 @@
     <string name="wheel_blue_violet">Azul violáceo</string>
     <string name="wheel_violet">Violeta</string>
     <string name="wheel_red_violet">Rojo violáceo</string>
+    <string name="inventory_add_brush">+ Añadir pincel</string>
+    <string name="inventory_brush_title">Añadir o actualizar un pincel</string>
+    <string name="inventory_brush_code">Tamaño o código</string>
+    <string name="inventory_brush_name">Descripción</string>
+    <string name="inventory_brush_save">Guardar pincel</string>
+    <string name="inventory_scan">Añadir desde una foto</string>
+    <string name="scan_title">Añadir desde una foto</string>
+    <string name="scan_step_photo">1. Foto de tus pinturas o pinceles</string>
+    <string name="scan_photo_help">Con las etiquetas hacia la cámara y buena luz. Caben varios botes en una foto.</string>
+    <string name="scan_step_send">2. Envíala a tu IA</string>
+    <string name="scan_step_paste">3. Vuelve y pega la respuesta</string>
+    <string name="scan_read">Leer la lista</string>
+    <string name="scan_confirm_help">Revisa la lista antes de guardar. Toca un elemento para corregirlo; desmarca lo que no quieras.</string>
+    <string name="scan_paints">Pinturas</string>
+    <string name="scan_new">Nuevo</string>
+    <string name="scan_updates">Actualiza el que tienes</string>
+    <string name="scan_incomplete">Falta el código o el nombre: tócalo para completarlo</string>
+    <string name="scan_discard">Descartar</string>
+    <plurals name="scan_save">
+        <item quantity="one">Añadir %d a mis pinturas</item>
+        <item quantity="other">Añadir %d a mis pinturas</item>
+    </plurals>
 </resources>
