@@ -17,7 +17,7 @@ Branch: feat/painting-styles (from feat/photo-inventory, Android; from main, PWA
 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
-| T1 | S3–S7 | inline | todo — domain: style/setting model, project + backup field, prompt and image-prompt text (PWA first as source of fixtures) | |
+| T1 | S3–S7 | inline | done — domain: style/setting model, project + backup field, prompt and image-prompt text (PWA first as source of fixtures) | 72c5488; PWA 06529e9 |
 | T2 | S5, S6 | inline | todo — Android storage (Room migration if needed) + backup round-trip | |
 | T3 | S3–S5 | inline | todo — Android UI: choose style/setting in the project and in Ask | |
 | T4 | S3–S7 | inline | todo — PWA: same model, prompts, backup, UI | |
@@ -27,3 +27,4 @@ Branch: feat/painting-styles (from feat/photo-inventory, Android; from main, PWA
 
 - L1 (2026-11-17, user): "Antes de la release vamos a incluir el tipo de pintado, recuerda que en la app que vimos había varios tipos" Verified in smarthobby-analisis/informe.md §6.3: 4 miniature styles (NMM, OSL, Vivid · High-Fantasy, Guerra · Grimdark) and 3 terrain styles (Invierno, Desierto, Fantasía), closed list. Forja has no style today.
 - L2 (2026-11-17, user): "todos". Feature document created.
+- L3 (2026-11-17): T1 done. PWA 06529e9: src/projects/style.ts (PAINTING_STYLES, BASE_SETTINGS, lookOf, adviceLookLines, imageLookLines), Project.style/baseSetting optional + setLook (my method stored absent), AdviceRequest extends Look, look section between MOMENT and the answer format, image line after the Style line, backup validation 'project #N has an unknown painting style or base setting'; 194 tests. Android 72c5488: domain/projects/PaintingStyle.kt mirror, Project nullable fields, AdviceRequest style/baseSetting, buildImagePrompt(look), same validation. Fixtures regenerated from the PWA: existing prompt fixtures unchanged byte for byte (my method adds nothing, AI instructions fingerprint unchanged), new prompt-looks.txt and image-prompt-looks.txt pin every style/setting, backup-v1.json project-2 now NMM + desert. Domain 113 tests green.
