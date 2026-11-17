@@ -164,6 +164,14 @@ private fun ConfirmList(list: ScanList, vm: ScanViewModel, onSaved: () -> Unit) 
                 Column(Modifier.weight(1f)) {
                     Text(listOf(item.paint.brand, item.paint.code).filter { it.isNotBlank() }.joinToString(" "), fontFamily = FontFamily.Monospace)
                     Text(displayName(item.paint))
+                    if (item.fromCatalogue) {
+                        Text(
+                            stringResource(R.string.scan_from_catalogue),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.testTag("scan_paint_catalogue_$i"),
+                        )
+                    }
                     val owned = item.existing
                     if (owned != null && item.complete) {
                         Text(

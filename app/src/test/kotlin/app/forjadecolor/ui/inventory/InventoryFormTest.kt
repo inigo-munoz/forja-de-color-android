@@ -110,6 +110,29 @@ class InventoryFormTest {
     }
 
     @Test
+    fun `searching the catalogue fills the form with the chosen paint, still editable`() {
+        show()
+        compose.onNodeWithTag("add_paint").performClick()
+        compose.onNodeWithTag("catalogue_search").performScrollTo().performTextReplacement("72010")
+        compose.onNodeWithTag("catalogue_result_0").performScrollTo().assert(hasText("Bloody Red", substring = true)).performClick()
+
+        assertEquals(listOf("Vallejo", "72.010", "Bloody Red", "Bloody Red", "Game Color"), listOf("field_brand", "field_code", "field_name", "field_name_en", "field_range").map(::fieldText))
+        assertEquals("#d41c1c", fieldText("color_hex"))
+        compose.onNodeWithTag("field_name").performScrollTo().performTextReplacement("Rojo Sanguina")
+        compose.onNodeWithTag("save_paint").performScrollTo().performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("Rojo Sanguina", substring = true).fetchSemanticsNodes().isNotEmpty() }
+        val saved = runBlocking { repo.getInventory() }.paints.single { it.code == "72.010" }
+        assertEquals(listOf("Rojo Sanguina", "Bloody Red"), listOf(saved.name, saved.nameEn))
+    }
+
+    @Test
+    fun `the catalogue search is only offered when adding`() {
+        show()
+        compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()
+        compose.onNodeWithTag("catalogue_search").assertDoesNotExist()
+    }
+
+    @Test
     fun `adding a code you already have warns with the paint you own`() {
         show()
         compose.onNodeWithTag("add_paint").performClick()

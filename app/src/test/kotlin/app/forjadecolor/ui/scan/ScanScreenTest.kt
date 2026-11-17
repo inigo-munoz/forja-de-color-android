@@ -32,8 +32,8 @@ private val SCAN = """Here you go:
 {"version": 1, "kind": "inventory",
  "paints": [
    {"brand": "Vallejo", "code": "72001", "name": "Dead White", "range": "Game Color", "type": "opaque", "hex": "#fafafa"},
-   {"brand": "Vallejo", "code": "72.090", "name": "Black Wash", "range": "Game Wash", "type": "wash", "hex": "#1a1a1a"},
-   {"brand": "Army Painter", "code": "", "name": "Dragon Red", "range": "Warpaints", "type": "opaque", "hex": "#aa1111"}
+   {"brand": "Vallejo", "code": "73.201", "name": "Black Wash", "range": "Game Color Wash", "type": "wash", "hex": "#1a1a1a"},
+   {"brand": "Scale75", "code": "", "name": "Dragon Red", "range": "Scalecolor", "type": "opaque", "hex": "#aa1111"}
  ],
  "brushes": [{"code": "B02001", "name": "Detail 1, new"}, {"code": "0", "name": "Kolinsky detail"}]}
 ```"""
@@ -124,12 +124,29 @@ class ScanScreenTest {
         val inv = inventory()
         assertEquals(49, inv.paints.size)
         val white = inv.findPaint(PaintRef("Vallejo", "72.001"))!!
-        assertEquals("Dead White", white.name)
+        // Checked in the catalogue: "Dead White" is its English name, so the Spanish one is kept.
+        assertEquals("Blanco Calavera" to "Dead White", white.name to white.nameEn)
         assertEquals("BSL Black", white.family?.name)
-        assertEquals(PaintType.WASH, inv.findPaint(PaintRef("Vallejo", "72.090"))!!.type)
+        assertEquals(PaintType.WASH, inv.findPaint(PaintRef("Vallejo", "73.201"))!!.type)
         assertTrue(inv.paints.none { it.name == "Dragon Red" })
         assertEquals(Brush("B02001", "Detail 1, new"), inv.brushes.first())
         assertEquals(3, inv.brushes.size)
+    }
+
+    @Test
+    fun `paints found in the catalogue take its data and say so`() {
+        show(answer = """{"version": 1, "kind": "inventory", "paints": [
+          {"brand": "Vallejo", "code": "72010", "nameEs": "Rojo Sanguina", "nameEn": "Blood Red", "hex": "#ff0000"},
+          {"brand": "Scale75", "code": "SC-01", "name": "Black", "hex": "#111111"}]}""")
+        click("scan_paste")
+        waitForList()
+
+        compose.onNodeWithTag("scan_paint_catalogue_0", useUnmergedTree = true).assertExists()
+        compose.onNodeWithTag("scan_paint_catalogue_1", useUnmergedTree = true).assertDoesNotExist()
+        click("scan_save")
+        app.waitFor(compose) { done == 1 }
+        val saved = inventory().findPaint(PaintRef("Vallejo", "72.010"))!!
+        assertEquals(listOf("Rojo Sanguina", "Bloody Red", "#d41c1c", "Game Color"), listOf(saved.name, saved.nameEn, saved.hex, saved.range))
     }
 
     @Test
@@ -139,13 +156,13 @@ class ScanScreenTest {
         waitForList()
 
         click("scan_paint_2")
-        compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("WP1105")
+        compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("SC-15")
         click("save_paint")
 
         app.waitFor(compose) { checked("scan_paint_include_2") }
         click("scan_save")
         app.waitFor(compose) { done == 1 }
-        assertEquals("Dragon Red", inventory().findPaint(PaintRef("Army Painter", "WP1105"))?.name)
+        assertEquals("Dragon Red", inventory().findPaint(PaintRef("Scale75", "SC-15"))?.name)
     }
 
     @Test
