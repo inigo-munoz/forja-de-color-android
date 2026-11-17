@@ -18,8 +18,8 @@ Branch: feat/photo-inventory (both repos). Delivery: ask-on-risk. Tests: Gradle 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
 | T1 | S3, S5 | inline | done — domain: scan prompt, answer parser, merge (addPaint / addBrush) | f97d838 |
-| T2 | S3 | inline | todo — Android: scan screen (photo, share, paste) | |
-| T3 | S2, S3 | inline | todo — Android: confirmation list (confirm / correct / discard), save | |
+| T2 | S3 | inline | done — Android: scan screen (photo, share, paste) | fa79614 |
+| T3 | S2, S3 | inline | done — Android: confirmation list (confirm / correct / discard), save | fa79614 |
 | T4 | S4 | inline | done — Android: add/edit brush form | bf3bdff |
 | T5 | S6 | inline | todo — PWA port, prompt fixtures shared | |
 | T6 | S1–S6 | inline | todo — device check on the Pixel, release | |
@@ -30,3 +30,4 @@ Branch: feat/photo-inventory (both repos). Delivery: ask-on-risk. Tests: Gradle 
 - L2 (2026-11-17, user): "si, con la confirmación por parte del usuario." Feature document created; Android first.
 - L3 (2026-11-17): T1 done in f97d838. domain/scan/InventoryScan.kt (buildScanPrompt, parseScanAnswer: 100k-char cap, prompt-paste detection, reuses advice extractJson, lenient items, dedupe, max 200; applyScan skips incomplete items), InventoryOps savePaintKeepingFamily (moved from the app's savePaint, now reused there), findBrush/addBrush. RED (unresolved refs) → GREEN: 8 tests; inventory UI tests still green.
 - L4 (2026-11-17): T4 done in bf3bdff: BrushForm.kt (BrushDraft, BrushFormDialog), '+ Add brush' and tap-to-edit in My paints, InventoryViewModel.saveBrush via addBrush. RED 3/3 failing → GREEN 3/3; PaintFormDialog/FormField/DraftSaver made internal for reuse in the scan confirmation.
+- L5 (2026-11-17): T2+T3 done in fa79614 (one unit: the screen and its list share the ViewModel). ui/scan/ScanViewModel.kt + ScanScreen.kt, route 'scan' from My paints 'Add from a photo'. Photo stored only while the bridge reads it, then deleted. Items ticked when complete; incomplete ones disabled until corrected via the reused PaintFormDialog/BrushFormDialog; save applies applyScan to ticked items. RED (tags missing) → GREEN 7/7 ScanScreenTest + entry-button test; full suite 295 tests, 0 failures. Not done: a scan answer shared into the app (share sheet) still routes to the project picker — paste works; noted for later.
