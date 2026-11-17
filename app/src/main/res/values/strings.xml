@@ -206,4 +206,5 @@
     <string name="catalogue_search">Search the catalogue (code or name)</string>
     <string name="scan_from_catalogue">Checked in the catalogue</string>
     <string name="catalogue_set">Set %1$s · %2$s · %3$d paints</string>
+    <string name="inventory_delete_confirm">Delete this paint from your inventory? Projects that use it will show it as not in your paints.</string>
 </resources>

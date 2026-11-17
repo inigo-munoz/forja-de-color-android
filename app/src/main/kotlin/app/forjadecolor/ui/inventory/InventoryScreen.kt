@@ -68,6 +68,8 @@ import app.forjadecolor.domain.paints.PaintType
 import app.forjadecolor.domain.paints.bslRole
 import app.forjadecolor.domain.paints.savePaintKeepingFamily
 import app.forjadecolor.domain.storage.Repository
+import app.forjadecolor.ui.components.ConfirmDialog
+import app.forjadecolor.ui.components.Confirmation
 import app.forjadecolor.ui.components.Swatch
 import app.forjadecolor.ui.components.parseHex
 import kotlin.math.abs
@@ -104,19 +106,23 @@ internal data class PaintDraft(
     val nameEn: String = "",
     /** Opened with "+ Add paint": a code the user already owns is flagged. */
     val isNew: Boolean = false,
+    /** The owned paint this form was opened from ("brand|code"); what Delete removes, whatever is typed since. */
+    val origin: String = "",
 ) {
+    val originRef: PaintRef? get() = origin.split('|', limit = 2).takeIf { it.size == 2 }?.let { PaintRef(it[0], it[1]) }
+
     companion object {
         // Same defaults as the PWA form.
         val NEW = PaintDraft("Vallejo", "", "", "Game Color", PaintType.OPAQUE, "#888888", isNew = true)
 
-        fun of(p: Paint) = PaintDraft(p.brand, p.code, p.name, p.range, p.type, p.hex, englishName(p).orEmpty())
+        fun of(p: Paint) = PaintDraft(p.brand, p.code, p.name, p.range, p.type, p.hex, englishName(p).orEmpty(), origin = "${p.brand}|${p.code}")
     }
 }
 
 /** Null (form closed) saves nothing, so it restores closed. */
 internal val DraftSaver = Saver<PaintDraft?, List<String>>(
-    save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex, it.nameEn, it.isNew.toString()) } },
-    restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5], l[6], l[7].toBoolean()) },
+    save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex, it.nameEn, it.isNew.toString(), it.origin) } },
+    restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5], l[6], l[7].toBoolean(), l[8]) },
 )
 
 /** Preset swatches for the colour picker, lowercase '#rrggbb'. */
@@ -179,6 +185,7 @@ fun InventoryScreen(
     val inventory by vm.inventory.collectAsState()
     var draft by rememberSaveable(stateSaver = DraftSaver) { mutableStateOf<PaintDraft?>(null) }
     var brushDraft by rememberSaveable(stateSaver = BrushDraftSaver) { mutableStateOf<BrushDraft?>(null) }
+    var confirmation by remember { mutableStateOf<Confirmation?>(null) }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp).testTag("screen_inventory"),
@@ -233,7 +240,11 @@ fun InventoryScreen(
         )
     }
 
+    confirmation?.let { ConfirmDialog(it, onDismiss = { confirmation = null }) }
+
     draft?.let { d ->
+        // Only an owned paint opened by tapping it can be deleted; the stored code identifies it.
+        val editing = if (d.isNew) null else d.originRef?.takeIf { inventory?.findPaint(it) != null }
         PaintFormDialog(
             draft = d,
             onChange = { draft = it },
@@ -241,6 +252,14 @@ fun InventoryScreen(
             onCancel = { draft = null },
             owned = { ref -> inventory?.findPaint(ref) },
             onPickSet = { draft = null; onAddSet(it) },
+            onDelete = editing?.let { ref ->
+                {
+                    confirmation = Confirmation(R.string.inventory_delete_confirm, R.string.action_delete) {
+                        vm.delete(ref)
+                        draft = null
+                    }
+                }
+            },
         )
     }
 }
@@ -297,6 +316,8 @@ internal fun PaintFormDialog(
     onCancel: () -> Unit,
     owned: (PaintRef) -> Paint? = { null },
     onPickSet: (String) -> Unit = {},
+    /** Shown only when editing a paint the user owns. */
+    onDelete: (() -> Unit)? = null,
 ) {
     // Only when adding: editing a paint you own is not a duplicate.
     val already = if (draft.isNew && draft.code.isNotBlank()) owned(PaintRef(draft.brand.trim(), draft.code.trim())) else null
@@ -307,7 +328,7 @@ internal fun PaintFormDialog(
         Surface(Modifier.fillMaxWidth().padding(16.dp).testTag("paint_form"), shape = MaterialTheme.shapes.large) {
             Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.inventory_add_title), style = MaterialTheme.typography.titleMedium)
-                if (draft.isNew) CatalogueSearch(onPick = { onChange(PaintDraft.of(paintFromCatalogue(it)).copy(isNew = true)) }, onPickSet = onPickSet)
+                if (draft.isNew) CatalogueSearch(onPick = { onChange(PaintDraft.of(paintFromCatalogue(it)).copy(isNew = true, origin = "")) }, onPickSet = onPickSet)
                 FormField(R.string.inventory_brand, draft.brand, "field_brand") { onChange(draft.copy(brand = it)) }
                 FormField(R.string.inventory_code, draft.code, "field_code") { onChange(draft.copy(code = it)) }
                 already?.let {
@@ -334,6 +355,11 @@ internal fun PaintFormDialog(
                 }
                 ColorPicker(draft.hex) { onChange(draft.copy(hex = it)) }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
+                    if (onDelete != null) {
+                        TextButton(onClick = onDelete, modifier = Modifier.testTag("delete_paint")) {
+                            Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
+                        }
+                    }
                     TextButton(onClick = onCancel, modifier = Modifier.testTag("cancel_paint")) { Text(stringResource(R.string.inventory_cancel)) }
                     Button(
                         enabled = valid,

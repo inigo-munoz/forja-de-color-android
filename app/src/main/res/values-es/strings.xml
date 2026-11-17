@@ -204,4 +204,5 @@
     <string name="catalogue_search">Buscar en el catálogo (código o nombre)</string>
     <string name="scan_from_catalogue">Comprobada en el catálogo</string>
     <string name="catalogue_set">Set %1$s · %2$s · %3$d pinturas</string>
+    <string name="inventory_delete_confirm">¿Borrar esta pintura de tu inventario? Los proyectos que la usan la mostrarán como que no la tienes.</string>
 </resources>
