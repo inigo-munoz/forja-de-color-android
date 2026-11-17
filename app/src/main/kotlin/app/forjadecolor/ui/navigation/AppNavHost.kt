@@ -43,7 +43,9 @@ object Routes {
     const val ASK = "ask/{id}"
     const val INVENTORY = "inventory"
     const val WHEEL = "wheel"
-    const val SCAN = "scan"
+    const val SCAN = "scan?set={set}"
+
+    fun scan(set: String? = null) = if (set == null) "scan" else "scan?set=${Uri.encode(set)}"
     const val SETTINGS = "settings"
     const val TECHNIQUE = "technique/{id}"
 
@@ -87,8 +89,15 @@ fun AppNavHost(container: AppContainer, navController: NavHostController = remem
                     onDone = { navController.popBackStack() },
                 )
             }
-            composable(Routes.INVENTORY) { InventoryScreen(container, onScan = { navController.navigate(Routes.SCAN) }) }
-            composable(Routes.SCAN) { ScanScreen(container, onDone = { navController.popBackStack() }) }
+            composable(Routes.INVENTORY) {
+                InventoryScreen(container, onScan = { navController.navigate(Routes.scan()) }, onAddSet = { navController.navigate(Routes.scan(it)) })
+            }
+            composable(
+                Routes.SCAN,
+                arguments = listOf(navArgument("set") { type = NavType.StringType; nullable = true; defaultValue = null }),
+            ) { entry ->
+                ScanScreen(container, onDone = { navController.popBackStack() }, setCode = entry.arguments?.getString("set"))
+            }
             composable(Routes.WHEEL) { ColourWheelScreen(container) }
             composable(Routes.SETTINGS) { SettingsScreen(container) }
             composable(Routes.TECHNIQUE, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->

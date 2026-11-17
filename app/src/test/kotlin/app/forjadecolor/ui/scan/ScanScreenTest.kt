@@ -150,6 +150,19 @@ class ScanScreenTest {
     }
 
     @Test
+    fun `a set opens straight as a list to confirm, with the paints already owned unticked`() {
+        app.setContent(compose) { ScanScreen(app.container, setCode = "72.212", onDone = { done++ }) }
+        waitForList()
+
+        assertEquals(listOf(false, false, false, true, false, true, true, true), (0..7).map { checked("scan_paint_include_$it") })
+        click("scan_save")
+        app.waitFor(compose) { done == 1 }
+        val codes = inventory().paints.map { it.code }
+        assertEquals(52, codes.size)
+        assertTrue(listOf("72.050", "72.091", "72.151", "72.153").all { it in codes })
+    }
+
+    @Test
     fun `tapping an item corrects it before saving`() {
         show()
         click("scan_paste")

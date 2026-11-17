@@ -126,6 +126,20 @@ class InventoryFormTest {
     }
 
     @Test
+    fun `the catalogue search also offers sets, which open as a list to confirm`() {
+        var opened: String? = null
+        val c = container
+        compose.setContent { ForgeTheme { InventoryScreen(c, onAddSet = { opened = it }) } }
+        waitForList()
+        compose.onNodeWithTag("add_paint").performClick()
+        compose.onNodeWithTag("catalogue_search").performScrollTo().performTextReplacement("72212")
+        compose.onNodeWithTag("catalogue_set_0").performScrollTo().assert(hasText("Non-Metallic Metal", substring = true)).performClick()
+
+        assertEquals("72.212", opened)
+        compose.onNodeWithTag("paint_form").assertDoesNotExist()
+    }
+
+    @Test
     fun `the catalogue search is only offered when adding`() {
         show()
         compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()

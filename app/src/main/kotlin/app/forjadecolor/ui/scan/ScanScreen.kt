@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,8 +57,10 @@ import app.forjadecolor.ui.project.LocalPhotoSources
  * only "Add to my paints" writes the inventory, then [onDone].
  */
 @Composable
-fun ScanScreen(container: AppContainer, onDone: () -> Unit) {
+fun ScanScreen(container: AppContainer, onDone: () -> Unit, setCode: String? = null) {
     val vm = viewModel { ScanViewModel(container) }
+    // A paint set (from the catalogue search) opens straight as the list to confirm.
+    LaunchedEffect(setCode) { setCode?.let(vm::loadSet) }
     val state by vm.state.collectAsState()
     val context = LocalContext.current
     var photo by rememberPendingPhoto()

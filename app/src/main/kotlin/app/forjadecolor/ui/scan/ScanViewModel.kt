@@ -11,6 +11,8 @@ import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.findBrush
 import app.forjadecolor.domain.paints.findPaint
+import app.forjadecolor.domain.paints.findSet
+import app.forjadecolor.domain.paints.setAsScan
 import app.forjadecolor.domain.scan.ScanResult
 import app.forjadecolor.domain.scan.applyScan
 import app.forjadecolor.domain.scan.buildScanPrompt
@@ -83,6 +85,21 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     fun readAnswer(): String? = container.advisorBridge.readAnswer()
+
+    private var setLoaded = false
+
+    /** Opens a paint set as the list to confirm, once: a recreated screen keeps the user's ticks and edits. */
+    fun loadSet(code: String) {
+        if (setLoaded) return
+        setLoaded = true
+        val set = findSet(code) ?: return
+        viewModelScope.launch {
+            val list = setAsScan(set, container.repository.getInventory())
+            _state.update {
+                it.copy(list = ScanList(list.paints.map { s -> PaintItem(s.paint, s.existing, isComplete(s.paint) && s.existing == null, s.fromCatalogue) }, emptyList()))
+            }
+        }
+    }
 
     /** Reads the answer into the list, every complete item ticked; an unusable answer leaves only errors. */
     fun read(raw: String) {

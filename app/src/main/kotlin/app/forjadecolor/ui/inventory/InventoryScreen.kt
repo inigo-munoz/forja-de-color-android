@@ -55,6 +55,7 @@ import app.forjadecolor.domain.paints.CatalogueEntry
 import app.forjadecolor.domain.paints.ColourGroup
 import app.forjadecolor.domain.paints.paintFromCatalogue
 import app.forjadecolor.domain.paints.searchCatalogue
+import app.forjadecolor.domain.paints.searchSets
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.paints.displayName
 import app.forjadecolor.domain.paints.englishName
@@ -171,6 +172,7 @@ internal fun hslToHex(h: Float, s: Float, l: Float): String {
 fun InventoryScreen(
     container: AppContainer,
     onScan: () -> Unit = {},
+    onAddSet: (String) -> Unit = {},
 ) {
     val vm = viewModel { InventoryViewModel(container) }
     LaunchedEffect(Unit) { vm.load() }
@@ -238,6 +240,7 @@ fun InventoryScreen(
             onSave = { vm.save(it); draft = null },
             onCancel = { draft = null },
             owned = { ref -> inventory?.findPaint(ref) },
+            onPickSet = { draft = null; onAddSet(it) },
         )
     }
 }
@@ -293,6 +296,7 @@ internal fun PaintFormDialog(
     onSave: (Paint) -> Unit,
     onCancel: () -> Unit,
     owned: (PaintRef) -> Paint? = { null },
+    onPickSet: (String) -> Unit = {},
 ) {
     // Only when adding: editing a paint you own is not a duplicate.
     val already = if (draft.isNew && draft.code.isNotBlank()) owned(PaintRef(draft.brand.trim(), draft.code.trim())) else null
@@ -303,7 +307,7 @@ internal fun PaintFormDialog(
         Surface(Modifier.fillMaxWidth().padding(16.dp).testTag("paint_form"), shape = MaterialTheme.shapes.large) {
             Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.inventory_add_title), style = MaterialTheme.typography.titleMedium)
-                if (draft.isNew) CatalogueSearch(onPick = { onChange(PaintDraft.of(paintFromCatalogue(it)).copy(isNew = true)) })
+                if (draft.isNew) CatalogueSearch(onPick = { onChange(PaintDraft.of(paintFromCatalogue(it)).copy(isNew = true)) }, onPickSet = onPickSet)
                 FormField(R.string.inventory_brand, draft.brand, "field_brand") { onChange(draft.copy(brand = it)) }
                 FormField(R.string.inventory_code, draft.code, "field_code") { onChange(draft.copy(code = it)) }
                 already?.let {
@@ -352,9 +356,10 @@ internal fun PaintFormDialog(
 
 /** Search box over the paint catalogue; picking a result fills the form, which stays editable. */
 @Composable
-private fun CatalogueSearch(onPick: (CatalogueEntry) -> Unit) {
+private fun CatalogueSearch(onPick: (CatalogueEntry) -> Unit, onPickSet: (String) -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     val results = remember(query) { if (query.trim().length < 2) emptyList() else searchCatalogue(query, limit = 8) }
+    val sets = remember(query) { if (query.trim().length < 2) emptyList() else searchSets(query) }
     OutlinedTextField(
         value = query,
         onValueChange = { query = it },
@@ -362,6 +367,11 @@ private fun CatalogueSearch(onPick: (CatalogueEntry) -> Unit) {
         singleLine = true,
         modifier = Modifier.fillMaxWidth().testTag("catalogue_search"),
     )
+    sets.forEachIndexed { i, set ->
+        OutlinedButton(onClick = { onPickSet(set.code) }, modifier = Modifier.fillMaxWidth().testTag("catalogue_set_$i")) {
+            Text(stringResource(R.string.catalogue_set, set.code, set.name, set.paints.size))
+        }
+    }
     results.forEachIndexed { i, e ->
         Row(
             Modifier.fillMaxWidth().clickable { onPick(e); query = "" }.padding(vertical = 4.dp).testTag("catalogue_result_$i")
