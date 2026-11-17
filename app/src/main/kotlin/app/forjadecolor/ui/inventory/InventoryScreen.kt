@@ -51,6 +51,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.paints.BslRole
+import app.forjadecolor.domain.paints.ColourGroup
+import app.forjadecolor.domain.paints.groupByColour
+import app.forjadecolor.ui.wheel.colourName
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.PaintType
@@ -182,7 +185,15 @@ fun InventoryScreen(
             val edit = { p: Paint -> draft = PaintDraft.of(p) }
             val groups = groupPaints(inv)
             groups.families.forEach { (name, paints) -> PaintSection(familyLabel(name), "family_$name", paints, edit) }
-            if (groups.others.isNotEmpty()) PaintSection(stringResource(R.string.inventory_other_paints), "family_other", groups.others, edit)
+            if (groups.others.isNotEmpty()) {
+                // Paints outside a BSL set, grouped by colour with the colour wheel's rule.
+                Column(Modifier.testTag("family_other"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.inventory_other_paints), style = MaterialTheme.typography.titleMedium)
+                    groupByColour(groups.others).forEach { (group, paints) ->
+                        PaintSection(stringResource(colourGroupLabel(group)), "colour_${colourGroupKey(group)}", paints, edit, subsection = true)
+                    }
+                }
+            }
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(stringResource(R.string.inventory_brushes), style = MaterialTheme.typography.titleMedium)
                 inv.brushes.forEach { b ->
@@ -221,9 +232,9 @@ fun InventoryScreen(
 }
 
 @Composable
-private fun PaintSection(title: String, tag: String, paints: List<Paint>, onEdit: (Paint) -> Unit) {
+private fun PaintSection(title: String, tag: String, paints: List<Paint>, onEdit: (Paint) -> Unit, subsection: Boolean = false) {
     Column(Modifier.testTag(tag), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
+        Text(title, style = if (subsection) MaterialTheme.typography.titleSmall else MaterialTheme.typography.titleMedium)
         paints.forEach { p ->
             Row(
                 Modifier.fillMaxWidth().clickable { onEdit(p) }.testTag("paint").semantics(mergeDescendants = true) {},
@@ -239,6 +250,20 @@ private fun PaintSection(title: String, tag: String, paints: List<Paint>, onEdit
             }
         }
     }
+}
+
+@StringRes
+private fun colourGroupLabel(group: ColourGroup): Int = when (group) {
+    is ColourGroup.Hue -> colourName(group.colour)
+    ColourGroup.Neutrals -> R.string.wheel_neutrals
+    ColourGroup.Mediums -> R.string.inventory_mediums
+}
+
+/** Test tag suffix: the wheel colour in lower case ("red", "red_orange"), "neutrals" or "mediums". */
+private fun colourGroupKey(group: ColourGroup): String = when (group) {
+    is ColourGroup.Hue -> group.colour.name.lowercase()
+    ColourGroup.Neutrals -> "neutrals"
+    ColourGroup.Mediums -> "mediums"
 }
 
 private fun roleLabel(role: BslRole): Int = when (role) {

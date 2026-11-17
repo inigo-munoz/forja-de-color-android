@@ -3,6 +3,8 @@ package app.forjadecolor.ui.inventory
 import android.content.Context
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import app.forjadecolor.domain.paints.Inventory
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -146,6 +148,30 @@ class InventoryScreenTest {
         assertEquals(listOf("Citadel", "Nuln Oil", "Nuln Oil", "Shade", "#888888"), listOf(added.brand, added.code, added.name, added.range, added.hex))
         assertEquals(PaintType.WASH, added.type)
         assertEquals(null, added.family)
-        compose.onNodeWithTag("family_other").onChildren().filter(hasTestTag("paint")).assertCountEquals(1)
+        compose.onAllNodes(hasTestTag("paint") and hasAnyAncestor(hasTestTag("family_other"))).assertCountEquals(1)
+        compose.onAllNodes(hasTestTag("paint") and hasAnyAncestor(hasTestTag("colour_neutrals"))).assertCountEquals(1)
+    }
+
+    @Test
+    fun `other paints are grouped by colour in wheel order, then neutrals and mediums, and BSL families stay apart`() {
+        fun p(code: String, name: String, hex: String, type: PaintType = PaintType.OPAQUE) = Paint("Citadel", code, name, "Base", type, hex)
+        val bsl = runBlocking { repo.getInventory() }.paints.first()
+        runBlocking {
+            repo.saveInventory(
+                Inventory(
+                    listOf(bsl, p("g1", "Moss", "#2e6b2e"), p("r1", "Scarlet", "#b01c1c"), p("m1", "Lahmian Medium", "#ffffff", PaintType.MEDIUM), p("k1", "Abaddon Black", "#141414")),
+                    emptyList(),
+                ),
+            )
+        }
+        show()
+
+        val tags = listOf("colour_red", "colour_green", "colour_neutrals", "colour_mediums")
+        val tops = tags.map { compose.onNodeWithTag(it).performScrollTo().assertExists().fetchSemanticsNode().boundsInRoot.top }
+        assertEquals(tops.sorted(), tops)
+        compose.onNode(hasText("Red") and hasAnyAncestor(hasTestTag("colour_red")), useUnmergedTree = true).assertExists()
+        compose.onAllNodes(hasTestTag("paint") and hasAnyAncestor(hasTestTag("colour_red"))).assertCountEquals(1)
+        compose.onNodeWithTag("colour_blue").assertDoesNotExist()
+        compose.onAllNodes(hasTestTag("paint") and hasAnyAncestor(hasTestTag("family_${bsl.family!!.name}"))).assertCountEquals(1)
     }
 }

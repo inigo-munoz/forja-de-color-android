@@ -198,4 +198,5 @@
     <string name="base_desert_help">Arena, tierra seca y tonos cálidos.</string>
     <string name="base_fantasy">Fantasía</string>
     <string name="base_fantasy_help">Colores mágicos e irreales.</string>
+    <string name="inventory_mediums">Medium</string>
 </resources>
