@@ -2,7 +2,9 @@ package app.forjadecolor.ui.scan
 
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -106,7 +108,11 @@ class ScanScreenTest {
         click("scan_paste")
         waitForList()
 
-        assertTrue(checked("scan_paint_include_0"))
+        // Dead White (72.001) is already owned: flagged and unticked; ticking it updates the owned one.
+        assertTrue(!checked("scan_paint_include_0"))
+        compose.onNodeWithTag("scan_paint_owned_0", useUnmergedTree = true).assert(hasText("You already have it: Blanco Calavera · Dead White (72.001)"))
+        compose.onNodeWithTag("scan_paint_owned_1", useUnmergedTree = true).assertDoesNotExist()
+        click("scan_paint_include_0")
         assertTrue(checked("scan_paint_include_1"))
         compose.onNodeWithTag("scan_paint_include_2").assertIsNotEnabled()
         assertEquals(48, inventory().paints.size)

@@ -201,4 +201,6 @@
     <string name="base_fantasy">Fantasy</string>
     <string name="base_fantasy_help">Magical, unreal colours.</string>
     <string name="inventory_mediums">Mediums</string>
+    <string name="already_owned">You already have it: %1$s (%2$s)</string>
+    <string name="inventory_name_en">English name</string>
 </resources>

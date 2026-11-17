@@ -52,6 +52,10 @@ import app.forjadecolor.AppContainer
 import app.forjadecolor.R
 import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.ColourGroup
+import app.forjadecolor.domain.paints.PaintRef
+import app.forjadecolor.domain.paints.displayName
+import app.forjadecolor.domain.paints.englishName
+import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.paints.groupByColour
 import app.forjadecolor.ui.wheel.colourName
 import app.forjadecolor.domain.paints.Inventory
@@ -93,19 +97,22 @@ internal data class PaintDraft(
     val range: String,
     val type: PaintType,
     val hex: String,
+    val nameEn: String = "",
+    /** Opened with "+ Add paint": a code the user already owns is flagged. */
+    val isNew: Boolean = false,
 ) {
     companion object {
         // Same defaults as the PWA form.
-        val NEW = PaintDraft("Vallejo", "", "", "Game Color", PaintType.OPAQUE, "#888888")
+        val NEW = PaintDraft("Vallejo", "", "", "Game Color", PaintType.OPAQUE, "#888888", isNew = true)
 
-        fun of(p: Paint) = PaintDraft(p.brand, p.code, p.name, p.range, p.type, p.hex)
+        fun of(p: Paint) = PaintDraft(p.brand, p.code, p.name, p.range, p.type, p.hex, englishName(p).orEmpty())
     }
 }
 
 /** Null (form closed) saves nothing, so it restores closed. */
 internal val DraftSaver = Saver<PaintDraft?, List<String>>(
-    save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex) } },
-    restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5]) },
+    save = { d -> d?.let { listOf(it.brand, it.code, it.name, it.range, it.type.name, it.hex, it.nameEn, it.isNew.toString()) } },
+    restore = { l -> PaintDraft(l[0], l[1], l[2], l[3], PaintType.valueOf(l[4]), l[5], l[6], l[7].toBoolean()) },
 )
 
 /** Preset swatches for the colour picker, lowercase '#rrggbb'. */
@@ -227,6 +234,7 @@ fun InventoryScreen(
             onChange = { draft = it },
             onSave = { vm.save(it); draft = null },
             onCancel = { draft = null },
+            owned = { ref -> inventory?.findPaint(ref) },
         )
     }
 }
@@ -243,7 +251,7 @@ private fun PaintSection(title: String, tag: String, paints: List<Paint>, onEdit
             ) {
                 Swatch(p.hex)
                 Text(p.code, fontFamily = FontFamily.Monospace)
-                Text(p.name)
+                Text(displayName(p))
                 bslRole(p)?.let { role ->
                     Text(stringResource(roleLabel(role)), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("role"))
                 }
@@ -276,7 +284,15 @@ private fun roleLabel(role: BslRole): Int = when (role) {
 /** The add/update form; saving goes through [onSave] (the ViewModel and [savePaint]). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, onSave: (Paint) -> Unit, onCancel: () -> Unit) {
+internal fun PaintFormDialog(
+    draft: PaintDraft,
+    onChange: (PaintDraft) -> Unit,
+    onSave: (Paint) -> Unit,
+    onCancel: () -> Unit,
+    owned: (PaintRef) -> Paint? = { null },
+) {
+    // Only when adding: editing a paint you own is not a duplicate.
+    val already = if (draft.isNew && draft.code.isNotBlank()) owned(PaintRef(draft.brand.trim(), draft.code.trim())) else null
     val fields = listOf(draft.brand, draft.code, draft.name, draft.range).map { it.trim() }
     val valid = fields.all { it.isNotEmpty() } && HEX.matches(draft.hex.trim())
 
@@ -286,7 +302,15 @@ internal fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, 
                 Text(stringResource(R.string.inventory_add_title), style = MaterialTheme.typography.titleMedium)
                 FormField(R.string.inventory_brand, draft.brand, "field_brand") { onChange(draft.copy(brand = it)) }
                 FormField(R.string.inventory_code, draft.code, "field_code") { onChange(draft.copy(code = it)) }
+                already?.let {
+                    Text(
+                        stringResource(R.string.already_owned, displayName(it), it.code),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.testTag("already_owned"),
+                    )
+                }
                 FormField(R.string.inventory_name, draft.name, "field_name") { onChange(draft.copy(name = it)) }
+                FormField(R.string.inventory_name_en, draft.nameEn, "field_name_en") { onChange(draft.copy(nameEn = it)) }
                 FormField(R.string.inventory_range, draft.range, "field_range") { onChange(draft.copy(range = it)) }
                 Text(stringResource(R.string.inventory_type), style = MaterialTheme.typography.labelLarge)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -307,7 +331,12 @@ internal fun PaintFormDialog(draft: PaintDraft, onChange: (PaintDraft) -> Unit, 
                         enabled = valid,
                         onClick = {
                             val (b, c, n, r) = fields
-                            onSave(Paint(brand = b, code = c, name = n, range = r, type = draft.type, hex = draft.hex.trim().lowercase()))
+                            onSave(
+                                Paint(
+                                    brand = b, code = c, name = n, range = r, type = draft.type, hex = draft.hex.trim().lowercase(),
+                                    nameEn = draft.nameEn.trim().ifEmpty { null },
+                                ),
+                            )
                         },
                         modifier = Modifier.testTag("save_paint"),
                     ) { Text(stringResource(R.string.inventory_add)) }

@@ -172,9 +172,10 @@ private fun Project.toEntity() =
     ProjectEntity(id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes, style?.name, baseSetting?.name)
 
 private fun Paint.toEntity(position: Int) =
-    PaintEntity(position, brand, code, name, range, type.name, hex, family?.name, family?.order, family?.role?.name)
+    PaintEntity(position, brand, code, name, range, type.name, hex, family?.name, family?.order, family?.role?.name, nameEn)
 
 private fun PaintEntity.toPaint() = Paint(
     brand, code, name, range, PaintType.valueOf(type), hex,
     familyName?.let { PaintFamily(it, familyOrder ?: 0, familyRole?.let(BslRole::valueOf)) },
+    nameEn = nameEn,
 )

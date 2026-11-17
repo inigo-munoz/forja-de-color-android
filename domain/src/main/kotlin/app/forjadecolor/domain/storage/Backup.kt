@@ -103,6 +103,8 @@ fun validateBackup(file: JsonElement?): String? {
     if (paints == null || brushes == null) return "backup has no valid inventory"
     val badPaint = paints.indexOfFirst { !(it is JsonObject && it.strings("brand", "code", "name", "range", "type", "hex")) }
     if (badPaint >= 0) return "paint #${badPaint + 1} needs brand, code, name, range, type and hex"
+    val badName = paints.indexOfFirst { p -> "nameEn" in (p as JsonObject) && wire(p["nameEn"]) == null }
+    if (badName >= 0) return "paint #${badName + 1} has an invalid English name"
     val badBrush = brushes.indexOfFirst { !(it is JsonObject && it.strings("code", "name")) }
     if (badBrush >= 0) return "brush #${badBrush + 1} needs code and name"
     val projects = file["projects"] as? JsonArray ?: return "backup has no valid projects"

@@ -20,6 +20,8 @@ data class PaintEntity(
     val familyName: String?,
     val familyOrder: Int?,
     val familyRole: String?,
+    /** English name (v4); null in older rows. */
+    val nameEn: String? = null,
 )
 
 @Entity(tableName = "brushes", primaryKeys = ["position"])

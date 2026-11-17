@@ -40,9 +40,9 @@ Look at the photo and list every paint bottle and every brush you can identify.
 
 Rules:
 - Only list what you can see. If you cannot read a code, leave "code" empty instead of guessing.
+- For each paint, search the web (the maker's site or a colour chart) for its official name in Spanish ("nameEs") and in English ("nameEn") and its real colour ("hex", as #rrggbb). If you cannot confirm a name or the colour, leave it empty instead of inventing it.
 - "brand" is the maker (for example Vallejo, Citadel, Army Painter) and "range" the product line (for example Game Color, Model Color).
 - "type" is one of: opaque, wash, metallic, medium, primer, other.
-- "hex" is the approximate colour of the paint as #rrggbb.
 - For a brush, "code" is the size or model printed on it (for example 2, 0, 5/0) and "name" a short description.
 
 $PROMPT_MARKER (reply with this JSON only):
@@ -51,7 +51,7 @@ $PROMPT_MARKER (reply with this JSON only):
   "version": 1,
   "kind": "inventory",
   "paints": [
-    { "brand": "Vallejo", "code": "72.001", "name": "Dead White", "range": "Game Color", "type": "opaque", "hex": "#ffffff" }
+    { "brand": "Vallejo", "code": "72.001", "nameEs": "Blanco Calavera", "nameEn": "Dead White", "range": "Game Color", "type": "opaque", "hex": "#ffffff" }
   ],
   "brushes": [
     { "code": "2", "name": "Round synthetic" }
@@ -132,11 +132,13 @@ private fun toPaint(e: JsonElement): Paint? {
     val o = e as? JsonObject ?: return null
     val brand = o.text("brand")
     val code = o.text("code")
-    val name = o.text("name")
+    val nameEn = o.text("nameEn")
+    // Spanish is the app's main name; an answer with only "name" or only "nameEn" still works.
+    val name = o.text("nameEs").ifEmpty { o.text("name") }.ifEmpty { nameEn }
     if (code.isBlank() && name.isBlank()) return null
     val type = PaintType.entries.firstOrNull { it.name.equals(o.text("type"), ignoreCase = true) } ?: PaintType.OTHER
     val hex = o.text("hex").lowercase().takeIf { HEX.matches(it) } ?: UNKNOWN_HEX
-    return Paint(brand, if (code.isBlank()) "" else normalizeCode(brand, code), name, o.text("range"), type, hex)
+    return Paint(brand, if (code.isBlank()) "" else normalizeCode(brand, code), name, o.text("range"), type, hex, nameEn = nameEn.ifEmpty { null })
 }
 
 private fun toBrush(e: JsonElement): Brush? {

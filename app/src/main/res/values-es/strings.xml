@@ -199,4 +199,6 @@
     <string name="base_fantasy">Fantasía</string>
     <string name="base_fantasy_help">Colores mágicos e irreales.</string>
     <string name="inventory_mediums">Medium</string>
+    <string name="already_owned">Ya la tienes: %1$s (%2$s)</string>
+    <string name="inventory_name_en">Nombre en inglés</string>
 </resources>

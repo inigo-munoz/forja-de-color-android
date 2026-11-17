@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
+import app.forjadecolor.domain.paints.displayName
 import app.forjadecolor.ui.ask.AnswerErrorsDialog
 import app.forjadecolor.ui.ask.copyToClipboard
 import app.forjadecolor.ui.components.PhotoPreview
@@ -162,8 +163,18 @@ private fun ConfirmList(list: ScanList, vm: ScanViewModel, onSaved: () -> Unit) 
                 Swatch(item.paint.hex)
                 Column(Modifier.weight(1f)) {
                     Text(listOf(item.paint.brand, item.paint.code).filter { it.isNotBlank() }.joinToString(" "), fontFamily = FontFamily.Monospace)
-                    Text(item.paint.name)
-                    Status(item.complete, item.updates)
+                    Text(displayName(item.paint))
+                    val owned = item.existing
+                    if (owned != null && item.complete) {
+                        Text(
+                            stringResource(R.string.already_owned, displayName(owned), owned.code),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.testTag("scan_paint_owned_$i"),
+                        )
+                    } else {
+                        Status(item.complete, item.updates)
+                    }
                 }
             }
         }

@@ -36,11 +36,14 @@ fun Inventory.paintsMentionedIn(text: String): List<Paint> =
 
 /**
  * Saves the paint through [addPaint]. Like the PWA, a paint that replaces one in a BSL family keeps
- * that family, so updating "72003" by hand or from a scan does not drop it from its set.
+ * that family, so updating "72003" by hand or from a scan does not drop it from its set; an update
+ * without an English name keeps the owned one. Same rule as the PWA.
  */
 fun Inventory.savePaintKeepingFamily(paint: Paint): Inventory {
     val prior = findPaint(PaintRef(paint.brand, paint.code))
-    return addPaint(if (prior?.family != null) paint.copy(family = prior.family) else paint)
+    val withFamily = if (prior?.family != null) paint.copy(family = prior.family) else paint
+    // An update without an English name keeps the one the owned paint had.
+    return addPaint(withFamily.copy(nameEn = withFamily.nameEn?.trim()?.ifEmpty { null } ?: prior?.nameEn))
 }
 
 /** The owned brush with this code (trimmed, case-insensitive), if any. */

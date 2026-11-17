@@ -48,6 +48,7 @@ import app.forjadecolor.domain.paints.Paint
 import app.forjadecolor.domain.paints.WheelColour
 import app.forjadecolor.domain.paints.WheelKind
 import app.forjadecolor.domain.paints.WheelPaints
+import app.forjadecolor.domain.paints.displayName
 import app.forjadecolor.domain.paints.placeOnWheel
 import app.forjadecolor.ui.components.ColourDot
 import app.forjadecolor.ui.components.Swatch
@@ -212,7 +213,7 @@ private fun PaintList(paints: List<Paint>, modifier: Modifier = Modifier) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Swatch(p.hex)
                 Text(p.code, fontFamily = FontFamily.Monospace)
-                Text(p.name)
+                Text(displayName(p))
             }
         }
     }

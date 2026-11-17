@@ -25,9 +25,10 @@ import kotlinx.coroutines.launch
 
 enum class ScanSendStatus { NONE, PHOTO_MISSING, FALLBACK }
 
-/** A paint read from the photo, waiting for the user: [updates] when it would replace an owned paint. */
-data class PaintItem(val paint: Paint, val updates: Boolean, val included: Boolean) {
+/** A paint read from the photo, waiting for the user: [existing] is the owned paint it would update. */
+data class PaintItem(val paint: Paint, val existing: Paint?, val included: Boolean) {
     val complete: Boolean get() = isComplete(paint)
+    val updates: Boolean get() = existing != null
 }
 
 /** A brush read from the photo, waiting for the user: [updates] when it would replace an owned brush. */
@@ -91,7 +92,8 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
                     it.copy(
                         errors = emptyList(),
                         list = ScanList(
-                            result.paints.map { s -> PaintItem(s.paint, s.existing != null, isComplete(s.paint)) },
+                            // A paint the user already owns comes unticked: ticking it updates the owned one.
+                            result.paints.map { s -> PaintItem(s.paint, s.existing, isComplete(s.paint) && s.existing == null) },
                             result.brushes.map { s -> BrushItem(s.brush, s.existing != null, s.brush.code.isNotBlank() && s.brush.name.isNotBlank()) },
                         ),
                     )
@@ -117,7 +119,7 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
         viewModelScope.launch {
             val inv = container.repository.getInventory()
             editList { l ->
-                l.copy(paints = l.paints.mapIndexed { i, p -> if (i == index) PaintItem(paint, owns(inv, paint), isComplete(paint)) else p })
+                l.copy(paints = l.paints.mapIndexed { i, p -> if (i == index) PaintItem(paint, owned(inv, paint), isComplete(paint)) else p })
             }
         }
     }
@@ -144,7 +146,7 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 
-    private fun owns(inv: Inventory, p: Paint) = p.code.isNotBlank() && inv.findPaint(PaintRef(p.brand, p.code)) != null
+    private fun owned(inv: Inventory, p: Paint) = if (p.code.isBlank()) null else inv.findPaint(PaintRef(p.brand, p.code))
 
     private fun editList(change: (ScanList) -> ScanList) = _state.update { s -> s.copy(list = s.list?.let(change)) }
 }

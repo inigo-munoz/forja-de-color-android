@@ -88,6 +88,12 @@ class InventoryScreenTest {
     }
 
     @Test
+    fun `each paint shows its Spanish and English names`() {
+        show()
+        compose.onAllNodes(hasTestTag("paint") and hasText("Blanco Calavera · Dead White", substring = true)).assertCountEquals(1)
+    }
+
+    @Test
     fun `shows the BSL role next to each paint in a family, filled from the seed for stored paints without roles`() {
         runBlocking {
             val bare = SEED_INVENTORY.paints.map { p: Paint -> p.copy(family = p.family?.copy(role = null)) }

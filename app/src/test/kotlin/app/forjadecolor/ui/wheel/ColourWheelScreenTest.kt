@@ -53,10 +53,10 @@ class ColourWheelScreenTest {
             repo.saveInventory(
                 Inventory(
                     listOf(
-                        paint("72.011", "Test Scarlet", "#c02321"),
-                        paint("72.029", "Test Moss", "#2e6b2e"),
-                        paint("72.051", "Test Black", "#000000"),
-                        paint("72.052", "Test Gold", "#d4af37", PaintType.METALLIC),
+                        paint("72.911", "Test Scarlet", "#c02321"),
+                        paint("72.929", "Test Moss", "#2e6b2e"),
+                        paint("72.951", "Test Black", "#000000"),
+                        paint("72.952", "Test Gold", "#d4af37", PaintType.METALLIC),
                     ),
                     emptyList(),
                 ),

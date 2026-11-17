@@ -22,6 +22,13 @@ class ApplyScanTest {
     }
 
     @Test
+    fun `updating a paint without an English name keeps the one it had`() {
+        val named = inv.copy(paints = listOf(owned.copy(nameEn = "My own name")))
+        assertEquals("My own name", named.savePaintKeepingFamily(owned.copy(name = "Renamed", family = null)).paints[0].nameEn)
+        assertEquals("New name", named.savePaintKeepingFamily(owned.copy(nameEn = "New name")).paints[0].nameEn)
+    }
+
+    @Test
     fun `a brush with an existing code is updated, a new one is added`() {
         val updated = inv.addBrush(Brush(" 2 ", "Round kolinsky")).addBrush(Brush("0", "Detail"))
         assertEquals(listOf(Brush("2", "Round kolinsky"), Brush("0", "Detail")), updated.brushes)
