@@ -27,6 +27,27 @@ class InventoryScanTest {
     }
 
     @Test
+    fun `the instructions ask to look up both names and the real colour, and not to invent`() {
+        val prompt = buildScanPrompt()
+        listOf("search the web", "\"nameEs\"", "\"nameEn\"", "leave it empty instead of inventing it").forEach { assertTrue(it in prompt, it) }
+    }
+
+    @Test
+    fun `reads the Spanish and English names, falling back to the plain name`() {
+        val result = success(
+            """{"version": 1, "kind": "inventory", "paints": [
+              {"brand": "Vallejo", "code": "72.090", "nameEs": "Lavado Negro", "nameEn": "Black Wash", "type": "wash", "hex": "#1a1a1a"},
+              {"brand": "Citadel", "code": "Nuln Oil", "name": "Nuln Oil", "type": "wash"},
+              {"brand": "Army Painter", "code": "WP1105", "nameEn": "Dragon Red"}
+            ]}""",
+        )
+        assertEquals(
+            listOf("Lavado Negro" to "Black Wash", "Nuln Oil" to null, "Dragon Red" to "Dragon Red"),
+            result.paints.map { it.paint.name to it.paint.nameEn },
+        )
+    }
+
+    @Test
     fun `the instructions ask for the scan JSON and say not to guess codes`() {
         val prompt = buildScanPrompt()
         assertTrue("\"kind\": \"inventory\"" in prompt)

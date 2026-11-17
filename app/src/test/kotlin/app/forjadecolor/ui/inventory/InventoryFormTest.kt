@@ -110,6 +110,32 @@ class InventoryFormTest {
     }
 
     @Test
+    fun `adding a code you already have warns with the paint you own`() {
+        show()
+        compose.onNodeWithTag("add_paint").performClick()
+        compose.onNodeWithTag("already_owned").assertDoesNotExist()
+
+        compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("72001")
+
+        compose.onNodeWithTag("already_owned").performScrollTo().assert(hasText("You already have it: Blanco Calavera · Dead White (72.001)"))
+        compose.onNodeWithTag("field_code").performScrollTo().performTextReplacement("72.999")
+        compose.onNodeWithTag("already_owned").assertDoesNotExist()
+    }
+
+    @Test
+    fun `editing a paint you own does not warn, and its English name is saved`() {
+        show()
+        compose.onAllNodes(hasTestTag("paint") and hasText("72.003", substring = true)).onFirst().performScrollTo().performClick()
+        compose.onNodeWithTag("already_owned").assertDoesNotExist()
+
+        compose.onNodeWithTag("field_name_en").performScrollTo().performTextReplacement("Pale Flesh (mine)")
+        compose.onNodeWithTag("save_paint").performScrollTo().performClick()
+        compose.waitUntil(5_000) { compose.onAllNodesWithText("Pale Flesh (mine)", substring = true).fetchSemanticsNodes().isNotEmpty() }
+
+        assertEquals("Pale Flesh (mine)", runBlocking { repo.getInventory() }.paints.single { it.code == "72.003" }.nameEn)
+    }
+
+    @Test
     fun `tapping a paint opens the form prefilled and saving updates it keeping its family`() {
         show()
         val seed = SEED_INVENTORY.paints.single { it.code == "72.003" }

@@ -18,6 +18,58 @@ private val FAMILIES: List<Pair<String, List<Triple<String, String, String>>>> =
     "BSL Multipurpose" to listOf(Triple("72.011", "Rojo Visceral", "#7d201f"), Triple("72.042", "Piel de Parásitos", "#a35e1c"), Triple("72.124", "Marrón Gargona", "#592f22"), Triple("72.045", "Marrón Carbonizado", "#442b26")),
 )
 
+// English names from Vallejo's official Game Color chart (CC266 Rev03, Sep 2025), verified 2026-11-17. Same as the PWA.
+private val ENGLISH_NAMES: Map<String, String> = mapOf(
+    "72.003" to "Pale Flesh",
+    "72.100" to "Rosy Flesh",
+    "72.107" to "Athena Skin",
+    "72.108" to "Succubus Skin",
+    "72.098" to "Elfic Flesh",
+    "72.099" to "Skin Tone",
+    "72.004" to "Elf Skin Tone",
+    "72.071" to "Barbarian Skin",
+    "72.109" to "Toxic Yellow",
+    "72.005" to "Moon Yellow",
+    "72.006" to "Sun Yellow",
+    "72.007" to "Gold Yellow",
+    "72.110" to "Sunset Orange",
+    "72.008" to "Orange Fire",
+    "72.009" to "Hot Orange",
+    "72.106" to "Scarlet Blood",
+    "72.013" to "Squid Pink",
+    "72.014" to "Warlord Purple",
+    "72.113" to "Deep Magenta",
+    "72.112" to "Evil Red",
+    "72.114" to "Lustful Purple",
+    "72.076" to "Alien Purple",
+    "72.015" to "Hexed Lichen",
+    "72.116" to "Midnight Purple",
+    "72.118" to "Sunrise Blue",
+    "72.021" to "Magic Blue",
+    "72.020" to "Imperial Blue",
+    "72.019" to "Night Blue",
+    "72.096" to "Verdigris",
+    "72.119" to "Aquamarine",
+    "72.024" to "Turquoise",
+    "72.120" to "Abyssal Turquoise",
+    "72.121" to "Ghost Green",
+    "72.025" to "Foul Green",
+    "72.026" to "Jade Green",
+    "72.027" to "Scurvy Green",
+    "72.122" to "Bile Green",
+    "72.032" to "Scorpy Green",
+    "72.123" to "Angel Green",
+    "72.028" to "Dark Green",
+    "72.001" to "Dead White",
+    "72.049" to "Stonewall Grey",
+    "72.155" to "Charcoal",
+    "72.051" to "Black",
+    "72.011" to "Gory Red",
+    "72.042" to "Parasite Brown",
+    "72.124" to "Gorgon Brown",
+    "72.045" to "Charred Brown",
+)
+
 // Roles by position (lightest → darkest). BSL Green has no shadow paint; BSL Multipurpose has no roles.
 private val USUAL_ROLES = listOf(BslRole.FOURTH, BslRole.LIGHT, BslRole.BASE, BslRole.SHADOW)
 private val ROLES: Map<String, List<BslRole>> = mapOf(
@@ -36,6 +88,7 @@ val SEED_INVENTORY: Inventory = Inventory(
                 type = PaintType.OPAQUE,
                 hex = hex,
                 family = PaintFamily(name = family, order = i + 1, role = (ROLES[family] ?: USUAL_ROLES).getOrNull(i)),
+                nameEn = ENGLISH_NAMES[code],
             )
         }
     },

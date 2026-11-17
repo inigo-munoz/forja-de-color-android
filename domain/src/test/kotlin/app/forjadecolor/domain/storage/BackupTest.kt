@@ -156,6 +156,17 @@ class BackupTest {
         assertEquals("forja-de-color-2026-11-11.json", backupFileName(exportAll(populated(), now)))
     }
 
+    private fun withPaint(extra: String) =
+        """{"app":"forja-de-color","version":1,"exportedAt":"","blobs":{},"projects":[],""" +
+            """"inventory":{"brushes":[],"paints":[{"brand":"Vallejo","code":"72.001","name":"Blanco Calavera","range":"Game Color","type":"opaque","hex":"#ffffff"$extra}]}}"""
+
+    @Test
+    fun `accepts paints with and without an English name, and rejects one that is not text, like the PWA`() {
+        assertNull(validateBackup(parseBackupText(withPaint(""))))
+        assertNull(validateBackup(parseBackupText(withPaint(",\"nameEn\":\"Dead White\""))))
+        assertEquals("paint #1 has an invalid English name", validateBackup(parseBackupText(withPaint(",\"nameEn\":3"))))
+    }
+
     // Painting styles: optional, same validation message as the PWA
     private fun withLook(look: String) =
         """{"app":"forja-de-color","version":1,"exportedAt":"","inventory":{"paints":[],"brushes":[]},"blobs":{},""" +

@@ -44,6 +44,8 @@ data class Paint(
     /** Approximate display colour, '#rrggbb'. Only for the interface. */
     val hex: String,
     val family: PaintFamily? = null,
+    /** English name, when known; [name] is the Spanish one. Null in older data: read it through [englishName]. */
+    val nameEn: String? = null,
 ) {
     val ref: PaintRef get() = PaintRef(brand, code)
 }
