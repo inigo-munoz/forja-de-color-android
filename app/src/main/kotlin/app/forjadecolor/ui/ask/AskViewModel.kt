@@ -7,7 +7,9 @@ import app.forjadecolor.domain.advice.AdviceRequest
 import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.advice.SendResult
 import app.forjadecolor.domain.advice.buildAdvicePackage
+import app.forjadecolor.domain.projects.Look
 import app.forjadecolor.domain.projects.Project
+import app.forjadecolor.domain.projects.setLook
 import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.aiInstructionsStatus
 import app.forjadecolor.ui.components.copyAiInstructions
@@ -66,6 +68,17 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
         photoId = null
     }
 
+    /** Saves the project's painting style and base setting, read fresh so nothing else is lost. */
+    fun setLook(look: Look) {
+        val id = _state.value.project?.id ?: return
+        viewModelScope.launch {
+            val fresh = repository.getProject(id) ?: return@launch
+            val updated = fresh.setLook(look)
+            repository.saveProject(updated)
+            _state.update { it.copy(project = updated) }
+        }
+    }
+
     /** Sends [picked] (stored first), or else the project's latest stored photo, with [request]. */
     fun send(picked: ByteArray?, request: AdviceRequest) {
         val current = _state.value.project ?: return
@@ -78,7 +91,9 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
                 _state.update { it.copy(sendStatus = SendStatus.PHOTO_MISSING) }
                 return@launch
             }
-            val pkg = buildAdvicePackage(request, repository.getInventory(), id)
+            // The project's look as saved now: it may have been changed on this screen.
+            val look = (repository.getProject(current.id) ?: current).look
+            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting), repository.getInventory(), id)
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.NONE, prompt = if (fallback) pkg.text else null) }
         }

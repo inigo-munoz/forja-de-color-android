@@ -176,4 +176,26 @@
         <item quantity="one">Añadir %d a mis pinturas</item>
         <item quantity="other">Añadir %d a mis pinturas</item>
     </plurals>
+    <string name="look_summary">Estilo: %1$s · Peana: %2$s</string>
+    <string name="look_change">Cambiar</string>
+    <string name="look_style">Estilo de pintado</string>
+    <string name="look_base">Peana</string>
+    <string name="look_save">Guardar</string>
+    <string name="style_my_method">Mi método</string>
+    <string name="style_my_method_help">Rápido y vistoso: BSL y slapchop.</string>
+    <string name="style_nmm">NMM (metal no metálico)</string>
+    <string name="style_nmm_help">Metal simulado solo con luces y sombras.</string>
+    <string name="style_osl">OSL (luz de una fuente)</string>
+    <string name="style_osl_help">Una luz propia tiñe lo que tiene alrededor.</string>
+    <string name="style_vivid">Vivid · Alta fantasía</string>
+    <string name="style_vivid_help">Colores vivos y saturados, como en una película de animación.</string>
+    <string name="style_grimdark">Grimdark</string>
+    <string name="style_grimdark_help">Desgaste, suciedad y daños de batalla.</string>
+    <string name="base_none">Sin ambientación</string>
+    <string name="base_winter">Invierno</string>
+    <string name="base_winter_help">Nieve, hielo y tonos fríos.</string>
+    <string name="base_desert">Desierto</string>
+    <string name="base_desert_help">Arena, tierra seca y tonos cálidos.</string>
+    <string name="base_fantasy">Fantasía</string>
+    <string name="base_fantasy_help">Colores mágicos e irreales.</string>
 </resources>

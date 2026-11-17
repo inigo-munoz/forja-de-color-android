@@ -178,4 +178,26 @@
         <item quantity="one">Add %d to my paints</item>
         <item quantity="other">Add %d to my paints</item>
     </plurals>
+    <string name="look_summary">Style: %1$s · Base: %2$s</string>
+    <string name="look_change">Change</string>
+    <string name="look_style">Painting style</string>
+    <string name="look_base">Base</string>
+    <string name="look_save">Save</string>
+    <string name="style_my_method">My method</string>
+    <string name="style_my_method_help">Quick and showy: BSL and slapchop.</string>
+    <string name="style_nmm">NMM (non-metallic metal)</string>
+    <string name="style_nmm_help">Metal faked with light and shadow only.</string>
+    <string name="style_osl">OSL (object source lighting)</string>
+    <string name="style_osl_help">A light of its own tints what is around it.</string>
+    <string name="style_vivid">Vivid · High-Fantasy</string>
+    <string name="style_vivid_help">Bright, saturated colours, like an animated film.</string>
+    <string name="style_grimdark">Grimdark</string>
+    <string name="style_grimdark_help">Wear, dirt and battle damage.</string>
+    <string name="base_none">No setting</string>
+    <string name="base_winter">Winter</string>
+    <string name="base_winter_help">Snow, ice and cold tones.</string>
+    <string name="base_desert">Desert</string>
+    <string name="base_desert_help">Sand, dry earth and warm tones.</string>
+    <string name="base_fantasy">Fantasy</string>
+    <string name="base_fantasy_help">Magical, unreal colours.</string>
 </resources>

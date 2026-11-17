@@ -59,6 +59,7 @@ import app.forjadecolor.R
 import app.forjadecolor.domain.advice.TechniqueCardId
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
+import app.forjadecolor.ui.components.LookLine
 import app.forjadecolor.ui.components.ConfirmDialog
 import app.forjadecolor.ui.components.Confirmation
 import kotlinx.coroutines.delay
@@ -141,6 +142,7 @@ fun ProjectScreen(
                 modifier = Modifier.testTag("toggle_done"),
             ) { Text(stringResource(if (current.status == ProjectStatus.DONE) R.string.project_reopen else R.string.project_mark_done)) }
         }
+        LookLine(current.look, onChange = vm::setLook)
 
         PrimaryTabRow(selectedTabIndex = selectedTab.ordinal) {
             ProjectTab.entries.forEach { tab ->
