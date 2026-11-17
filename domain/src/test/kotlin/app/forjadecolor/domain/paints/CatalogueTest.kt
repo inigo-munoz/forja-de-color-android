@@ -23,6 +23,20 @@ class CatalogueTest {
     }
 
     @Test
+    fun `types each paint from its range and whole words of its name, with inks apart`() {
+        fun type(brand: String, code: String) = findInCatalogue(brand, code)?.type
+        assertEquals(PaintType.INK, type("Vallejo", "70.939"))
+        assertEquals(PaintType.INK, type("Vallejo", "72.091"))
+        assertEquals(PaintType.METALLIC, type("Citadel", "Leadbelcher"))
+        assertEquals(PaintType.OPAQUE, type("Citadel", "Steel Legion Drab"))
+        assertEquals(PaintType.OPAQUE, type("Vallejo", "70.987"))
+        assertEquals(PaintType.OPAQUE, type("Army Painter", "Ancient Stone"))
+        assertEquals(PaintType.OPAQUE, type("Vallejo", "72.007"))
+        assertEquals(PaintType.MEDIUM, type("Citadel", "Lahmian Medium"))
+        assertEquals(PaintType.WASH, type("Citadel", "Nuln Oil"))
+    }
+
+    @Test
     fun `finds a paint by code however it is written, or by name for Citadel`() {
         assertEquals("Bloody Red", findInCatalogue("vallejo", "72010")?.nameEn)
         assertEquals("Nuln Oil", findInCatalogue("Citadel", "", "nuln oil")?.code)

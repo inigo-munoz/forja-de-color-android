@@ -460,6 +460,7 @@ private fun familyLabel(name: String): String = FAMILY_LABELS[name]?.let { strin
 private fun paintTypeLabel(type: PaintType): Int = when (type) {
     PaintType.OPAQUE -> R.string.paint_type_opaque
     PaintType.WASH -> R.string.paint_type_wash
+    PaintType.INK -> R.string.paint_type_ink
     PaintType.METALLIC -> R.string.paint_type_metallic
     PaintType.MEDIUM -> R.string.paint_type_medium
     PaintType.PRIMER -> R.string.paint_type_primer
