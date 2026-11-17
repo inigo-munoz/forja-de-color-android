@@ -18,9 +18,9 @@ Branch: feat/paint-names (both repos). Delivery: ask-on-risk. Tests: Gradle (JUn
 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
-| T1 | S3–S5 | inline | todo — domain both apps: nameEn, englishName fallback to seed, scan prompt + parser (nameEs/nameEn), backup validation, seed names, fixtures | |
-| T2 | S4 | inline | todo — Android Room v4 (paints.nameEn) + migration test | |
-| T3 | S4, S6, S7 | inline | todo — Android UI: both names in lists, scan warning + unticked, form warning, English name field | |
+| T1 | S3–S5 | inline | done — domain both apps: nameEn, englishName fallback to seed, scan prompt + parser (nameEs/nameEn), backup validation, seed names, fixtures | Android 4045adc; PWA 0786bf0 |
+| T2 | S4 | inline | done — Android Room v4 (paints.nameEn) + migration test | 7e3bc50 |
+| T3 | S4, S6, S7 | inline | done — Android UI: both names in lists, scan warning + unticked, form warning, English name field | 4045adc |
 | T4 | S4, S6, S7 | inline | todo — PWA UI, same | |
 | T5 | S1–S7 | delegated (verifier) | todo — independent verifier (storage + contract), device check, release | |
 
@@ -28,3 +28,6 @@ Branch: feat/paint-names (both repos). Delivery: ask-on-risk. Tests: Gradle (JUn
 
 - L1 (2026-11-17, user): "Hay que ver que haga busqueda con la IA para comprobar el color de la pintura y sus nombres en ingles y español y si ya la tiene que de un aviso". Verified: the scan prompt asks only for an approximate colour from the photo; paints keep one name (seed names are Spanish); an owned paint in the scan list only shows "Updates the one you have" and comes ticked.
 - L2 (2026-11-17, user): "si, hazlo así". Feature document created; English names of the 48 seed paints being verified online by a research agent.
+- L3 (2026-11-17): research agent verified the 48 English names on Vallejo's official Game Color chart (CC266 Rev03, Sep 2025; acrylicosvallejo.com blocks automated access). It also found 3 Spanish names in the seed that differ from Vallejo's: 72.100 "Carne Rosa" (seed: Carne Rosada), 72.004 "Piel de Elfos" (seed: Piel de Elfo), 72.124 "Marrón Gorgona" (seed: Marrón Gargona). NOT changed: the Spanish names come from the owner's list and feed the advisor prompt (changing them changes the AI instructions); raised to the owner.
+- L4 (2026-11-17): T1–T3 done. PWA 0786bf0: names.ts (englishName with seed fallback, displayName), Paint.nameEn, scan prompt asks to search the web for nameEs/nameEn and real hex and to leave unconfirmed fields empty, parser reads nameEs/nameEn/name, backup 'paint #N has an invalid English name', seed ENGLISH_NAMES; 227 tests. Android 7e3bc50 (Room v4 MIGRATION_3_4 ADD COLUMN paints.nameEn, 3→4 test) and 4045adc (domain mirror, scan-prompt fixture regenerated from the PWA, advisor prompt fixtures unchanged, UI: displayName in My paints/wheel/scan, English name field, "You already have it" in the add form and the scan list, owned scan items unticked). Tests written first; RED observed for the PWA domain, not run separately for Android UI and the migration. Two test setups adjusted: wheel test paints used real seed codes (now showing English names), migration test needed the inventory-saved flag. Android 326 tests green. Pending: T4 PWA UI, T5 verifier + device + release.
+- L5 (2026-11-17, user, mid-turn): "quiero que hagas la revisión de todo lo que tengo en el movil ahora mismo. Si hace falta descarga de los principales fabricantes sus listas de pinturas para tenerlas ya guardadas y buscarlas primero en la app y luego en la IA" — scope question asked (what to review; catalogue left for v2 in the design); waiting for the answer.
