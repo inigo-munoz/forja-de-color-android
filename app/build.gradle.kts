@@ -15,8 +15,8 @@ android {
         applicationId = "app.forjadecolor"
         minSdk = 26
         targetSdk = 37
-        versionCode = 16
-        versionName = "1.7.0"
+        versionCode = 17
+        versionName = "1.7.1"
     }
 
     // Release signing reads a properties file kept OUTSIDE the repository (storeFile, storePassword,
