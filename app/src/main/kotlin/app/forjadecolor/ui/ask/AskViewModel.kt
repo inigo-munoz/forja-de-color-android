@@ -84,39 +84,27 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
     }
 
     /** Sends [picked] (stored first), or else the project's latest stored photo, with [request]. */
-    fun send(picked: ByteArray?, request: AdviceRequest) {
+    fun send(picked: ByteArray?, request: AdviceRequest, chosen: List<String> = emptyList()) {
         val current = _state.value.project ?: return
         viewModelScope.launch {
             val fresh = repository.getProject(current.id) ?: current
-            // Half-painted needs the miniature as it is now: never the unpainted initial photo.
-            if (request.moment == Moment.HALF_PAINTED && picked == null && fresh.progress.isEmpty()) {
-                _state.update { it.copy(sendStatus = SendStatus.CURRENT_PHOTO_MISSING) }
+            // A photo taken or chosen here goes first, then the project photos the user chose (up to MAX_SENT).
+            val pickedId = picked?.let { photoId ?: repository.putBlob(StoredBlob("image/jpeg", it)).also { id -> photoId = id } }
+            val ids = (listOfNotNull(pickedId) + chosen.filter { repository.getBlob(it) != null }).distinct().take(MAX_SENT)
+            if (ids.isEmpty()) {
+                // Half-painted needs the miniature as it is now: never the unpainted photo by default.
+                val status = if (request.moment == Moment.HALF_PAINTED) SendStatus.CURRENT_PHOTO_MISSING else SendStatus.PHOTO_MISSING
+                _state.update { it.copy(sendStatus = status) }
                 return@launch
             }
-            // Start and primed see the unpainted miniature from every angle, while there are angles and no
-            // progress photo yet; otherwise the photo sent is the one it always was (latest progress, else main).
-            val unpainted = fresh.extraPhotoBlobIds.isNotEmpty() && fresh.progress.isEmpty()
-            val angles = if (picked == null && unpainted && (request.moment == Moment.START || request.moment == Moment.PRIMED)) {
-                fresh.photos.filter { repository.getBlob(it) != null }
-            } else {
-                emptyList()
-            }
-            val id = when {
-                picked != null -> photoId ?: repository.putBlob(StoredBlob("image/jpeg", picked)).also { photoId = it }
-                angles.isNotEmpty() -> angles.first()
-                else -> defaultPhotoId(fresh)?.takeIf { repository.getBlob(it) != null }
-            }
-            if (id == null) {
-                _state.update { it.copy(sendStatus = SendStatus.PHOTO_MISSING) }
-                return@launch
-            }
+            val id = ids.first()
             // The project's look as saved now: it may have been changed on this screen.
             val look = fresh.look
             // Half-painted carries the latest recipe and the zones ticked as painted.
             val recipe = fresh.advice.lastOrNull { it.response is RecipeResponse }
             val previous = if (request.moment == Moment.HALF_PAINTED && recipe != null) PreviousRecipe(recipe.response as RecipeResponse, recipe.doneZones) else null
             val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, previous = previous), repository.getInventory(), id)
-                .copy(extraImageIds = angles.drop(1))
+                .copy(extraImageIds = ids.drop(1))
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }
         }

@@ -213,4 +213,8 @@
     <string name="project_angles">Angles</string>
     <string name="project_add_angle">Add angle</string>
     <string name="confirm_delete_angle">Delete this angle photo?</string>
+    <string name="ask_choose_photos">Tap the project photos to send (up to %1$d).</string>
+    <string name="ask_choose_project_photo">Choose a project photo</string>
+    <string name="ask_chosen_photos">Project photos that will be sent:</string>
+    <string name="ask_done">Done</string>
 </resources>

@@ -27,6 +27,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import app.forjadecolor.domain.projects.MAX_ANGLES
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.border
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -79,6 +85,26 @@ fun buildRequest(moment: Moment, typedZone: String, pickedZone: String?, questio
 
 /** The stored photo to send when none was picked: the latest progress photo, else the initial photo. */
 fun defaultPhotoId(p: Project): String? = p.progress.lastOrNull()?.blobId ?: p.initialPhotoBlobId
+
+/** Most photos sent in one go. */
+const val MAX_SENT = MAX_ANGLES + 1
+
+/** The project's photos the user can send: newest progress first, then the main photo and its angles. */
+fun askablePhotos(p: Project): List<String> = (p.progress.asReversed().map { it.blobId } + p.photos).distinct()
+
+/**
+ * What is chosen when the moment changes: start, the unpainted miniature from every angle; primed and
+ * during, the latest progress photo (else the main one); half-painted, the latest progress photo only.
+ */
+fun defaultPhotos(p: Project, moment: Moment): List<String> {
+    val latest = listOfNotNull(p.progress.lastOrNull()?.blobId)
+    return when (moment) {
+        Moment.START -> p.photos.ifEmpty { latest }
+        Moment.PRIMED -> latest.ifEmpty { p.photos }
+        Moment.HALF_PAINTED -> latest
+        Moment.DURING -> latest.ifEmpty { listOfNotNull(p.initialPhotoBlobId) }
+    }.take(MAX_SENT)
+}
 
 /** Parses an answer and adds it to the project. Returns the errors to show, or null when it was saved. */
 suspend fun saveAnswer(container: AppContainer, projectId: String, raw: String): List<String>? {
@@ -144,6 +170,9 @@ fun AskScreen(
         return
     }
     val zones = remember(current) { recipeZones(current) }
+    // The project photos to send; the moment's default until the user changes it.
+    var chosen by rememberSaveable(moment) { mutableStateOf(defaultPhotos(current, moment)) }
+    var pickingProject by rememberSaveable { mutableStateOf(false) }
     val sendStatus = when (state.sendStatus) {
         SendStatus.NONE -> ""
         SendStatus.SHARED -> stringResource(R.string.paste_instructions_hint)
@@ -160,7 +189,8 @@ fun AskScreen(
     val shoot = sources.camera({}, onPhoto)
 
     val send: () -> Unit = {
-        vm.send(photo, buildRequest(moment, typedZone, pickedZone ?: zones.firstOrNull(), question, details))
+        val order = askablePhotos(current)
+        vm.send(photo, buildRequest(moment, typedZone, pickedZone ?: zones.firstOrNull(), question, details), chosen.sortedBy { order.indexOf(it) })
     }
     val accept: (String) -> Unit = { raw ->
         vm.accept(raw, onSaved = onDone, onRejected = {
@@ -246,15 +276,27 @@ fun AskScreen(
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 StepHeading(2, R.string.ask_step_send)
                 Text(stringResource(R.string.ask_photo), style = MaterialTheme.typography.labelLarge)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = pick, modifier = Modifier.testTag("ask_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
+                val projectPhotos = askablePhotos(current)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (projectPhotos.isNotEmpty()) {
+                        OutlinedButton(onClick = { pickingProject = true }, modifier = Modifier.testTag("ask_choose_project_photo")) {
+                            Text(stringResource(R.string.ask_choose_project_photo))
+                        }
+                    }
                     OutlinedButton(onClick = shoot, modifier = Modifier.testTag("ask_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
+                    OutlinedButton(onClick = pick, modifier = Modifier.testTag("ask_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
                 }
                 val picked = photo
-                if (picked != null) {
-                    PhotoPreview(picked, tag = "ask_photo_preview", onRemove = { photo = null })
-                } else {
-                    DefaultPhoto(container, defaultPhotoId(current))
+                if (picked != null) PhotoPreview(picked, tag = "ask_photo_preview", onRemove = { photo = null })
+                ChosenPhotos(container, projectPhotos.filter { it in chosen }, hasPicked = picked != null)
+                if (pickingProject) {
+                    ProjectPhotoDialog(container, projectPhotos, chosen, onDone = { pickingProject = false }) { id ->
+                        chosen = when {
+                            id in chosen -> chosen - id
+                            chosen.size + (if (picked != null) 1 else 0) < MAX_SENT -> chosen + id
+                            else -> chosen
+                        }
+                    }
                 }
 
                 Button(onClick = send, modifier = Modifier.testTag("send")) { Text(stringResource(R.string.ask_send)) }
@@ -305,17 +347,50 @@ private fun StepHeading(number: Int, text: Int) {
 }
 
 /** With no photo picked: the project photo that will be sent, or a nudge to pick one when there is none. */
+/** The project photos that will be sent, as small thumbnails; "no photo" when there are none. */
 @Composable
-private fun DefaultPhoto(container: AppContainer, photoId: String?) {
-    // Merged so the thumbnail and its sentence read as one item.
-    Row(Modifier.semantics(mergeDescendants = true) {}.testTag("ask_default_photo"), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-        if (photoId != null) {
-            BlobImage(container.repository, photoId, Modifier.size(56.dp).testTag("ask_default_photo_thumb"))
-            Text(stringResource(R.string.ask_default_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        } else {
-            Text(stringResource(R.string.ask_no_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+private fun ChosenPhotos(container: AppContainer, chosen: List<String>, hasPicked: Boolean) {
+    if (chosen.isEmpty()) {
+        if (!hasPicked) {
+            Text(stringResource(R.string.ask_no_photo), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("ask_default_photo"))
         }
+        return
     }
+    Text(stringResource(R.string.ask_chosen_photos), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        chosen.forEach { id -> BlobImage(container.repository, id, Modifier.size(56.dp).clip(RoundedCornerShape(6.dp)).testTag("ask_chosen_photo")) }
+    }
+}
+
+/** "Choose a project photo": every photo of the project; tapping one adds it to, or removes it from, what is sent. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ProjectPhotoDialog(container: AppContainer, photos: List<String>, chosen: List<String>, onDone: () -> Unit, onToggle: (String) -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDone,
+        title = { Text(stringResource(R.string.ask_choose_project_photo)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.ask_choose_photos, MAX_SENT), style = MaterialTheme.typography.bodySmall)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    photos.forEach { id ->
+                        val on = id in chosen
+                        Box(
+                            Modifier.size(80.dp)
+                                .border(if (on) 3.dp else 1.dp, if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                                .padding(3.dp)
+                                .selectable(selected = on, onClick = { onToggle(id) }, role = Role.Checkbox)
+                                .testTag("ask_project_photo"),
+                        ) {
+                            BlobImage(container.repository, id, Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)))
+                            if (on) Text("✓", color = MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.TopEnd).padding(2.dp))
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDone, modifier = Modifier.testTag("ask_project_photos_done")) { Text(stringResource(R.string.ask_done)) } },
+    )
 }
 
 /** Only matters for free chat in the user's Claude project or custom GPT: invites to copy, or warns they are out of date. */

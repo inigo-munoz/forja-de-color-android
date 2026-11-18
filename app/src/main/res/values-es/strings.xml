@@ -211,4 +211,8 @@
     <string name="project_angles">Ángulos</string>
     <string name="project_add_angle">Añadir ángulo</string>
     <string name="confirm_delete_angle">¿Eliminar esta foto de ángulo?</string>
+    <string name="ask_choose_photos">Toca las fotos del proyecto que quieres enviar (hasta %1$d).</string>
+    <string name="ask_choose_project_photo">Elegir foto del proyecto</string>
+    <string name="ask_chosen_photos">Fotos del proyecto que se enviarán:</string>
+    <string name="ask_done">Listo</string>
 </resources>
