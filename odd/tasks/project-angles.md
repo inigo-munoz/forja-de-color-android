@@ -18,14 +18,15 @@ Branch: feat/project-angles (on feat/half-painted-context, both repos). Delivery
 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
-| T1 | S4, S7 | inline | todo — domain both apps: extraPhotoBlobIds, blobIds, backup validation, fixture | |
-| T2 | S7 | inline | todo — Android Room v5 + migration test | |
-| T3 | S5 | inline | todo — both apps: several images in the advice package and the share bridges; Ask sends all angles for start/primed | |
-| T4 | S3, S6 | inline | todo — Android UI: New project with several photos, angles in the Photos tab | |
-| T5 | S3, S6 | inline | todo — PWA UI | |
+| T1 | S4, S7 | inline | done — domain both apps | Android 5b3a298; PWA 4c3add5 |
+| T2 | S7 | inline | done — Android Room v5 + migration test | 5b3b14a |
+| T3 | S5 | inline | done — several images in the package and bridges; Ask sends all angles for start/primed | ae886fb; PWA 4c3add5 + UI |
+| T4 | S3, S6 | inline | done — Android UI | ab465dc |
+| T5 | S3, S6 | inline | done — PWA UI | see L3 |
 | T6 | S1–S7 | delegated (verifier) | todo — independent verifier (items 1, 3), device check, release | |
 
 ## Log
 
 - L1 (2026-11-18, user): "que se puedan incluir varias fotos para nuevos proyectos, para poder hacer fotos desde varios angulos." Verified: a project keeps one initial photo; the advisor sends one image.
 - L2 (2026-11-18, user): "si, hazlo así". Feature document created.
+- L3 (2026-11-18): T1–T5 done. Model: extraPhotoBlobIds (Android List with @EncodeDefault NEVER; PWA optional, absent when empty), MAX_ANGLES = 3, photos/photosOf, addAngle/removeAngle, blobIds includes angles (backups and photo clean-up). Backup validation "project #N has invalid extra photos"; fixture backup-v1.json project-1 has angle "photo-angle". Room v5 MIGRATION_4_5 ADD COLUMN extraPhotosJson TEXT NOT NULL DEFAULT '[]'. Share: several images → ACTION_SEND_MULTIPLE (main first, forja-de-color-N.jpg) / Web Share files. Ask: start/primed without a picked photo sends main + angles; half-painted/during the current photo. UI: New project takes up to 4 photos (Android pending list kept across recreation; PWA multiple file input), Photos tab "Angles" add/remove with confirmation (removed file deleted). Tests: RED observed for PWA domain/UI, Android domain and bridge; Room and UI tests written with the code. Android 360 tests, PWA 263 + build. Verifier launched (items 1, 3).
