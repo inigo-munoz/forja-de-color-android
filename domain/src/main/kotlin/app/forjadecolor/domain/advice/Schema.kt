@@ -123,4 +123,4 @@ data class AdviceRequest(
 data class PreviousRecipe(val response: RecipeResponse, val doneZones: List<Int>)
 
 /** What is shared with the user's AI chat: the prompt and the id of the stored photo. */
-data class AdvicePackage(val text: String, val imageId: String)
+data class AdvicePackage(val text: String, val imageId: String, val extraImageIds: List<String> = emptyList())

@@ -273,7 +273,10 @@
         }
       ],
       "initialPhotoBlobId": "photo-initial",
-      "targetImageBlobId": "photo-target"
+      "targetImageBlobId": "photo-target",
+      "extraPhotoBlobIds": [
+        "photo-angle"
+      ]
     },
     {
       "id": "project-2",
@@ -291,6 +294,10 @@
     "photo-initial": {
       "type": "image/jpeg",
       "base64": "/9j/AAH+"
+    },
+    "photo-angle": {
+      "type": "image/jpeg",
+      "base64": "BQUF"
     },
     "photo-target": {
       "type": "image/png",
