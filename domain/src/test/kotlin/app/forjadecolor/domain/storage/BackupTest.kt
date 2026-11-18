@@ -214,6 +214,14 @@ class BackupTest {
     }
 
     @Test
+    fun `reads the base motif the PWA exported, and rejects one that is not text, like the PWA`() = runBlocking {
+        val repo = InMemoryRepository()
+        importAll(repo, parseBackupText(pwaFixture("backup-v1.json")))
+        assertEquals("ruinas de un templo", repo.getProject("project-2")!!.baseMotif)
+        assertEquals("project #1 has an invalid base motif", validateBackup(parseBackupText(withLook(",\"baseMotif\":3"))))
+    }
+
+    @Test
     fun `reads the style the PWA exported`() = runBlocking {
         val repo = InMemoryRepository()
         importAll(repo, parseBackupText(pwaFixture("backup-v1.json")))

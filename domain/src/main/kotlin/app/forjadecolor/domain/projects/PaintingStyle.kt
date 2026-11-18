@@ -22,7 +22,22 @@ enum class BaseSetting {
 }
 
 /** The style and base setting a prompt follows. */
-data class Look(val style: PaintingStyle = PaintingStyle.MY_METHOD, val baseSetting: BaseSetting? = null)
+data class Look(
+    val style: PaintingStyle = PaintingStyle.MY_METHOD,
+    val baseSetting: BaseSetting? = null,
+    /** Free-text theme for the base ("lava", "graveyard"…), alone or with a setting. */
+    val baseMotif: String? = null,
+)
+
+/** Longest base motif kept. */
+const val MAX_MOTIF = 100
+
+/** A motif as stored: trimmed, without a final full stop, at most [MAX_MOTIF] characters; empty → null. Same as the PWA. */
+fun cleanMotif(m: String?): String? = m?.trim()?.trimEnd('.')?.take(MAX_MOTIF)?.trim()?.ifEmpty { null }
+
+// With a themed base the advisor may go beyond the paint inventory, for basing materials only.
+private const val BASE_MATERIALS = "BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level \"baseMaterials\" list of short strings; I may not have them."
+private const val IMAGE_TERRAIN = "On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is."
 
 // Prompt text: same as the PWA (src/projects/style.ts). My method adds nothing, so the prompts and
 // the AI instructions stay as they were.
@@ -61,7 +76,14 @@ fun adviceLookLines(look: Look): List<String> = buildList {
         add("Keep my method above for speed, but follow this style in the colours, the steps and the tips.")
     }
     look.baseSetting?.let { add(adviceBase(it)) }
+    val motif = cleanMotif(look.baseMotif)
+    motif?.let { add("BASE MOTIF: $it.") }
+    if (look.baseSetting != null || motif != null) add(BASE_MATERIALS)
 }
 
 /** Lines for the image prompt; empty for my method without a base setting. */
-fun imageLookLines(look: Look): List<String> = listOfNotNull(imageStyle(look.style), look.baseSetting?.let(::imageBase))
+fun imageLookLines(look: Look): List<String> {
+    val motif = cleanMotif(look.baseMotif)
+    val terrain = if (look.baseSetting != null || motif != null) IMAGE_TERRAIN else null
+    return listOfNotNull(imageStyle(look.style), look.baseSetting?.let(::imageBase), motif?.let { "Base theme: $it." }, terrain)
+}

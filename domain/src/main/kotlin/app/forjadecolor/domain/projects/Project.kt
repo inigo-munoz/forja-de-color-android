@@ -39,6 +39,8 @@ data class Project(
     val style: PaintingStyle? = null,
     /** Null: no setting for the base. */
     val baseSetting: BaseSetting? = null,
+    /** Free-text theme for the base; null when there is none (left out of the JSON). */
+    val baseMotif: String? = null,
     /** Up to [MAX_ANGLES] more photos of the unpainted miniature; left out of the JSON when empty. */
     @OptIn(ExperimentalSerializationApi::class)
     @EncodeDefault(EncodeDefault.Mode.NEVER)
@@ -51,7 +53,7 @@ data class Project(
     val photos: List<String> get() = listOfNotNull(initialPhotoBlobId) + extraPhotoBlobIds
 
     /** The look the prompts follow; a project saved before styles existed is painted with my method. */
-    val look: Look get() = Look(style ?: PaintingStyle.MY_METHOD, baseSetting)
+    val look: Look get() = Look(style ?: PaintingStyle.MY_METHOD, baseSetting, baseMotif)
 }
 
 /** Extra angles a project keeps besides its main photo. */
@@ -65,7 +67,7 @@ fun Project.removeAngle(blobId: String): Project = copy(extraPhotoBlobIds = extr
 
 /** Sets the look; my method is stored as null, like older projects and the PWA. */
 fun Project.setLook(look: Look): Project =
-    copy(style = look.style.takeIf { it != PaintingStyle.MY_METHOD }, baseSetting = look.baseSetting)
+    copy(style = look.style.takeIf { it != PaintingStyle.MY_METHOD }, baseSetting = look.baseSetting, baseMotif = cleanMotif(look.baseMotif))
 
 fun createProject(name: String, now: Instant, id: String): Project =
     Project(id, name, isoString(now), ProjectStatus.IN_PROGRESS, notes = "", progress = emptyList(), advice = emptyList())

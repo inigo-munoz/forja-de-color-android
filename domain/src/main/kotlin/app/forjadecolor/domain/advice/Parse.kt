@@ -103,6 +103,8 @@ private fun validateRecipe(data: JsonObject, errors: MutableList<String>) {
     if (complements != null && !(complements is JsonArray && complements.all { it.isRef() })) errors += "recipe: complements must be paints"
     val remaining = data["remainingSteps"]
     if (remaining != null && !remaining.isStrArray()) errors += "recipe: remainingSteps must be a list of steps"
+    val materials = data["baseMaterials"]
+    if (materials != null && !materials.isStrArray()) errors += "recipe: baseMaterials must be a list of materials"
 }
 
 private fun validateZone(z: JsonElement, i: Int, errors: MutableList<String>) {

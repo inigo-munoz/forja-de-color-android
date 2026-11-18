@@ -179,4 +179,14 @@ class ParseTest {
         }
         assertTrue(errorsOf(parse(c)).isNotBlank())
     }
+
+    @Test
+    fun `reads basing materials from a recipe, and rejects a malformed list like the PWA`() {
+        val base = """{"version":1,"kind":"recipe","moment":"start","prep":[],"tips":[],"zones":[{"name":"capa","technique":"slapchop","paint":{"brand":"Vallejo","code":"72.021"},"dilution":"1:3","steps":[]}]"""
+        val ok = parseAdviceResponse("$base,\"baseMaterials\":[\"arena fina\",\"nieve artificial\"]}", app.forjadecolor.domain.paints.SEED_INVENTORY)
+        val recipe = (ok as ParseResult.Success).entry.response as RecipeResponse
+        assertEquals(listOf("arena fina", "nieve artificial"), recipe.baseMaterials)
+        val bad = parseAdviceResponse("$base,\"baseMaterials\":\"arena\"}", app.forjadecolor.domain.paints.SEED_INVENTORY)
+        assertTrue("recipe: baseMaterials must be a list of materials" in (bad as ParseResult.Failure).errors)
+    }
 }

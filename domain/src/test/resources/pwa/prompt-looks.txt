@@ -154,6 +154,7 @@ INVENTORY (brand|code|name|family|order|role|type)
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
 BASE SETTING: winter. Snow, ice and cold tones on the base.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {
@@ -182,6 +183,7 @@ INVENTORY (brand|code|name|family|order|role|type)
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
 BASE SETTING: desert. Sand, dry earth and warm tones on the base.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {
@@ -210,6 +212,7 @@ INVENTORY (brand|code|name|family|order|role|type)
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
 BASE SETTING: fantasy. Magical, unreal colours on the base.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {
@@ -240,6 +243,68 @@ MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zone
 STYLE: OSL (object source lighting). Choose one glowing light source on the miniature and tint the nearby surfaces with its colour, brightest closest to it.
 Keep my method above for speed, but follow this style in the colours, the steps and the tips.
 BASE SETTING: winter. Snow, ice and cold tones on the base.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
+
+ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
+{
+  "version": 1,
+  "kind": "recipe",
+  "moment": "start",
+  "prep": ["step", "..."],
+  "zones": [
+    { "name": "zone", "technique": "slapchop", "paint": { "brand": "Vallejo", "code": "72.021" }, "dilution": "1:3", "steps": ["..."], "brush": "B02001" },
+    { "name": "zone", "technique": "bsl", "bsl": { "base": { "brand": "Vallejo", "code": "72.099" }, "shadow": { "brand": "Vallejo", "code": "72.071" }, "light": { "brand": "Vallejo", "code": "72.098" } }, "steps": ["..."] }
+  ],
+  "tips": ["..."]
+}
+-----
+You are my miniature painting assistant. I paint fast but want a good-looking result.
+METHOD
+- Default technique is Slapchop: black primer, then a heavy grey drybrush and a lighter white drybrush to sketch light and shadow, then translucent colour on top.
+- I have no translucent paints: make them by thinning my opaque paints. Every Slapchop zone needs a dilution ratio "N:M" (paint:medium or water), e.g. "1:3".
+- Use BSL (base, shadow, light) triads only on detail zones: faces, skin, focal points. Prefer the BSL families listed below; each family is ordered 1 (lightest) to 4 (darkest).
+- For a BSL zone use the family's base, shadow and light paints by their role (extra light for final highlights); a family without a shadow paint is shaded by glazing its base.
+- Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
+- Write every human-readable text (zone names, steps, tips) in Spanish.
+
+INVENTORY (brand|code|name|family|order|role|type)
+
+MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
+
+BASE MOTIF: río de lava.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
+
+ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
+{
+  "version": 1,
+  "kind": "recipe",
+  "moment": "start",
+  "prep": ["step", "..."],
+  "zones": [
+    { "name": "zone", "technique": "slapchop", "paint": { "brand": "Vallejo", "code": "72.021" }, "dilution": "1:3", "steps": ["..."], "brush": "B02001" },
+    { "name": "zone", "technique": "bsl", "bsl": { "base": { "brand": "Vallejo", "code": "72.099" }, "shadow": { "brand": "Vallejo", "code": "72.071" }, "light": { "brand": "Vallejo", "code": "72.098" } }, "steps": ["..."] }
+  ],
+  "tips": ["..."]
+}
+-----
+You are my miniature painting assistant. I paint fast but want a good-looking result.
+METHOD
+- Default technique is Slapchop: black primer, then a heavy grey drybrush and a lighter white drybrush to sketch light and shadow, then translucent colour on top.
+- I have no translucent paints: make them by thinning my opaque paints. Every Slapchop zone needs a dilution ratio "N:M" (paint:medium or water), e.g. "1:3".
+- Use BSL (base, shadow, light) triads only on detail zones: faces, skin, focal points. Prefer the BSL families listed below; each family is ordered 1 (lightest) to 4 (darkest).
+- For a BSL zone use the family's base, shadow and light paints by their role (extra light for final highlights); a family without a shadow paint is shaded by glazing its base.
+- Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
+- Write every human-readable text (zone names, steps, tips) in Spanish.
+
+INVENTORY (brand|code|name|family|order|role|type)
+
+MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
+
+STYLE: Grimdark. Muted, desaturated colours with wear, dirt, rust and battle damage.
+Keep my method above for speed, but follow this style in the colours, the steps and the tips.
+BASE SETTING: desert. Sand, dry earth and warm tones on the base.
+BASE MOTIF: ruinas.
+BASE MATERIALS: you may also recommend basing materials for this base (sand, static grass, snow, pigments, tufts…) in a top-level "baseMaterials" list of short strings; I may not have them.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {

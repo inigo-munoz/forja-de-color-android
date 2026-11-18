@@ -74,6 +74,8 @@ data class RecipeResponse(
     /** half-painted only */
     val complements: List<PaintRef>? = null,
     val remainingSteps: List<String>? = null,
+    /** Basing materials the advisor recommends for a themed base; the user may not have them. */
+    val baseMaterials: List<String>? = null,
 ) : AdviceResponse
 
 @Serializable
@@ -116,6 +118,7 @@ data class AdviceRequest(
     val freeText: String? = null,
     val style: PaintingStyle? = null,
     val baseSetting: BaseSetting? = null,
+    val baseMotif: String? = null,
     /** Half-painted: the project's latest recipe and the zones ticked as painted. */
     val previous: PreviousRecipe? = null,
 )

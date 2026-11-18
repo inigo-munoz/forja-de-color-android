@@ -115,7 +115,7 @@ fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): Adv
         Moment.HALF_PAINTED -> recipeFormat(RecipeMoment.HALF_PAINTED)
         Moment.DURING -> CONSULTATION_FORMAT
     }
-    val look = adviceLookLines(Look(req.style ?: PaintingStyle.MY_METHOD, req.baseSetting))
+    val look = adviceLookLines(Look(req.style ?: PaintingStyle.MY_METHOD, req.baseSetting, req.baseMotif))
     val sections = listOf(method(inv), inventoryLines(inv), momentRequest(req)) + listOfNotNull(previousRecipe(req, inv), look.joinToString("\n").ifEmpty { null }) + format
     val text = sections.joinToString("\n\n")
     return AdvicePackage(text, photoId)

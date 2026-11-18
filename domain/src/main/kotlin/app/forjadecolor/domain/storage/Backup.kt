@@ -122,6 +122,8 @@ fun validateBackup(file: JsonElement?): String? {
         angles != null && !(angles is JsonArray && angles.all { wire(it) != null })
     }
     if (badAngles >= 0) return "project #${badAngles + 1} has invalid extra photos"
+    val badMotif = projects.indexOfFirst { p -> "baseMotif" in (p as JsonObject) && wire(p["baseMotif"]) == null }
+    if (badMotif >= 0) return "project #${badMotif + 1} has an invalid base motif"
     projects.forEachIndexed { i, p -> doneZonesProblem(p as JsonObject, i)?.let { return it } }
     val blobs = file["blobs"] as? JsonObject ?: return "backup has no valid photos"
     if (blobs.values.any { !(it is JsonObject && it.strings("type", "base64")) }) return "backup has a damaged photo"
