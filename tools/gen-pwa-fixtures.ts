@@ -36,9 +36,14 @@ const recipe = {
 };
 w('image-prompt.txt', buildImagePrompt(recipe, SEED_INVENTORY));
 
+// Half-painted with the earlier recipe (first zone ticked), and the method with an ink in the inventory.
+w('prompt-half-painted-previous.txt', buildAdvicePackage({ moment: 'half-painted', previous: { response: recipe, doneZones: [0] } }, SEED_INVENTORY, photo).text);
+const withInk = { ...SEED_INVENTORY, paints: [...SEED_INVENTORY.paints, { brand: 'Vallejo', code: '72.091', name: 'Sepia', range: 'Game Color', type: 'ink' as const, hex: '#563d27' }] };
+w('brain-instructions-ink.txt', buildBrainInstructions(withInk));
+
 // Painting styles: every style and every base setting, one prompt each, separated by a line of dashes.
 const empty = { paints: [], brushes: [] };
-const looks = [...PAINTING_STYLES.map((style) => ({ style })), ...BASE_SETTINGS.map((baseSetting) => ({ baseSetting })), { style: 'osl' as const, baseSetting: 'winter' as const }];
+const looks = [...PAINTING_STYLES.map((style) => ({ style })), ...BASE_SETTINGS.map((baseSetting) => ({ baseSetting })), { style: 'osl' as const, baseSetting: 'winter' as const }, { baseMotif: 'río de lava' }, { style: 'grimdark' as const, baseSetting: 'desert' as const, baseMotif: 'ruinas' }];
 w('prompt-looks.txt', looks.map((look) => buildAdvicePackage({ moment: 'start', ...look }, empty, photo).text).join('\n-----\n'));
 w('image-prompt-looks.txt', looks.map((look) => buildImagePrompt(recipe, SEED_INVENTORY, look)).join('\n-----\n'));
 
@@ -57,7 +62,8 @@ if (!consult.ok) throw new Error(consult.errors.join());
 const primed = parseAdviceResponse(JSON.stringify({ ...recipe, moment: 'primed', prep: [] }), inv);
 if (!primed.ok) throw new Error(primed.errors.join());
 let p = createProject('Paladín', new Date('2026-11-10T09:00:00.000Z'), 'project-1');
-p = { ...setNotes(p, 'Capa verde'), initialPhotoBlobId: a, targetImageBlobId: b };
+const angle = await repo.putBlob(new Blob([new Uint8Array([5, 5, 5])], { type: 'image/jpeg' }), 'photo-angle');
+p = { ...setNotes(p, 'Capa verde'), initialPhotoBlobId: a, targetImageBlobId: b, extraPhotoBlobIds: [angle] };
 p = addProgressPhoto(p, { id: 'pp-1', takenAt: '2026-11-11T10:00:00.000Z', blobId: c });
 p = addAdvice(p, { id: 'adv-1', receivedAt: '2026-11-10T09:30:00.000Z', ...parsed.entry });
 p = addAdvice(p, { id: 'adv-2', receivedAt: '2026-11-11T11:00:00.000Z', ...consult.entry });
@@ -66,7 +72,7 @@ p = addAdvice(p, { id: 'adv-3', receivedAt: '2026-11-11T12:00:00.000Z', ...prime
 p = setZoneDone(setZoneDone(p, 'adv-1', 2, true), 'adv-1', 0, true);
 await repo.saveProject(p);
 // The second project has a painting style and a base setting; the first has none (both absent).
-await repo.saveProject(setLook({ ...createProject('Goblin', new Date('2026-11-12T08:00:00.000Z'), 'project-2'), status: 'done' }, { style: 'nmm', baseSetting: 'desert' }));
+await repo.saveProject(setLook({ ...createProject('Goblin', new Date('2026-11-12T08:00:00.000Z'), 'project-2'), status: 'done' }, { style: 'nmm', baseSetting: 'desert', baseMotif: 'ruinas de un templo' }));
 const backup = await exportAll(repo, new Date('2026-11-14T12:00:00.000Z'));
 w('backup-v1.json', JSON.stringify(backup, null, 2));
 console.log('ok');

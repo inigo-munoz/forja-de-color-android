@@ -3,6 +3,7 @@ package app.forjadecolor.ui.projects
 import android.graphics.Bitmap
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -119,6 +120,29 @@ class ProjectsScreenTest {
         compose.onNodeWithTag("new_project_create").performScrollTo().performClick()
         app.waitFor(compose) { opened.isNotEmpty() }
         assertNull(app.projects().single().initialPhotoBlobId)
+    }
+
+    @Test
+    fun `takes several photos from different angles, up to four, the first being the main one`() {
+        show()
+        openForm()
+        compose.onNodeWithTag("new_project_name").performScrollTo().performTextInput("Búho")
+        listOf<Byte>(1, 2, 3, 4).forEach { b ->
+            app.photos.nextPhoto = byteArrayOf(b)
+            compose.onNodeWithTag("new_project_take_photo").performScrollTo().performClick()
+        }
+        compose.onAllNodesWithTag("new_project_photo_preview").assertCountEquals(4)
+        compose.onNodeWithTag("new_project_take_photo").assertIsNotEnabled()
+        compose.onNodeWithTag("new_project_choose_photo").assertIsNotEnabled()
+
+        compose.onAllNodesWithTag("new_project_photo_preview_remove")[1].performScrollTo().performClick()
+        compose.onAllNodesWithTag("new_project_photo_preview").assertCountEquals(3)
+        compose.onNodeWithTag("new_project_create").performScrollTo().performClick()
+
+        app.waitFor(compose) { opened.isNotEmpty() }
+        val p = app.projects().single()
+        val bytes = p.photos.map { runBlocking { app.repository.getBlob(it) }!!.bytes.single() }
+        assertEquals(listOf<Byte>(1, 3, 4), bytes)
     }
 
     @Test

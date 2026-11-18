@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.hasTestTag
@@ -37,6 +38,7 @@ import app.forjadecolor.domain.advice.Technique
 import app.forjadecolor.domain.advice.ZoneRecipe
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.projects.addAdvice
+import app.forjadecolor.domain.projects.ProgressPhoto
 import app.forjadecolor.domain.projects.createProject
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.Repository
@@ -209,6 +211,108 @@ class AskScreenTest {
     }
 
     @Test
+    fun `half-painted without a new photo or progress photos asks for a current one instead of sending the unpainted photo`() {
+        show()
+        click("moment_half-painted")
+        click("send")
+        app.waitFor(compose) { compose.onAllNodesWithTag("send_status").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("send_status").assert(hasText("current photo", substring = true))
+        assertTrue(app.bridge.sent.isEmpty())
+    }
+
+    @Test
+    fun `half-painted sends the earlier recipe and the zones ticked as painted`() {
+        runBlocking {
+            photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
+            val p = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR.copy(doneZones = listOf(0)))
+            app.repository.saveProject(p.copy(initialPhotoBlobId = photoId, progress = listOf(ProgressPhoto("g1", "2026-11-12T10:00:00.000Z", photoId))))
+        }
+        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
+        click("moment_half-painted")
+        click("send")
+
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        val text = app.bridge.sent.single().text
+        assertTrue("PREVIOUS RECIPE" in text)
+        assertTrue("- capa (slapchop): Azul Mágico (Vallejo 72.021). Painted." in text)
+    }
+
+    @Test
+    fun `lets the user choose which project photos go, with a default per moment`() {
+        runBlocking {
+            photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()), "main")
+            app.repository.putBlob(StoredBlob("image/jpeg", "side".toByteArray()), "angle-1")
+            app.repository.putBlob(StoredBlob("image/jpeg", "old".toByteArray()), "prog-1")
+            app.repository.putBlob(StoredBlob("image/jpeg", "now".toByteArray()), "prog-2")
+            val p = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR).copy(initialPhotoBlobId = "main", extraPhotoBlobIds = listOf("angle-1"))
+            app.repository.saveProject(
+                p.copy(progress = listOf(ProgressPhoto("g1", "2026-11-12T10:00:00.000Z", "prog-1"), ProgressPhoto("g2", "2026-11-14T10:00:00.000Z", "prog-2"))),
+            )
+        }
+        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
+        // The project's photos are chosen in a dialog: newest progress first, then the main photo and its angles.
+        click("ask_choose_project_photo")
+        compose.onAllNodesWithTag("ask_project_photo").assertCountEquals(4)
+        compose.onNodeWithTag("ask_project_photos_done").performClick()
+
+        // Start: the unpainted miniature from every angle.
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.size == 1 }
+        assertEquals(listOf("main", "angle-1"), listOf(app.bridge.sent[0].imageId) + app.bridge.sent[0].extraImageIds)
+
+        // Half-painted: the latest progress photo; the user adds the older one too.
+        click("moment_half-painted")
+        compose.onAllNodesWithTag("ask_chosen_photo").assertCountEquals(1)
+        click("ask_choose_project_photo")
+        compose.onAllNodesWithTag("ask_project_photo")[1].performClick()
+        compose.onNodeWithTag("ask_project_photos_done").performClick()
+        compose.onAllNodesWithTag("ask_chosen_photo").assertCountEquals(2)
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.size == 2 }
+        assertEquals(listOf("prog-2", "prog-1"), listOf(app.bridge.sent[1].imageId) + app.bridge.sent[1].extraImageIds)
+
+        // Nothing chosen: nothing is sent.
+        click("ask_choose_project_photo")
+        compose.onAllNodesWithTag("ask_project_photo")[0].performClick()
+        compose.onAllNodesWithTag("ask_project_photo")[1].performClick()
+        compose.onNodeWithTag("ask_project_photos_done").performClick()
+        click("send")
+        app.waitFor(compose) { compose.onAllNodesWithTag("send_status").fetchSemanticsNodes().isNotEmpty() }
+        assertEquals(2, app.bridge.sent.size)
+    }
+
+    @Test
+    fun `a photo taken on the Ask screen goes first, with the chosen project photos`() {
+        show()
+        app.photos.nextPhoto = byteArrayOf(4, 4)
+        click("ask_take_photo")
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        val pkg = app.bridge.sent.single()
+        assertContentEquals(byteArrayOf(4, 4), runBlocking { app.repository.getBlob(pkg.imageId) }!!.bytes)
+        assertEquals(listOf(photoId), pkg.extraImageIds)
+    }
+
+    @Test
+    fun `primed without angles sends the latest progress photo, as before`() {
+        runBlocking {
+            photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
+            val prog = app.repository.putBlob(StoredBlob("image/jpeg", "primed".toByteArray()), "prog")
+            val p = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR).copy(initialPhotoBlobId = photoId)
+            app.repository.saveProject(p.copy(progress = listOf(ProgressPhoto("g1", "2026-11-12T10:00:00.000Z", prog))))
+        }
+        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
+        click("moment_primed")
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.size == 1 }
+        assertEquals("prog", app.bridge.sent[0].imageId)
+        assertEquals(emptyList(), app.bridge.sent[0].extraImageIds)
+    }
+
+    @Test
     fun `explains the fallback and shows the prompt to copy when the share sheet could not be used`() {
         show(sendResult = SendResult.FALLBACK)
         click("send")
@@ -327,17 +431,16 @@ class AskScreenTest {
     }
 
     @Test
-    @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun `says the project photo will be sent until a photo is taken`() {
+    fun `three ways to add photos, and the project's photos chosen in a dialog, the main one chosen for start`() {
         show()
-        compose.onNodeWithTag("ask_default_photo").performScrollTo().assert(hasText("The project photo will be sent.", substring = true))
-        compose.onNodeWithTag("ask_default_photo_thumb", useUnmergedTree = true).assertExists()
+        listOf("ask_choose_project_photo", "ask_take_photo", "ask_choose_photo").forEach { compose.onNodeWithTag(it).assertExists() }
+        compose.onAllNodesWithTag("ask_chosen_photo").assertCountEquals(1)
+        compose.onAllNodesWithTag("ask_project_photo").assertCountEquals(0)
 
-        app.photos.nextPhoto = jpeg()
-        click("ask_take_photo")
-
-        compose.onNodeWithTag("ask_photo_preview").performScrollTo().assertIsDisplayed()
-        compose.onAllNodesWithTag("ask_default_photo").assertCountEquals(0)
+        click("ask_choose_project_photo")
+        compose.onNodeWithTag("ask_project_photo").assertIsSelected()
+        compose.onNodeWithTag("ask_project_photos_done").performClick()
+        compose.onAllNodesWithTag("ask_project_photo").assertCountEquals(0)
     }
 
     @Test

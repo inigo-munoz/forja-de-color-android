@@ -16,6 +16,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import app.forjadecolor.domain.projects.cleanMotif
+import app.forjadecolor.domain.projects.MAX_MOTIF
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,7 +42,8 @@ fun LookLine(look: Look, onChange: (Look) -> Unit, modifier: Modifier = Modifier
     var editing by rememberSaveable { mutableStateOf(false) }
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            stringResource(R.string.look_summary, stringResource(styleName(look.style)), stringResource(baseName(look.baseSetting))),
+            stringResource(R.string.look_summary, stringResource(styleName(look.style)), stringResource(baseName(look.baseSetting))) +
+                (look.baseMotif?.let { " · $it" } ?: ""),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.weight(1f).testTag("look_line"),
         )
@@ -55,6 +59,7 @@ fun LookLine(look: Look, onChange: (Look) -> Unit, modifier: Modifier = Modifier
 fun LookDialog(initial: Look, onSave: (Look) -> Unit, onCancel: () -> Unit) {
     var style by rememberSaveable { mutableStateOf(initial.style) }
     var base by rememberSaveable { mutableStateOf(initial.baseSetting) }
+    var motif by rememberSaveable { mutableStateOf(initial.baseMotif.orEmpty()) }
     Dialog(onDismissRequest = onCancel, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(Modifier.fillMaxWidth().padding(16.dp).testTag("look_dialog"), shape = MaterialTheme.shapes.large) {
             Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -66,9 +71,17 @@ fun LookDialog(initial: Look, onSave: (Look) -> Unit, onCancel: () -> Unit) {
                 (listOf<BaseSetting?>(null) + BaseSetting.entries).forEach { b ->
                     Choice(baseName(b), baseHelp(b), selected = base == b, tag = "base_${b?.let { wire(it.name) } ?: "none"}") { base = b }
                 }
+                OutlinedTextField(
+                    value = motif,
+                    onValueChange = { motif = it.take(MAX_MOTIF) },
+                    label = { Text(stringResource(R.string.look_motif)) },
+                    placeholder = { Text(stringResource(R.string.look_motif_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp).testTag("look_motif"),
+                )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
                     TextButton(onClick = onCancel, modifier = Modifier.testTag("look_cancel")) { Text(stringResource(R.string.inventory_cancel)) }
-                    Button(onClick = { onSave(Look(style, base)) }, modifier = Modifier.testTag("look_save")) { Text(stringResource(R.string.look_save)) }
+                    Button(onClick = { onSave(Look(style, base, cleanMotif(motif))) }, modifier = Modifier.testTag("look_save")) { Text(stringResource(R.string.look_save)) }
                 }
             }
         }

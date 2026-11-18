@@ -40,6 +40,10 @@ data class ProjectEntity(
     val style: String? = null,
     /** BaseSetting name; null = no setting (v3). */
     val baseSetting: String? = null,
+    /** Extra angles, a JSON list of photo ids (v5). */
+    @ColumnInfo(defaultValue = "[]") val extraPhotosJson: String = "[]",
+    /** Free-text theme for the base (v6). */
+    val baseMotif: String? = null,
 )
 
 @Entity(

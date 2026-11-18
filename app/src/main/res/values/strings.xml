@@ -208,4 +208,16 @@
     <string name="catalogue_set">Set %1$s · %2$s · %3$d paints</string>
     <string name="inventory_delete_confirm">Delete this paint from your inventory? Projects that use it will show it as not in your paints.</string>
     <string name="paste_instructions_hint">Instructions copied. If the chat only shows the photo, long-press the text box and tap Paste (or the clipboard suggestion on the keyboard).</string>
+    <string name="ask_current_photo">For half-painted, take or choose a current photo of the miniature: the project only has the unpainted one.</string>
+    <string name="projects_angles_help">Up to 4 photos from different angles; the first is the main one. The advisor gets them all at the start.</string>
+    <string name="project_angles">Angles</string>
+    <string name="project_add_angle">Add angle</string>
+    <string name="confirm_delete_angle">Delete this angle photo?</string>
+    <string name="ask_choose_photos">Tap the project photos to send (up to %1$d).</string>
+    <string name="ask_choose_project_photo">Choose a project photo</string>
+    <string name="ask_chosen_photos">Project photos that will be sent:</string>
+    <string name="ask_done">Done</string>
+    <string name="look_motif">Base motif (optional)</string>
+    <string name="look_motif_hint">e.g. lava river, graveyard, autumn forest</string>
+    <string name="project_base_materials">For the base (materials you may not have)</string>
 </resources>

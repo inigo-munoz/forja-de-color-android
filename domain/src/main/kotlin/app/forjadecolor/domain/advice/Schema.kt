@@ -74,6 +74,8 @@ data class RecipeResponse(
     /** half-painted only */
     val complements: List<PaintRef>? = null,
     val remainingSteps: List<String>? = null,
+    /** Basing materials the advisor recommends for a themed base; the user may not have them. */
+    val baseMaterials: List<String>? = null,
 ) : AdviceResponse
 
 @Serializable
@@ -116,7 +118,12 @@ data class AdviceRequest(
     val freeText: String? = null,
     val style: PaintingStyle? = null,
     val baseSetting: BaseSetting? = null,
+    val baseMotif: String? = null,
+    /** Half-painted: the project's latest recipe and the zones ticked as painted. */
+    val previous: PreviousRecipe? = null,
 )
 
+data class PreviousRecipe(val response: RecipeResponse, val doneZones: List<Int>)
+
 /** What is shared with the user's AI chat: the prompt and the id of the stored photo. */
-data class AdvicePackage(val text: String, val imageId: String)
+data class AdvicePackage(val text: String, val imageId: String, val extraImageIds: List<String> = emptyList())

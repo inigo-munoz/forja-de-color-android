@@ -3,6 +3,8 @@ package app.forjadecolor.domain.projects
 import app.forjadecolor.domain.advice.AdviceEntry
 import app.forjadecolor.domain.isoString
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import java.time.Instant
 
@@ -27,6 +29,7 @@ data class Project(
     val name: String,
     val createdAt: String,
     val status: ProjectStatus,
+    /** The main photo: list, header, Before/after and "Paint it with ChatGPT". */
     val initialPhotoBlobId: String? = null,
     val targetImageBlobId: String? = null,
     val notes: String,
@@ -36,17 +39,35 @@ data class Project(
     val style: PaintingStyle? = null,
     /** Null: no setting for the base. */
     val baseSetting: BaseSetting? = null,
+    /** Free-text theme for the base; null when there is none (left out of the JSON). */
+    val baseMotif: String? = null,
+    /** Up to [MAX_ANGLES] more photos of the unpainted miniature; left out of the JSON when empty. */
+    @OptIn(ExperimentalSerializationApi::class)
+    @EncodeDefault(EncodeDefault.Mode.NEVER)
+    val extraPhotoBlobIds: List<String> = emptyList(),
 ) {
     /** Every photo the project references, for backups and clean-up. */
-    val blobIds: List<String> get() = listOfNotNull(initialPhotoBlobId, targetImageBlobId) + progress.map { it.blobId }
+    val blobIds: List<String> get() = listOfNotNull(initialPhotoBlobId) + extraPhotoBlobIds + listOfNotNull(targetImageBlobId) + progress.map { it.blobId }
+
+    /** The main photo and its angles, in order: what the advisor sends for start and primed. */
+    val photos: List<String> get() = listOfNotNull(initialPhotoBlobId) + extraPhotoBlobIds
 
     /** The look the prompts follow; a project saved before styles existed is painted with my method. */
-    val look: Look get() = Look(style ?: PaintingStyle.MY_METHOD, baseSetting)
+    val look: Look get() = Look(style ?: PaintingStyle.MY_METHOD, baseSetting, baseMotif)
 }
+
+/** Extra angles a project keeps besides its main photo. */
+const val MAX_ANGLES = 3
+
+/** Adds an angle; ignored once the project has [MAX_ANGLES]. */
+fun Project.addAngle(blobId: String): Project =
+    if (extraPhotoBlobIds.size >= MAX_ANGLES) this else copy(extraPhotoBlobIds = extraPhotoBlobIds + blobId)
+
+fun Project.removeAngle(blobId: String): Project = copy(extraPhotoBlobIds = extraPhotoBlobIds - blobId)
 
 /** Sets the look; my method is stored as null, like older projects and the PWA. */
 fun Project.setLook(look: Look): Project =
-    copy(style = look.style.takeIf { it != PaintingStyle.MY_METHOD }, baseSetting = look.baseSetting)
+    copy(style = look.style.takeIf { it != PaintingStyle.MY_METHOD }, baseSetting = look.baseSetting, baseMotif = cleanMotif(look.baseMotif))
 
 fun createProject(name: String, now: Instant, id: String): Project =
     Project(id, name, isoString(now), ProjectStatus.IN_PROGRESS, notes = "", progress = emptyList(), advice = emptyList())

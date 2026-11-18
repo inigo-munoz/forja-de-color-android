@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.forjadecolor.AppContainer
 import app.forjadecolor.domain.advice.AdviceRequest
+import app.forjadecolor.domain.advice.Moment
+import app.forjadecolor.domain.advice.PreviousRecipe
+import app.forjadecolor.domain.advice.RecipeResponse
 import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.advice.SendResult
 import app.forjadecolor.domain.advice.buildAdvicePackage
@@ -22,7 +25,7 @@ import kotlinx.coroutines.launch
 
 /** What sending said: nothing, a photo is needed, or the share sheet failed and the prompt is shown to copy. */
 /** SHARED: the share sheet opened; the instructions are on the clipboard, since Claude keeps only the photo. */
-enum class SendStatus { NONE, PHOTO_MISSING, SHARED, FALLBACK }
+enum class SendStatus { NONE, PHOTO_MISSING, CURRENT_PHOTO_MISSING, SHARED, FALLBACK }
 
 data class AskState(
     val loaded: Boolean = false,
@@ -81,20 +84,27 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
     }
 
     /** Sends [picked] (stored first), or else the project's latest stored photo, with [request]. */
-    fun send(picked: ByteArray?, request: AdviceRequest) {
+    fun send(picked: ByteArray?, request: AdviceRequest, chosen: List<String> = emptyList()) {
         val current = _state.value.project ?: return
         viewModelScope.launch {
-            val id = when {
-                picked != null -> photoId ?: repository.putBlob(StoredBlob("image/jpeg", picked)).also { photoId = it }
-                else -> defaultPhotoId(current)?.takeIf { repository.getBlob(it) != null }
-            }
-            if (id == null) {
-                _state.update { it.copy(sendStatus = SendStatus.PHOTO_MISSING) }
+            val fresh = repository.getProject(current.id) ?: current
+            // A photo taken or chosen here goes first, then the project photos the user chose (up to MAX_SENT).
+            val pickedId = picked?.let { photoId ?: repository.putBlob(StoredBlob("image/jpeg", it)).also { id -> photoId = id } }
+            val ids = (listOfNotNull(pickedId) + chosen.filter { repository.getBlob(it) != null }).distinct().take(MAX_SENT)
+            if (ids.isEmpty()) {
+                // Half-painted needs the miniature as it is now: never the unpainted photo by default.
+                val status = if (request.moment == Moment.HALF_PAINTED) SendStatus.CURRENT_PHOTO_MISSING else SendStatus.PHOTO_MISSING
+                _state.update { it.copy(sendStatus = status) }
                 return@launch
             }
+            val id = ids.first()
             // The project's look as saved now: it may have been changed on this screen.
-            val look = (repository.getProject(current.id) ?: current).look
-            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting), repository.getInventory(), id)
+            val look = fresh.look
+            // Half-painted carries the latest recipe and the zones ticked as painted.
+            val recipe = fresh.advice.lastOrNull { it.response is RecipeResponse }
+            val previous = if (request.moment == Moment.HALF_PAINTED && recipe != null) PreviousRecipe(recipe.response as RecipeResponse, recipe.doneZones) else null
+            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, baseMotif = look.baseMotif, previous = previous), repository.getInventory(), id)
+                .copy(extraImageIds = ids.drop(1))
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }
         }

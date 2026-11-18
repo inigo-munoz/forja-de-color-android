@@ -7,60 +7,60 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
-Vallejo|72.003|Carne Pálida|BSL Warm Flesh|1|extra light
-Vallejo|72.100|Carne Rosa|BSL Warm Flesh|2|light
-Vallejo|72.107|Piel de Atenea|BSL Warm Flesh|3|base
-Vallejo|72.108|Piel de Súcubo|BSL Warm Flesh|4|shadow
-Vallejo|72.098|Carne Élfica|BSL Flesh|1|extra light
-Vallejo|72.099|Piel|BSL Flesh|2|light
-Vallejo|72.004|Piel de Elfos|BSL Flesh|3|base
-Vallejo|72.071|Piel de Bárbaro|BSL Flesh|4|shadow
-Vallejo|72.109|Amarillo Tóxico|BSL Yellow|1|extra light
-Vallejo|72.005|Amarillo Lunar|BSL Yellow|2|light
-Vallejo|72.006|Amarillo Soleado|BSL Yellow|3|base
-Vallejo|72.007|Amarillo Dorado|BSL Yellow|4|shadow
-Vallejo|72.110|Naranja Atardecer|BSL Orange|1|extra light
-Vallejo|72.008|Naranja Fuego|BSL Orange|2|light
-Vallejo|72.009|Naranja Tostado|BSL Orange|3|base
-Vallejo|72.106|Sangre Escarlata|BSL Orange|4|shadow
-Vallejo|72.013|Rosa Pulpo|BSL Magenta|1|extra light
-Vallejo|72.014|Púrpura|BSL Magenta|2|light
-Vallejo|72.113|Magenta Profundo|BSL Magenta|3|base
-Vallejo|72.112|Rojo Maligno|BSL Magenta|4|shadow
-Vallejo|72.114|Púrpura Lujurioso|BSL Violet|1|extra light
-Vallejo|72.076|Púrpura Alienígena|BSL Violet|2|light
-Vallejo|72.015|Púrpura Hechicero|BSL Violet|3|base
-Vallejo|72.116|Púrpura Medianoche|BSL Violet|4|shadow
-Vallejo|72.118|Azul Amanecer|BSL Blue|1|extra light
-Vallejo|72.021|Azul Mágico|BSL Blue|2|light
-Vallejo|72.020|Azul Imperial|BSL Blue|3|base
-Vallejo|72.019|Azul Negro|BSL Blue|4|shadow
-Vallejo|72.096|Verdín|BSL Turquoise|1|extra light
-Vallejo|72.119|Aguamarina|BSL Turquoise|2|light
-Vallejo|72.024|Halcón Milenario|BSL Turquoise|3|base
-Vallejo|72.120|Turquesa Abisal|BSL Turquoise|4|shadow
-Vallejo|72.121|Verde Espectral|BSL Cold Green|1|extra light
-Vallejo|72.025|Verde Malicioso|BSL Cold Green|2|light
-Vallejo|72.026|Verde Jade|BSL Cold Green|3|base
-Vallejo|72.027|Verde Casposo|BSL Cold Green|4|shadow
-Vallejo|72.122|Verde Bilioso|BSL Green|1|extra light
-Vallejo|72.032|Verde Escorpena|BSL Green|2|light
-Vallejo|72.123|Verde Angelical|BSL Green|3|light
-Vallejo|72.028|Verde Oscuro|BSL Green|4|base
-Vallejo|72.001|Blanco Calavera|BSL Black|1|extra light
-Vallejo|72.049|Gris Muralla|BSL Black|2|light
-Vallejo|72.155|Gris Carbón|BSL Black|3|base
-Vallejo|72.051|Negro|BSL Black|4|shadow
-Vallejo|72.011|Rojo Visceral|BSL Multipurpose|1|
-Vallejo|72.042|Piel de Parásitos|BSL Multipurpose|2|
-Vallejo|72.124|Marrón Gorgona|BSL Multipurpose|3|
-Vallejo|72.045|Marrón Carbonizado|BSL Multipurpose|4|
+INVENTORY (brand|code|name|family|order|role|type)
+Vallejo|72.003|Carne Pálida|BSL Warm Flesh|1|extra light|opaque
+Vallejo|72.100|Carne Rosa|BSL Warm Flesh|2|light|opaque
+Vallejo|72.107|Piel de Atenea|BSL Warm Flesh|3|base|opaque
+Vallejo|72.108|Piel de Súcubo|BSL Warm Flesh|4|shadow|opaque
+Vallejo|72.098|Carne Élfica|BSL Flesh|1|extra light|opaque
+Vallejo|72.099|Piel|BSL Flesh|2|light|opaque
+Vallejo|72.004|Piel de Elfos|BSL Flesh|3|base|opaque
+Vallejo|72.071|Piel de Bárbaro|BSL Flesh|4|shadow|opaque
+Vallejo|72.109|Amarillo Tóxico|BSL Yellow|1|extra light|opaque
+Vallejo|72.005|Amarillo Lunar|BSL Yellow|2|light|opaque
+Vallejo|72.006|Amarillo Soleado|BSL Yellow|3|base|opaque
+Vallejo|72.007|Amarillo Dorado|BSL Yellow|4|shadow|opaque
+Vallejo|72.110|Naranja Atardecer|BSL Orange|1|extra light|opaque
+Vallejo|72.008|Naranja Fuego|BSL Orange|2|light|opaque
+Vallejo|72.009|Naranja Tostado|BSL Orange|3|base|opaque
+Vallejo|72.106|Sangre Escarlata|BSL Orange|4|shadow|opaque
+Vallejo|72.013|Rosa Pulpo|BSL Magenta|1|extra light|opaque
+Vallejo|72.014|Púrpura|BSL Magenta|2|light|opaque
+Vallejo|72.113|Magenta Profundo|BSL Magenta|3|base|opaque
+Vallejo|72.112|Rojo Maligno|BSL Magenta|4|shadow|opaque
+Vallejo|72.114|Púrpura Lujurioso|BSL Violet|1|extra light|opaque
+Vallejo|72.076|Púrpura Alienígena|BSL Violet|2|light|opaque
+Vallejo|72.015|Púrpura Hechicero|BSL Violet|3|base|opaque
+Vallejo|72.116|Púrpura Medianoche|BSL Violet|4|shadow|opaque
+Vallejo|72.118|Azul Amanecer|BSL Blue|1|extra light|opaque
+Vallejo|72.021|Azul Mágico|BSL Blue|2|light|opaque
+Vallejo|72.020|Azul Imperial|BSL Blue|3|base|opaque
+Vallejo|72.019|Azul Negro|BSL Blue|4|shadow|opaque
+Vallejo|72.096|Verdín|BSL Turquoise|1|extra light|opaque
+Vallejo|72.119|Aguamarina|BSL Turquoise|2|light|opaque
+Vallejo|72.024|Halcón Milenario|BSL Turquoise|3|base|opaque
+Vallejo|72.120|Turquesa Abisal|BSL Turquoise|4|shadow|opaque
+Vallejo|72.121|Verde Espectral|BSL Cold Green|1|extra light|opaque
+Vallejo|72.025|Verde Malicioso|BSL Cold Green|2|light|opaque
+Vallejo|72.026|Verde Jade|BSL Cold Green|3|base|opaque
+Vallejo|72.027|Verde Casposo|BSL Cold Green|4|shadow|opaque
+Vallejo|72.122|Verde Bilioso|BSL Green|1|extra light|opaque
+Vallejo|72.032|Verde Escorpena|BSL Green|2|light|opaque
+Vallejo|72.123|Verde Angelical|BSL Green|3|light|opaque
+Vallejo|72.028|Verde Oscuro|BSL Green|4|base|opaque
+Vallejo|72.001|Blanco Calavera|BSL Black|1|extra light|opaque
+Vallejo|72.049|Gris Muralla|BSL Black|2|light|opaque
+Vallejo|72.155|Gris Carbón|BSL Black|3|base|opaque
+Vallejo|72.051|Negro|BSL Black|4|shadow|opaque
+Vallejo|72.011|Rojo Visceral|BSL Multipurpose|1||opaque
+Vallejo|72.042|Piel de Parásitos|BSL Multipurpose|2||opaque
+Vallejo|72.124|Marrón Gorgona|BSL Multipurpose|3||opaque
+Vallejo|72.045|Marrón Carbonizado|BSL Multipurpose|4||opaque
 brush|B02001|Detail núm. 1
 brush|B02002|Detail núm. 2
 brush|B07001|Dry Brush Small
 
-MOMENT: half-painted. The photo shows my miniature partly painted. Say which zones are already painted, propose complementary colours and the steps left to finish it.
+MOMENT: half-painted. The photo shows my miniature partly painted and I want to finish it: I do not want to repaint it. Review the zones already painted and suggest a fix (a wash, a glaze, a highlight) only when something clearly needs it; then give the steps to finish the zones that are left, with colours that match what is already painted.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {
@@ -75,5 +75,5 @@ ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
   "tips": ["..."],
   "complements": [{ "brand": "Vallejo", "code": "72.008" }],
   "remainingSteps": ["..."]
-  (mark zones that are already painted with "alreadyPainted": true)
+  (mark zones already painted with "alreadyPainted": true; their steps are only the touch-ups they need, or empty)
 }

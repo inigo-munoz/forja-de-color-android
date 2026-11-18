@@ -315,6 +315,29 @@ class ProjectScreenTest {
     }
 
     @Test
+    fun `the Photos tab adds and removes angles of the main photo, deleting the removed file`() {
+        val angle = runBlocking {
+            val main = app.repository.putBlob(StoredBlob("image/jpeg", "raw".toByteArray()))
+            val a = app.repository.putBlob(StoredBlob("image/jpeg", "side".toByteArray()))
+            app.repository.saveProject(createProject("Bárbara", app.now, "p1").copy(initialPhotoBlobId = main, extraPhotoBlobIds = listOf(a)))
+            a
+        }
+        app.setContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("toggle_done").fetchSemanticsNodes().isNotEmpty() }
+        openTab("photos")
+        compose.onAllNodesWithTag("angle_photo").assertCountEquals(1)
+
+        app.photos.nextPhoto = byteArrayOf(8)
+        compose.onNodeWithTag("add_angle").performScrollTo().performClick()
+        app.waitFor(compose) { app.project("p1")!!.extraPhotoBlobIds.size == 2 }
+
+        compose.onAllNodesWithTag("delete_angle")[0].performScrollTo().performClick()
+        compose.onNodeWithTag("confirm_delete").performClick()
+        app.waitFor(compose) { app.project("p1")!!.extraPhotoBlobIds.size == 1 }
+        app.waitFor(compose) { runBlocking { app.repository.getBlob(angle) } == null }
+    }
+
+    @Test
     fun `the selected tab survives recreation`() {
         runBlocking { app.repository.saveProject(createProject("Bárbara", app.now, "p1")) }
         val restoration = app.setRestorableContent(compose) { ProjectScreen(app.container, "p1", onAsk = {}, onOpenTechnique = {}, onBack = {}) }

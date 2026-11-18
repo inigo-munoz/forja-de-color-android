@@ -40,13 +40,14 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
+import app.forjadecolor.domain.projects.MAX_ANGLES
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
 import app.forjadecolor.domain.projects.createProject
 import app.forjadecolor.domain.projects.projectActivity
 import app.forjadecolor.domain.storage.StoredBlob
 import app.forjadecolor.ui.components.PhotoPreview
-import app.forjadecolor.ui.components.rememberPendingPhoto
+import app.forjadecolor.ui.components.rememberPendingPhotos
 import app.forjadecolor.ui.project.BlobImage
 import app.forjadecolor.ui.project.LocalPhotoSources
 import app.forjadecolor.ui.share.IncomingSharePrompt
@@ -59,10 +60,11 @@ import java.util.UUID
 fun orderProjects(projects: List<Project>): List<Project> =
     projects.sortedWith(compareBy<Project> { if (it.status == ProjectStatus.IN_PROGRESS) 0 else 1 }.thenByDescending { it.createdAt })
 
-/** Creates and stores a project, with its photo when one was taken; returns the new project. */
-suspend fun createAndSaveProject(container: AppContainer, name: String, photo: ByteArray?): Project {
-    val photoId = photo?.let { container.repository.putBlob(StoredBlob("image/jpeg", it)) }
-    val project = createProject(name, container.now(), UUID.randomUUID().toString()).copy(initialPhotoBlobId = photoId)
+/** Creates and stores a project with its photos (the first is the main one, the rest angles); returns it. */
+suspend fun createAndSaveProject(container: AppContainer, name: String, photos: List<ByteArray>): Project {
+    val ids = photos.take(MAX_ANGLES + 1).map { container.repository.putBlob(StoredBlob("image/jpeg", it)) }
+    val project = createProject(name, container.now(), UUID.randomUUID().toString())
+        .copy(initialPhotoBlobId = ids.firstOrNull(), extraPhotoBlobIds = ids.drop(1))
     container.repository.saveProject(project)
     return project
 }
@@ -120,7 +122,7 @@ fun ProjectsScreen(
 
     if (formOpen) {
         NewProjectDialog(
-            onCreate = { name, photo -> formOpen = false; vm.create(name, photo, onOpenProject) },
+            onCreate = { name, photos -> formOpen = false; vm.create(name, photos, onOpenProject) },
             onCancel = { formOpen = false },
         )
     }
@@ -158,12 +160,14 @@ private fun activityLine(project: Project): String {
 
 /** The new-project form in a dialog; its fields survive rotation, and cancelling creates nothing. */
 @Composable
-private fun NewProjectDialog(onCreate: (name: String, photo: ByteArray?) -> Unit, onCancel: () -> Unit) {
+private fun NewProjectDialog(onCreate: (name: String, photos: List<ByteArray>) -> Unit, onCancel: () -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
-    var photo by rememberPendingPhoto()
+    var photos by rememberPendingPhotos()
     var photoError by remember { mutableStateOf(false) }
     val sources = LocalPhotoSources.current
-    val onPhoto: (ByteArray) -> Unit = { photo = it; photoError = false }
+    // Several angles of the miniature: the first is the main photo.
+    val onPhoto: (ByteArray) -> Unit = { if (photos.size <= MAX_ANGLES) photos = photos + it; photoError = false }
+    val room = photos.size <= MAX_ANGLES
     val onError: (Throwable) -> Unit = { photoError = true }
     val pick = sources.picker(onError, onPhoto)
     val shoot = sources.camera(onError, onPhoto)
@@ -181,15 +185,18 @@ private fun NewProjectDialog(onCreate: (name: String, photo: ByteArray?) -> Unit
                 )
                 Text(stringResource(R.string.projects_photo), style = MaterialTheme.typography.labelLarge)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = pick, modifier = Modifier.testTag("new_project_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
-                    OutlinedButton(onClick = shoot, modifier = Modifier.testTag("new_project_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
+                    OutlinedButton(onClick = pick, enabled = room, modifier = Modifier.testTag("new_project_choose_photo")) { Text(stringResource(R.string.t8_choose_photo)) }
+                    OutlinedButton(onClick = shoot, enabled = room, modifier = Modifier.testTag("new_project_take_photo")) { Text(stringResource(R.string.t8_take_photo)) }
                 }
-                photo?.let { PhotoPreview(it, tag = "new_project_photo_preview", onRemove = { photo = null }) }
+                Text(stringResource(R.string.projects_angles_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                photos.forEachIndexed { i, bytes ->
+                    PhotoPreview(bytes, tag = "new_project_photo_preview", onRemove = { photos = photos.filterIndexed { j, _ -> j != i } })
+                }
                 if (photoError) Text(stringResource(R.string.t8_photo_error), color = MaterialTheme.colorScheme.error)
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)) {
                     TextButton(onClick = onCancel, modifier = Modifier.testTag("new_project_cancel")) { Text(stringResource(R.string.inventory_cancel)) }
                     Button(
-                        onClick = { name.trim().takeIf { it.isNotEmpty() }?.let { onCreate(it, photo) } },
+                        onClick = { name.trim().takeIf { it.isNotEmpty() }?.let { onCreate(it, photos) } },
                         modifier = Modifier.testTag("new_project_create"),
                     ) { Text(stringResource(R.string.projects_create)) }
                 }

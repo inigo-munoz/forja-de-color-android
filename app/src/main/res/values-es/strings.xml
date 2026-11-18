@@ -206,4 +206,16 @@
     <string name="catalogue_set">Set %1$s · %2$s · %3$d pinturas</string>
     <string name="inventory_delete_confirm">¿Borrar esta pintura de tu inventario? Los proyectos que la usan la mostrarán como que no la tienes.</string>
     <string name="paste_instructions_hint">Instrucciones copiadas. Si en el chat solo aparece la foto, mantén pulsado el cuadro de texto y toca Pegar (o la sugerencia del portapapeles en el teclado).</string>
+    <string name="ask_current_photo">Para «A medio pintar», saca o elige una foto actual de la miniatura: el proyecto solo tiene la de sin pintar.</string>
+    <string name="projects_angles_help">Hasta 4 fotos desde distintos ángulos; la primera es la principal. El asesor las recibe todas al empezar.</string>
+    <string name="project_angles">Ángulos</string>
+    <string name="project_add_angle">Añadir ángulo</string>
+    <string name="confirm_delete_angle">¿Eliminar esta foto de ángulo?</string>
+    <string name="ask_choose_photos">Toca las fotos del proyecto que quieres enviar (hasta %1$d).</string>
+    <string name="ask_choose_project_photo">Elegir foto del proyecto</string>
+    <string name="ask_chosen_photos">Fotos del proyecto que se enviarán:</string>
+    <string name="ask_done">Listo</string>
+    <string name="look_motif">Motivo de la peana (opcional)</string>
+    <string name="look_motif_hint">p. ej. río de lava, cementerio, bosque otoñal</string>
+    <string name="project_base_materials">Para la peana (materiales que quizá no tienes)</string>
 </resources>

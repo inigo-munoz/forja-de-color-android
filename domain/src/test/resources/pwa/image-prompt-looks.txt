@@ -42,37 +42,63 @@ Paint each zone with these colours:
 - peana: Citadel Abaddon Black
 Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
 -----
-Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
 Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
 Base: winter ground with snow and ice.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
 Paint each zone with these colours:
 - túnica: Verde Escorpena #4e8437
 - cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
 - peana: Citadel Abaddon Black
 Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
 -----
-Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
 Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
 Base: desert sand and dry earth.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
 Paint each zone with these colours:
 - túnica: Verde Escorpena #4e8437
 - cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
 - peana: Citadel Abaddon Black
 Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
 -----
-Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
 Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
 Base: magical ground with unreal colours.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
 Paint each zone with these colours:
 - túnica: Verde Escorpena #4e8437
 - cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
 - peana: Citadel Abaddon Black
 Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
 -----
-Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
 Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
 Painting style: OSL — a glowing light source on the miniature tints the nearby surfaces.
 Base: winter ground with snow and ice.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
+Paint each zone with these colours:
+- túnica: Verde Escorpena #4e8437
+- cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
+- peana: Citadel Abaddon Black
+Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
+-----
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
+Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
+Base theme: río de lava.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
+Paint each zone with these colours:
+- túnica: Verde Escorpena #4e8437
+- cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9
+- peana: Citadel Abaddon Black
+Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only.
+-----
+Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it.
+Style: tabletop-quality "slapchop" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.
+Painting style: grimdark — muted colours with wear, dirt and battle damage.
+Base: desert sand and dry earth.
+Base theme: ruinas.
+On the base only, you may add terrain that fits it (snow, rocks, plants, effects); leave the miniature itself exactly as it is.
 Paint each zone with these colours:
 - túnica: Verde Escorpena #4e8437
 - cara: base Piel #e3ac86, shadows Piel de Bárbaro #926640, highlights Carne Élfica #ebd7b9

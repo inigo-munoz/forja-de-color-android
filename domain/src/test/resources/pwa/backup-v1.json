@@ -273,7 +273,10 @@
         }
       ],
       "initialPhotoBlobId": "photo-initial",
-      "targetImageBlobId": "photo-target"
+      "targetImageBlobId": "photo-target",
+      "extraPhotoBlobIds": [
+        "photo-angle"
+      ]
     },
     {
       "id": "project-2",
@@ -284,13 +287,18 @@
       "progress": [],
       "advice": [],
       "style": "nmm",
-      "baseSetting": "desert"
+      "baseSetting": "desert",
+      "baseMotif": "ruinas de un templo"
     }
   ],
   "blobs": {
     "photo-initial": {
       "type": "image/jpeg",
       "base64": "/9j/AAH+"
+    },
+    "photo-angle": {
+      "type": "image/jpeg",
+      "base64": "BQUF"
     },
     "photo-target": {
       "type": "image/png",

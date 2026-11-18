@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
 import app.forjadecolor.domain.advice.AdviceEntry
 import app.forjadecolor.domain.advice.RecipeMoment
 import app.forjadecolor.domain.advice.RecipeResponse
@@ -150,5 +151,25 @@ class LookTest {
         val text = app.bridge.sent.single().text
         assertTrue("Painting style: grimdark" in text)
         assertTrue("Base: magical ground" in text)
+    }
+
+    @Test
+    fun `a free-text base motif is saved, shown and sent to the advisor`() {
+        save()
+        showProject()
+        click("look_change")
+        compose.onNodeWithTag("look_motif").performScrollTo().performTextReplacement("río de lava")
+        click("look_save")
+
+        app.waitFor(compose) { app.project("p1")?.baseMotif == "río de lava" }
+        compose.onNodeWithTag("look_line").assert(hasText("río de lava", substring = true))
+    }
+
+    @Test
+    fun `a recipe shows the basing materials the advisor recommends, as maybe not owned`() {
+        save { it.addAdvice(RECIPE.copy(response = (RECIPE.response as RecipeResponse).copy(baseMaterials = listOf("arena fina", "nieve artificial")))) }
+        showProject()
+        compose.onNodeWithTag("base_materials").performScrollTo().assert(hasText("arena fina", substring = true))
+        compose.onNodeWithTag("base_materials").assert(hasText("nieve artificial", substring = true))
     }
 }
