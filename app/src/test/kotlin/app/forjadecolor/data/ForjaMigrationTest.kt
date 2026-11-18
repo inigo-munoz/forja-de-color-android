@@ -5,6 +5,7 @@ import app.forjadecolor.domain.paints.PaintFamily
 import app.forjadecolor.domain.projects.BaseSetting
 import app.forjadecolor.domain.projects.Look
 import app.forjadecolor.domain.projects.PaintingStyle
+import app.forjadecolor.domain.projects.addAngle
 import app.forjadecolor.domain.projects.setLook
 
 import android.content.Context
@@ -96,7 +97,7 @@ class ForjaMigrationTest {
             val advice = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration"))).getProject("p1")!!.advice.single()
             assertEquals(emptyList(), advice.doneZones)
             assertEquals(listOf("X999"), advice.unknownBrushes)
-            assertEquals(4, db.openHelper.readableDatabase.version)
+            assertEquals(5, db.openHelper.readableDatabase.version)
         } finally {
             db.close()
         }
@@ -110,7 +111,7 @@ class ForjaMigrationTest {
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(4, db.openHelper.readableDatabase.version)
+            assertEquals(5, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val p = repo.getProject("p1")!!
             assertEquals(listOf("Paladín", "t", "Capa verde"), listOf(p.name, p.targetImageBlobId, p.notes))
@@ -134,7 +135,7 @@ class ForjaMigrationTest {
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(4, db.openHelper.readableDatabase.version)
+            assertEquals(5, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val inv = repo.getInventory()
             assertEquals(listOf("Blanco Calavera", "Nuln Oil"), inv.paints.map { it.name })
@@ -164,6 +165,28 @@ class ForjaMigrationTest {
             } finally {
                 db.close()
             }
+        }
+    }
+
+    @Test
+    fun `migrating 4 to 5 keeps every project with no extra angles, and angles are saved and read back`() = runBlocking {
+        createAt(4) { db ->
+            db.execSQL("INSERT INTO projects VALUES ('p1', 'Paladín', '2026-11-10T09:00:00.000Z', 'IN_PROGRESS', 'i', NULL, 'Capa verde', 'NMM', NULL)")
+            db.execSQL("INSERT INTO blobs VALUES ('i', 'image/jpeg', 'f1')")
+        }
+        val db = ForjaDatabase.create(context, name)
+        try {
+            assertEquals(5, db.openHelper.readableDatabase.version)
+            val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
+            val p = repo.getProject("p1")!!
+            assertEquals(listOf("Paladín", "i", "Capa verde"), listOf(p.name, p.initialPhotoBlobId, p.notes))
+            assertEquals(PaintingStyle.NMM, p.style)
+            assertEquals(emptyList(), p.extraPhotoBlobIds)
+
+            repo.saveProject(p.addAngle("a1").addAngle("a2"))
+            assertEquals(listOf("i", "a1", "a2"), repo.getProject("p1")!!.photos)
+        } finally {
+            db.close()
         }
     }
 

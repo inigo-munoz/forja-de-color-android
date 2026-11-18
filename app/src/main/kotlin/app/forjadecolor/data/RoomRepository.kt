@@ -155,6 +155,7 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
         // An unknown name (written by a newer app) reads as no choice rather than failing.
         style = PaintingStyle.entries.firstOrNull { it.name == row.style },
         baseSetting = BaseSetting.entries.firstOrNull { it.name == row.baseSetting },
+        extraPhotoBlobIds = ForjaJson.decodeFromString(STRINGS, row.extraPhotosJson),
         progress = dao.progress(row.id).map { ProgressPhoto(it.id, it.takenAt, it.blobId) },
         advice = dao.advice(row.id).map {
             AdviceEntry(
@@ -169,7 +170,10 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
 }
 
 private fun Project.toEntity() =
-    ProjectEntity(id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes, style?.name, baseSetting?.name)
+    ProjectEntity(
+        id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes, style?.name, baseSetting?.name,
+        ForjaJson.encodeToString(STRINGS, extraPhotoBlobIds),
+    )
 
 private fun Paint.toEntity(position: Int) =
     PaintEntity(position, brand, code, name, range, type.name, hex, family?.name, family?.order, family?.role?.name, nameEn)
