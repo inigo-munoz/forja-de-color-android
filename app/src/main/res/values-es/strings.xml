@@ -206,4 +206,5 @@
     <string name="catalogue_set">Set %1$s · %2$s · %3$d pinturas</string>
     <string name="inventory_delete_confirm">¿Borrar esta pintura de tu inventario? Los proyectos que la usan la mostrarán como que no la tienes.</string>
     <string name="paste_instructions_hint">Instrucciones copiadas. Si en el chat solo aparece la foto, mantén pulsado el cuadro de texto y toca Pegar (o la sugerencia del portapapeles en el teclado).</string>
+    <string name="ask_current_photo">Para «A medio pintar», saca o elige una foto actual de la miniatura: el proyecto solo tiene la de sin pintar.</string>
 </resources>

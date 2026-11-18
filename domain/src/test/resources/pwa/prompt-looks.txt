@@ -7,7 +7,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -33,7 +33,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -62,7 +62,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -91,7 +91,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -120,7 +120,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -149,7 +149,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -177,7 +177,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -205,7 +205,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 
@@ -233,7 +233,7 @@ METHOD
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish.
 
-INVENTORY (brand|code|name|family|order|role)
+INVENTORY (brand|code|name|family|order|role|type)
 
 MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones.
 

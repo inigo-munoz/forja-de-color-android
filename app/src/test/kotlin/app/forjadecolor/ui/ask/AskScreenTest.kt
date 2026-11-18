@@ -37,6 +37,7 @@ import app.forjadecolor.domain.advice.Technique
 import app.forjadecolor.domain.advice.ZoneRecipe
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.projects.addAdvice
+import app.forjadecolor.domain.projects.ProgressPhoto
 import app.forjadecolor.domain.projects.createProject
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.storage.Repository
@@ -206,6 +207,34 @@ class AskScreenTest {
         app.waitFor(compose) { compose.onAllNodesWithTag("send_status").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithTag("send_status").assert(hasText("Instructions copied", substring = true))
         compose.onNodeWithTag("send_status").assert(hasText("Paste", substring = true))
+    }
+
+    @Test
+    fun `half-painted without a new photo or progress photos asks for a current one instead of sending the unpainted photo`() {
+        show()
+        click("moment_half-painted")
+        click("send")
+        app.waitFor(compose) { compose.onAllNodesWithTag("send_status").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("send_status").assert(hasText("current photo", substring = true))
+        assertTrue(app.bridge.sent.isEmpty())
+    }
+
+    @Test
+    fun `half-painted sends the earlier recipe and the zones ticked as painted`() {
+        runBlocking {
+            photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
+            val p = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR.copy(doneZones = listOf(0)))
+            app.repository.saveProject(p.copy(initialPhotoBlobId = photoId, progress = listOf(ProgressPhoto("g1", "2026-11-12T10:00:00.000Z", photoId))))
+        }
+        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
+        click("moment_half-painted")
+        click("send")
+
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        val text = app.bridge.sent.single().text
+        assertTrue("PREVIOUS RECIPE" in text)
+        assertTrue("- capa (slapchop): Azul Mágico (Vallejo 72.021). Painted." in text)
     }
 
     @Test

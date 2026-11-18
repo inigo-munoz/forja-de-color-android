@@ -6,19 +6,29 @@ import app.forjadecolor.domain.projects.adviceLookLines
 
 import app.forjadecolor.domain.paints.BslRole
 import app.forjadecolor.domain.paints.Inventory
+import app.forjadecolor.domain.paints.PaintRef
+import app.forjadecolor.domain.paints.PaintType
+import app.forjadecolor.domain.paints.findPaint
 import app.forjadecolor.domain.paints.bslRole
 
 // Prompt text must stay identical to the PWA's (src/advice/package.ts): the user's Claude Project /
 // custom GPT is set up with it. Pinned by AdvicePackageTest against fixtures generated from the PWA.
 
-private val METHOD = """You are my miniature painting assistant. I paint fast but want a good-looking result.
+// The translucency rule follows the inventory: with no inks or washes, translucent colour comes from thinning.
+private const val NO_TRANSLUCENT = "- I have no translucent paints: make them by thinning my opaque paints. Every Slapchop zone needs a dilution ratio \"N:M\" (paint:medium or water), e.g. \"1:3\"."
+private const val WITH_TRANSLUCENT = "- For translucent colour, use my inks and washes where they suit, or thin my opaque paints. Every Slapchop zone needs a dilution ratio \"N:M\" (paint:medium or water), e.g. \"1:3\"."
+
+private fun method(inv: Inventory): String {
+    val translucent = if (inv.paints.any { it.type == PaintType.INK || it.type == PaintType.WASH }) WITH_TRANSLUCENT else NO_TRANSLUCENT
+    return """You are my miniature painting assistant. I paint fast but want a good-looking result.
 METHOD
 - Default technique is Slapchop: black primer, then a heavy grey drybrush and a lighter white drybrush to sketch light and shadow, then translucent colour on top.
-- I have no translucent paints: make them by thinning my opaque paints. Every Slapchop zone needs a dilution ratio "N:M" (paint:medium or water), e.g. "1:3".
+$translucent
 - Use BSL (base, shadow, light) triads only on detail zones: faces, skin, focal points. Prefer the BSL families listed below; each family is ordered 1 (lightest) to 4 (darkest).
 - For a BSL zone use the family's base, shadow and light paints by their role (extra light for final highlights); a family without a shadow paint is shaded by glazing its base.
 - Rules: only use paints and brushes from this inventory; cite them by brand and code. Never invent paints. Do not repeat the same paint needlessly.
 - Write every human-readable text (zone names, steps, tips) in Spanish."""
+}
 
 private fun recipeFormat(moment: RecipeMoment): String {
     val halfPainted = if (moment == RecipeMoment.HALF_PAINTED) {
@@ -61,10 +71,10 @@ private val ROLE_WORDS = mapOf(BslRole.BASE to "base", BslRole.SHADOW to "shadow
 private fun inventoryLines(inv: Inventory): String {
     val paints = inv.paints.map { p ->
         val role = bslRole(p)?.let { ROLE_WORDS.getValue(it) } ?: ""
-        listOf(p.brand, p.code, p.name, p.family?.name ?: p.range, p.family?.order?.toString() ?: "", role).joinToString("|")
+        listOf(p.brand, p.code, p.name, p.family?.name ?: p.range, p.family?.order?.toString() ?: "", role, p.type.name.lowercase()).joinToString("|")
     }
     val brushes = inv.brushes.map { "brush|${it.code}|${it.name}" }
-    return (listOf("INVENTORY (brand|code|name|family|order|role)") + paints + brushes).joinToString("\n")
+    return (listOf("INVENTORY (brand|code|name|family|order|role|type)") + paints + brushes).joinToString("\n")
 }
 
 private fun momentRequest(req: AdviceRequest): String = when (req.moment) {
@@ -77,6 +87,27 @@ private fun momentRequest(req: AdviceRequest): String = when (req.moment) {
     }
 }
 
+private fun describe(inv: Inventory, ref: PaintRef): String =
+    inv.findPaint(ref)?.let { "${it.name} (${it.brand} ${it.code})" } ?: "${ref.brand} ${ref.code}"
+
+/** Half-painted only: the latest recipe, so the AI keeps its colours and knows what is painted. */
+private fun previousRecipe(req: AdviceRequest, inv: Inventory): String? {
+    val previous = req.previous ?: return null
+    if (req.moment != Moment.HALF_PAINTED) return null
+    val done = previous.doneZones.toSet()
+    val zones = previous.response.zones.mapIndexed { i, z ->
+        val bsl = z.bsl
+        val paints = when {
+            z.technique == Technique.BSL && bsl != null ->
+                "base ${describe(inv, bsl.base)}, shadow ${describe(inv, bsl.shadow)}, light ${describe(inv, bsl.light)}"
+            z.paint != null -> describe(inv, z.paint)
+            else -> "no paint"
+        }
+        "- ${z.name} (${z.technique.name.lowercase()}): $paints. ${if (i in done) "Painted." else "Not painted yet."}"
+    }
+    return (listOf("PREVIOUS RECIPE for this miniature (keep these colours unless there is a reason to change them, and say why if you change one):") + zones).joinToString("\n")
+}
+
 fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): AdvicePackage {
     val format = when (req.moment) {
         Moment.START -> recipeFormat(RecipeMoment.START)
@@ -85,13 +116,13 @@ fun buildAdvicePackage(req: AdviceRequest, inv: Inventory, photoId: String): Adv
         Moment.DURING -> CONSULTATION_FORMAT
     }
     val look = adviceLookLines(Look(req.style ?: PaintingStyle.MY_METHOD, req.baseSetting))
-    val sections = listOf(METHOD, inventoryLines(inv), momentRequest(req)) + listOfNotNull(look.joinToString("\n").ifEmpty { null }) + format
+    val sections = listOf(method(inv), inventoryLines(inv), momentRequest(req)) + listOfNotNull(previousRecipe(req, inv), look.joinToString("\n").ifEmpty { null }) + format
     val text = sections.joinToString("\n\n")
     return AdvicePackage(text, photoId)
 }
 
 fun buildBrainInstructions(inv: Inventory): String = listOf(
-    METHOD,
+    method(inv),
     inventoryLines(inv),
     "When I send a photo I will say the moment (start, primed, half-painted or during). For start, primed and half-painted answer with this format (for primed, leave prep empty):",
     recipeFormat(RecipeMoment.START),

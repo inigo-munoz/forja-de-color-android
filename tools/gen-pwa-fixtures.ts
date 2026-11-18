@@ -36,6 +36,11 @@ const recipe = {
 };
 w('image-prompt.txt', buildImagePrompt(recipe, SEED_INVENTORY));
 
+// Half-painted with the earlier recipe (first zone ticked), and the method with an ink in the inventory.
+w('prompt-half-painted-previous.txt', buildAdvicePackage({ moment: 'half-painted', previous: { response: recipe, doneZones: [0] } }, SEED_INVENTORY, photo).text);
+const withInk = { ...SEED_INVENTORY, paints: [...SEED_INVENTORY.paints, { brand: 'Vallejo', code: '72.091', name: 'Sepia', range: 'Game Color', type: 'ink' as const, hex: '#563d27' }] };
+w('brain-instructions-ink.txt', buildBrainInstructions(withInk));
+
 // Painting styles: every style and every base setting, one prompt each, separated by a line of dashes.
 const empty = { paints: [], brushes: [] };
 const looks = [...PAINTING_STYLES.map((style) => ({ style })), ...BASE_SETTINGS.map((baseSetting) => ({ baseSetting })), { style: 'osl' as const, baseSetting: 'winter' as const }];

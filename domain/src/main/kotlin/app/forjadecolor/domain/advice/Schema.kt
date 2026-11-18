@@ -116,7 +116,11 @@ data class AdviceRequest(
     val freeText: String? = null,
     val style: PaintingStyle? = null,
     val baseSetting: BaseSetting? = null,
+    /** Half-painted: the project's latest recipe and the zones ticked as painted. */
+    val previous: PreviousRecipe? = null,
 )
+
+data class PreviousRecipe(val response: RecipeResponse, val doneZones: List<Int>)
 
 /** What is shared with the user's AI chat: the prompt and the id of the stored photo. */
 data class AdvicePackage(val text: String, val imageId: String)

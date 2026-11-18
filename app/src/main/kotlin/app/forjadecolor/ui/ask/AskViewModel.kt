@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.forjadecolor.AppContainer
 import app.forjadecolor.domain.advice.AdviceRequest
+import app.forjadecolor.domain.advice.Moment
+import app.forjadecolor.domain.advice.PreviousRecipe
+import app.forjadecolor.domain.advice.RecipeResponse
 import app.forjadecolor.domain.advice.InstructionsStatus
 import app.forjadecolor.domain.advice.SendResult
 import app.forjadecolor.domain.advice.buildAdvicePackage
@@ -22,7 +25,7 @@ import kotlinx.coroutines.launch
 
 /** What sending said: nothing, a photo is needed, or the share sheet failed and the prompt is shown to copy. */
 /** SHARED: the share sheet opened; the instructions are on the clipboard, since Claude keeps only the photo. */
-enum class SendStatus { NONE, PHOTO_MISSING, SHARED, FALLBACK }
+enum class SendStatus { NONE, PHOTO_MISSING, CURRENT_PHOTO_MISSING, SHARED, FALLBACK }
 
 data class AskState(
     val loaded: Boolean = false,
@@ -84,17 +87,26 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
     fun send(picked: ByteArray?, request: AdviceRequest) {
         val current = _state.value.project ?: return
         viewModelScope.launch {
+            val fresh = repository.getProject(current.id) ?: current
+            // Half-painted needs the miniature as it is now: never the unpainted initial photo.
+            if (request.moment == Moment.HALF_PAINTED && picked == null && fresh.progress.isEmpty()) {
+                _state.update { it.copy(sendStatus = SendStatus.CURRENT_PHOTO_MISSING) }
+                return@launch
+            }
             val id = when {
                 picked != null -> photoId ?: repository.putBlob(StoredBlob("image/jpeg", picked)).also { photoId = it }
-                else -> defaultPhotoId(current)?.takeIf { repository.getBlob(it) != null }
+                else -> defaultPhotoId(fresh)?.takeIf { repository.getBlob(it) != null }
             }
             if (id == null) {
                 _state.update { it.copy(sendStatus = SendStatus.PHOTO_MISSING) }
                 return@launch
             }
             // The project's look as saved now: it may have been changed on this screen.
-            val look = (repository.getProject(current.id) ?: current).look
-            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting), repository.getInventory(), id)
+            val look = fresh.look
+            // Half-painted carries the latest recipe and the zones ticked as painted.
+            val recipe = fresh.advice.lastOrNull { it.response is RecipeResponse }
+            val previous = if (request.moment == Moment.HALF_PAINTED && recipe != null) PreviousRecipe(recipe.response as RecipeResponse, recipe.doneZones) else null
+            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, previous = previous), repository.getInventory(), id)
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }
         }
