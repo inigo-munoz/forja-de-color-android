@@ -568,6 +568,7 @@ class ProjectScreenTest {
         assertTrue(pkg.text.contains("Azul Mágico #016ca7"))
         assertEquals(app.project("p1")!!.initialPhotoBlobId, pkg.imageId)
         inEntry("e1", "paint_image_status").assert(hasText("Save the image ChatGPT makes", substring = true))
+        inEntry("e1", "paint_image_status").assert(hasText("Instructions copied", substring = true))
     }
 
     @Test

@@ -199,6 +199,16 @@ class AskScreenTest {
     }
 
     @Test
+    fun `after sharing, says the instructions are copied and how to paste them, since Claude keeps only the photo`() {
+        show()
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.isNotEmpty() }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send_status").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("send_status").assert(hasText("Instructions copied", substring = true))
+        compose.onNodeWithTag("send_status").assert(hasText("Paste", substring = true))
+    }
+
+    @Test
     fun `explains the fallback and shows the prompt to copy when the share sheet could not be used`() {
         show(sendResult = SendResult.FALLBACK)
         click("send")

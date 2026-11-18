@@ -101,6 +101,7 @@ fun ScanScreen(container: AppContainer, onDone: () -> Unit, setCode: String? = n
                 Button(onClick = { vm.send(photo) }, modifier = Modifier.testTag("scan_send")) { Text(stringResource(R.string.ask_send)) }
                 when (state.sendStatus) {
                     ScanSendStatus.NONE -> {}
+                    ScanSendStatus.SHARED -> Text(stringResource(R.string.paste_instructions_hint), modifier = Modifier.testTag("scan_send_status"))
                     ScanSendStatus.PHOTO_MISSING -> Text(stringResource(R.string.ask_no_photo), modifier = Modifier.testTag("scan_send_status"))
                     ScanSendStatus.FALLBACK -> Text(
                         "${stringResource(R.string.ask_fallback)} ${stringResource(R.string.ask_prompt_box)}",
