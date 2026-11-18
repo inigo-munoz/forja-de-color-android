@@ -76,6 +76,15 @@ class ScanScreenTest {
     }
 
     @Test
+    fun `after sharing, says the instructions are copied and how to paste them`() {
+        show()
+        click("scan_choose_photo")
+        click("scan_send")
+        app.waitFor(compose) { compose.onAllNodesWithTag("scan_send_status").fetchSemanticsNodes().isNotEmpty() }
+        compose.onNodeWithTag("scan_send_status").assert(hasText("Instructions copied", substring = true))
+    }
+
+    @Test
     fun `without a photo it asks for one and sends nothing`() {
         show()
         click("scan_send")

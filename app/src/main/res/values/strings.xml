@@ -207,4 +207,5 @@
     <string name="scan_from_catalogue">Checked in the catalogue</string>
     <string name="catalogue_set">Set %1$s · %2$s · %3$d paints</string>
     <string name="inventory_delete_confirm">Delete this paint from your inventory? Projects that use it will show it as not in your paints.</string>
+    <string name="paste_instructions_hint">Instructions copied. If the chat only shows the photo, long-press the text box and tap Paste (or the clipboard suggestion on the keyboard).</string>
 </resources>

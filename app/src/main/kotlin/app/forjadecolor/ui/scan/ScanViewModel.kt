@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class ScanSendStatus { NONE, PHOTO_MISSING, FALLBACK }
+enum class ScanSendStatus { NONE, PHOTO_MISSING, SHARED, FALLBACK }
 
 /** A paint read from the photo, waiting for the user: [existing] is the owned paint it would update. */
 data class PaintItem(val paint: Paint, val existing: Paint?, val included: Boolean, val fromCatalogue: Boolean = false) {
@@ -79,7 +79,7 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
             }
             _state.update {
                 if (result == SendResult.FALLBACK) it.copy(sendStatus = ScanSendStatus.FALLBACK, prompt = buildScanPrompt())
-                else it.copy(sendStatus = ScanSendStatus.NONE, prompt = null)
+                else it.copy(sendStatus = ScanSendStatus.SHARED, prompt = null)
             }
         }
     }

@@ -146,6 +146,7 @@ fun AskScreen(
     val zones = remember(current) { recipeZones(current) }
     val sendStatus = when (state.sendStatus) {
         SendStatus.NONE -> ""
+        SendStatus.SHARED -> stringResource(R.string.paste_instructions_hint)
         SendStatus.PHOTO_MISSING -> stringResource(R.string.ask_photo)
         SendStatus.FALLBACK -> "${stringResource(R.string.ask_fallback)} ${stringResource(R.string.ask_prompt_box)}"
     }

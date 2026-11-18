@@ -92,7 +92,10 @@ internal fun AdviceCard(
                         onClick = { scope.launch { onPaintImage(r)?.let { imageStatus = paintImageMessage(it) } } },
                         modifier = Modifier.testTag("paint_image"),
                     ) { Text(stringResource(R.string.project_paint_image)) }
-                    imageStatus?.let { Text(stringResource(it), modifier = Modifier.testTag("paint_image_status")) }
+                    imageStatus?.let {
+                        val hint = if (it == R.string.project_paint_image_sent) stringResource(R.string.paste_instructions_hint) + " " else ""
+                        Text(hint + stringResource(it), modifier = Modifier.testTag("paint_image_status"))
+                    }
                 }
                 is ConsultationResponse -> ConsultationView(r, label, steps, onOpenTechnique)
             }

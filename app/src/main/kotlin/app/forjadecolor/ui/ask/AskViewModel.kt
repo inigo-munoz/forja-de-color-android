@@ -21,7 +21,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /** What sending said: nothing, a photo is needed, or the share sheet failed and the prompt is shown to copy. */
-enum class SendStatus { NONE, PHOTO_MISSING, FALLBACK }
+/** SHARED: the share sheet opened; the instructions are on the clipboard, since Claude keeps only the photo. */
+enum class SendStatus { NONE, PHOTO_MISSING, SHARED, FALLBACK }
 
 data class AskState(
     val loaded: Boolean = false,
@@ -95,7 +96,7 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
             val look = (repository.getProject(current.id) ?: current).look
             val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting), repository.getInventory(), id)
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
-            _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.NONE, prompt = if (fallback) pkg.text else null) }
+            _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }
         }
     }
 
