@@ -27,16 +27,21 @@ class AndroidShareBridge(context: Context, private val repository: Repository) :
 
     override suspend fun send(pkg: AdvicePackage): SendResult {
         copyPrompt(pkg.text)
-        val blob = repository.getBlob(pkg.imageId) ?: return SendResult.FALLBACK
-        val file = withContext(Dispatchers.IO) {
-            File(context.cacheDir, "share").apply { mkdirs() }.resolve(SHARED_NAME).apply { writeBytes(blob.bytes) }
+        // The main photo first, then the angles: several go together in one multiple share.
+        val blobs = (listOf(pkg.imageId) + pkg.extraImageIds).map { repository.getBlob(it) }
+        val main = blobs.first() ?: return SendResult.FALLBACK
+        val uris = withContext(Dispatchers.IO) {
+            val dir = File(context.cacheDir, "share").apply { mkdirs() }
+            (listOf(main) + blobs.drop(1).filterNotNull()).mapIndexed { i, blob ->
+                val file = dir.resolve(if (i == 0) SHARED_NAME else "forja-de-color-${i + 1}.jpg").apply { writeBytes(blob.bytes) }
+                FileProvider.getUriForFile(context, fileAuthority(context), file)
+            }
         }
-        val uri = FileProvider.getUriForFile(context, fileAuthority(context), file)
-        val share = Intent(Intent.ACTION_SEND).apply {
+        val share = Intent(if (uris.size == 1) Intent.ACTION_SEND else Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/jpeg"
-            putExtra(Intent.EXTRA_STREAM, uri)
+            if (uris.size == 1) putExtra(Intent.EXTRA_STREAM, uris.first()) else putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
             putExtra(Intent.EXTRA_TEXT, pkg.text)
-            clipData = ClipData.newRawUri(SHARED_NAME, uri)
+            clipData = ClipData.newRawUri(SHARED_NAME, uris.first()).apply { uris.drop(1).forEach { addItem(ClipData.Item(it)) } }
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         val chooser = Intent.createChooser(share, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

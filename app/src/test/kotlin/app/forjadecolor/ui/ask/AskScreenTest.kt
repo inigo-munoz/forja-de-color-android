@@ -238,6 +238,30 @@ class AskScreenTest {
     }
 
     @Test
+    fun `start sends the main photo and every angle, half-painted only the current photo`() {
+        runBlocking {
+            photoId = app.repository.putBlob(StoredBlob("image/jpeg", "photo".toByteArray()))
+            val a1 = app.repository.putBlob(StoredBlob("image/jpeg", "side".toByteArray()), "angle-1")
+            val a2 = app.repository.putBlob(StoredBlob("image/jpeg", "back".toByteArray()), "angle-2")
+            val p = createProject("Bárbara", app.now, "p1").addAdvice(PRIOR).copy(initialPhotoBlobId = photoId, extraPhotoBlobIds = listOf(a1, a2))
+            app.repository.saveProject(p.copy(progress = listOf(ProgressPhoto("g1", "2026-11-12T10:00:00.000Z", a2))))
+        }
+        app.setContent(compose) { AskScreen(app.container, "p1", onDone = { done++ }) }
+        app.waitFor(compose) { compose.onAllNodesWithTag("send").fetchSemanticsNodes().isNotEmpty() }
+
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.size == 1 }
+        assertEquals(photoId, app.bridge.sent[0].imageId)
+        assertEquals(listOf("angle-1", "angle-2"), app.bridge.sent[0].extraImageIds)
+
+        click("moment_half-painted")
+        click("send")
+        app.waitFor(compose) { app.bridge.sent.size == 2 }
+        assertEquals("angle-2", app.bridge.sent[1].imageId)
+        assertEquals(emptyList(), app.bridge.sent[1].extraImageIds)
+    }
+
+    @Test
     fun `explains the fallback and shows the prompt to copy when the share sheet could not be used`() {
         show(sendResult = SendResult.FALLBACK)
         click("send")

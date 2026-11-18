@@ -93,8 +93,15 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
                 _state.update { it.copy(sendStatus = SendStatus.CURRENT_PHOTO_MISSING) }
                 return@launch
             }
+            // Start and primed see the unpainted miniature from every angle; later moments the current photo.
+            val angles = if (picked == null && (request.moment == Moment.START || request.moment == Moment.PRIMED)) {
+                fresh.photos.filter { repository.getBlob(it) != null }
+            } else {
+                emptyList()
+            }
             val id = when {
                 picked != null -> photoId ?: repository.putBlob(StoredBlob("image/jpeg", picked)).also { photoId = it }
+                angles.isNotEmpty() -> angles.first()
                 else -> defaultPhotoId(fresh)?.takeIf { repository.getBlob(it) != null }
             }
             if (id == null) {
@@ -107,6 +114,7 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
             val recipe = fresh.advice.lastOrNull { it.response is RecipeResponse }
             val previous = if (request.moment == Moment.HALF_PAINTED && recipe != null) PreviousRecipe(recipe.response as RecipeResponse, recipe.doneZones) else null
             val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, previous = previous), repository.getInventory(), id)
+                .copy(extraImageIds = angles.drop(1))
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }
         }

@@ -64,6 +64,22 @@ class AndroidShareBridgeTest {
     }
 
     @Test
+    fun `several angles go together in one multiple share, main photo first`() = runBlocking {
+        val blobs = mapOf("p1" to StoredBlob("image/jpeg", photo), "a1" to StoredBlob("image/jpeg", byteArrayOf(5)), "a2" to StoredBlob("image/jpeg", byteArrayOf(6)))
+        val bridge = AndroidShareBridge(app, BlobsOnly(blobs))
+
+        assertEquals(SendResult.SHARED, bridge.send(AdvicePackage("the prompt", "p1", listOf("a1", "a2"))))
+
+        val chooser = assertNotNull(shadowOf(app).nextStartedActivity)
+        val share = assertNotNull(IntentCompat.getParcelableExtra(chooser, Intent.EXTRA_INTENT, Intent::class.java))
+        assertEquals(Intent.ACTION_SEND_MULTIPLE, share.action)
+        assertEquals("the prompt", share.getStringExtra(Intent.EXTRA_TEXT))
+        val streams = assertNotNull(IntentCompat.getParcelableArrayListExtra(share, Intent.EXTRA_STREAM, Uri::class.java))
+        assertEquals(listOf("forja-de-color.jpg", "forja-de-color-2.jpg", "forja-de-color-3.jpg"), streams.map { it.lastPathSegment })
+        assertEquals(3, share.clipData!!.itemCount)
+    }
+
+    @Test
     fun `the prompt also lands on the clipboard and is read back as the answer`() = runBlocking {
         val bridge = AndroidShareBridge(app, BlobsOnly(mapOf("p1" to StoredBlob("image/jpeg", photo))))
 
