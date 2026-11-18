@@ -113,3 +113,26 @@ fun rememberPendingPhoto(): MutableState<ByteArray?> {
         ),
     ) { mutableStateOf(null) }
 }
+
+/**
+ * Several photos picked or taken but not saved yet (a new project's angles), kept across recreation like
+ * [rememberPendingPhoto]: each one parked in `cacheDir/pending-photos/<id>-<n>.jpg`, the count saved.
+ */
+@Composable
+fun rememberPendingPhotos(): MutableState<List<ByteArray>> {
+    val context = LocalContext.current
+    val id = rememberSaveable { UUID.randomUUID().toString() }
+    val dir = remember(id) { File(context.cacheDir, "pending-photos") }
+    fun file(n: Int) = File(dir, "$id-$n.jpg")
+    return rememberSaveable(
+        saver = Saver(
+            save = { state ->
+                val photos = state.value
+                (photos.size until photos.size + 8).forEach { file(it).delete() }
+                photos.forEachIndexed { n, bytes -> runCatching { dir.mkdirs(); file(n).writeBytes(bytes) } }
+                photos.size
+            },
+            restore = { count -> mutableStateOf((0 until count).mapNotNull { runCatching { file(it).readBytes() }.getOrNull() }) },
+        ),
+    ) { mutableStateOf(emptyList()) }
+}

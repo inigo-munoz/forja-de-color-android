@@ -12,6 +12,8 @@ import app.forjadecolor.domain.isoString
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.PaintRef
 import app.forjadecolor.domain.projects.Look
+import app.forjadecolor.domain.projects.addAngle
+import app.forjadecolor.domain.projects.removeAngle
 import app.forjadecolor.domain.projects.setLook
 import app.forjadecolor.domain.projects.ProgressPhoto
 import app.forjadecolor.domain.projects.Project
@@ -88,6 +90,12 @@ class ProjectViewModel(private val container: AppContainer, private val projectI
     fun setTarget(bytes: ByteArray) = updateDroppingPhotos { p ->
         p.copy(targetImageBlobId = repository.putBlob(StoredBlob("image/jpeg", bytes))) to listOf(p.targetImageBlobId)
     }
+
+    /** Adds another angle of the unpainted miniature (up to MAX_ANGLES). */
+    fun addAngle(bytes: ByteArray) = update { p -> p.addAngle(repository.putBlob(StoredBlob("image/jpeg", bytes))) }
+
+    /** Removes an angle and deletes its photo unless another project uses it. */
+    fun removeAngle(blobId: String) = updateDroppingPhotos { p -> p.removeAngle(blobId) to listOf(blobId) }
 
     fun removeTarget() = updateDroppingPhotos { p -> p.copy(targetImageBlobId = null) to listOf(p.targetImageBlobId) }
 

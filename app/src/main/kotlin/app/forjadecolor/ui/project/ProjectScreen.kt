@@ -56,6 +56,8 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.forjadecolor.AppContainer
 import app.forjadecolor.R
+import app.forjadecolor.domain.storage.Repository
+import app.forjadecolor.domain.projects.MAX_ANGLES
 import app.forjadecolor.domain.advice.TechniqueCardId
 import app.forjadecolor.domain.projects.Project
 import app.forjadecolor.domain.projects.ProjectStatus
@@ -126,6 +128,8 @@ fun ProjectScreen(
         vm.setTarget(bytes)
     }
     val pickProgress = sources.picker({ progressError = true }, addProgress)
+    val pickAngle = sources.picker({ progressError = true }) { vm.addAngle(it) }
+    val shootAngle = sources.camera({ progressError = true }) { vm.addAngle(it) }
     val shootProgress = sources.camera({ progressError = true }, addProgress)
     val pickTarget = sources.picker({ targetError = true }, setTarget)
 
@@ -180,6 +184,9 @@ fun ProjectScreen(
                 NotesCard(current.notes, vm::saveNotes)
             }
             ProjectTab.PHOTOS -> {
+                if (current.initialPhotoBlobId != null) AnglesCard(current, repository, onAdd = pickAngle, onShoot = shootAngle) { id ->
+                    confirmation = Confirmation(R.string.confirm_delete_angle, R.string.action_delete) { vm.removeAngle(id) }
+                }
                 Card(Modifier.fillMaxWidth()) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(stringResource(R.string.project_progress), style = MaterialTheme.typography.titleMedium)
@@ -352,6 +359,31 @@ private fun NotesCard(stored: String, save: (String) -> Unit) {
                 minLines = 3,
                 modifier = Modifier.fillMaxWidth().testTag("notes").onFocusChanged { if (!it.isFocused) flush() },
             )
+        }
+    }
+}
+
+/** The main photo's extra angles, each removable, and buttons to add more (up to MAX_ANGLES). */
+@Composable
+private fun AnglesCard(project: Project, repository: Repository, onAdd: () -> Unit, onShoot: () -> Unit, onDelete: (String) -> Unit) {
+    Card(Modifier.fillMaxWidth().testTag("angles")) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.project_angles), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.projects_angles_help), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                project.extraPhotoBlobIds.forEach { id ->
+                    Column(Modifier.testTag("angle_photo")) {
+                        BlobImage(repository, id, Modifier.size(96.dp))
+                        TextButton(onClick = { onDelete(id) }, modifier = Modifier.testTag("delete_angle")) { Text(stringResource(R.string.project_delete_photo)) }
+                    }
+                }
+            }
+            if (project.extraPhotoBlobIds.size < MAX_ANGLES) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onAdd, modifier = Modifier.testTag("add_angle")) { Text(stringResource(R.string.project_add_angle)) }
+                    OutlinedButton(onClick = onShoot, modifier = Modifier.testTag("add_angle_camera")) { Text(stringResource(R.string.t8_take_photo)) }
+                }
+            }
         }
     }
 }

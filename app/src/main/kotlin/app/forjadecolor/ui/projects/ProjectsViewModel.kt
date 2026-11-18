@@ -54,11 +54,11 @@ class ProjectsViewModel(private val container: AppContainer) : ViewModel() {
     }
 
     /** One tap, one project: a second tap while saving is ignored. */
-    fun create(name: String, photo: ByteArray?, onCreated: (projectId: String) -> Unit) {
+    fun create(name: String, photos: List<ByteArray>, onCreated: (projectId: String) -> Unit) {
         if (creating) return
         creating = true
         viewModelScope.launch {
-            val id = createAndSaveProject(container, name, photo).id
+            val id = createAndSaveProject(container, name, photos).id
             onMain { onCreated(id) }
         }
     }

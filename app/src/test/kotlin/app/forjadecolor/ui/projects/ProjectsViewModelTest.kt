@@ -19,14 +19,14 @@ class ProjectsViewModelTest {
         val vm = ProjectsViewModel(app.container)
         val opened = mutableListOf<String>()
 
-        vm.create("Bárbara", null) { opened += it }
-        vm.create("Bárbara", null) { opened += it }
+        vm.create("Bárbara", emptyList()) { opened += it }
+        vm.create("Bárbara", emptyList()) { opened += it }
         awaitOnMain { opened.size == 1 }
         assertEquals(1, app.projects().size)
 
         // The list stays on the back stack while the project is open, so its ViewModel outlives the screen.
         runBlocking { vm.load() }
-        vm.create("Búho", null) { opened += it }
+        vm.create("Búho", emptyList()) { opened += it }
         awaitOnMain { opened.size == 2 }
         assertEquals(setOf("Bárbara", "Búho"), app.projects().map { it.name }.toSet())
     }
