@@ -217,4 +217,7 @@
     <string name="ask_choose_project_photo">Choose a project photo</string>
     <string name="ask_chosen_photos">Project photos that will be sent:</string>
     <string name="ask_done">Done</string>
+    <string name="look_motif">Base motif (optional)</string>
+    <string name="look_motif_hint">e.g. lava river, graveyard, autumn forest</string>
+    <string name="project_base_materials">For the base (materials you may not have)</string>
 </resources>

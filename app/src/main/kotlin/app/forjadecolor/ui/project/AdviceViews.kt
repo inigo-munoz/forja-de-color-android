@@ -152,6 +152,13 @@ private fun RecipeView(
         Heading(stringResource(R.string.project_remaining))
         NumberedList(it, steps)
     }
+    r.baseMaterials?.takeIf { it.isNotEmpty() }?.let { materials ->
+        // Beyond the paint inventory, for the base only: the owner may need to buy them.
+        Column(Modifier.testTag("base_materials").semantics(mergeDescendants = true) {}) {
+            Heading(stringResource(R.string.project_base_materials))
+            materials.forEach { Text("• $it", style = MaterialTheme.typography.bodyMedium) }
+        }
+    }
     if (r.tips.isNotEmpty()) {
         Heading(stringResource(R.string.project_tips))
         NumberedList(r.tips)

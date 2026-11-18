@@ -215,4 +215,7 @@
     <string name="ask_choose_project_photo">Elegir foto del proyecto</string>
     <string name="ask_chosen_photos">Fotos del proyecto que se enviarán:</string>
     <string name="ask_done">Listo</string>
+    <string name="look_motif">Motivo de la peana (opcional)</string>
+    <string name="look_motif_hint">p. ej. río de lava, cementerio, bosque otoñal</string>
+    <string name="project_base_materials">Para la peana (materiales que quizá no tienes)</string>
 </resources>
