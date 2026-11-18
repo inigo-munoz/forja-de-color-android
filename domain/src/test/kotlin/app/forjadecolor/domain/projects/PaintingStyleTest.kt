@@ -64,4 +64,13 @@ class PaintingStyleTest {
         assertEquals(Look(PaintingStyle.MY_METHOD, BaseSetting.WINTER, "ruinas nevadas"), p.setLook(Look(baseSetting = BaseSetting.WINTER, baseMotif = "  ruinas nevadas.  ")).look)
         assertNull(p.setLook(Look(baseMotif = "   ")).baseMotif)
     }
+
+    @Test
+    fun `cleanMotif cuts at MAX_MOTIF and drops final dots like the PWA, and a blank motif adds no lines`() {
+        assertEquals("lava", cleanMotif("  lava...  "))
+        assertNull(cleanMotif(" ... "))
+        assertEquals("a".repeat(100), cleanMotif("a".repeat(100) + ". x"))
+        assertEquals(emptyList(), adviceLookLines(Look(baseMotif = "   ")))
+        assertEquals(emptyList(), imageLookLines(Look(baseMotif = "")))
+    }
 }

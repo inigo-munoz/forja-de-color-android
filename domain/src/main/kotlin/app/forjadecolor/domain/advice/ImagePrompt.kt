@@ -2,6 +2,7 @@ package app.forjadecolor.domain.advice
 
 import app.forjadecolor.domain.projects.Look
 import app.forjadecolor.domain.projects.imageLookLines
+import app.forjadecolor.domain.projects.themedBase
 
 import app.forjadecolor.domain.paints.Inventory
 import app.forjadecolor.domain.paints.PaintRef
@@ -26,7 +27,12 @@ fun buildImagePrompt(recipe: RecipeResponse, inv: Inventory, look: Look = Look()
     }
     return (
         listOf(
-            "Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything.",
+            // With a themed base, terrain may be added on the base, so this line protects only the miniature.
+            if (themedBase(look)) {
+                "Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt and framing of the miniature: do not add, remove or reshape anything on it."
+            } else {
+                "Edit the attached photo of a miniature so it looks painted. Keep the exact pose, sculpt, base and framing: do not add, remove or reshape anything."
+            },
             "Style: tabletop-quality \"slapchop\" painting — strong light and shadow from a white drybrush over black primer, with translucent colour on top; detail zones (faces, skin) with smooth base / shadow / highlight.",
         ) + imageLookLines(look) + "Paint each zone with these colours:" + zones + "Photorealistic photo of a painted miniature on a plain neutral background. Reply with the image only."
         ).joinToString("\n")

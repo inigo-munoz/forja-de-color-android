@@ -81,6 +81,9 @@ fun adviceLookLines(look: Look): List<String> = buildList {
     if (look.baseSetting != null || motif != null) add(BASE_MATERIALS)
 }
 
+/** The base has a setting or a motif: the advisor may suggest materials and the image may add terrain. */
+fun themedBase(look: Look): Boolean = look.baseSetting != null || cleanMotif(look.baseMotif) != null
+
 /** Lines for the image prompt; empty for my method without a base setting. */
 fun imageLookLines(look: Look): List<String> {
     val motif = cleanMotif(look.baseMotif)
