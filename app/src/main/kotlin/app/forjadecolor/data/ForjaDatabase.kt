@@ -8,7 +8,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
- * Version history: 1 = first schema; 2 = advice_entries.doneZonesJson ([MIGRATION_1_2]); 3 = projects.style and baseSetting ([MIGRATION_2_3]); 4 = paints.nameEn ([MIGRATION_3_4]); 5 = projects.extraPhotosJson ([MIGRATION_4_5]). Every upgrade must keep existing rows (with a migration test);
+ * Version history: 1 = first schema; 2 = advice_entries.doneZonesJson ([MIGRATION_1_2]); 3 = projects.style and baseSetting ([MIGRATION_2_3]); 4 = paints.nameEn ([MIGRATION_3_4]); 5 = projects.extraPhotosJson ([MIGRATION_4_5]); 6 = projects.baseMotif ([MIGRATION_5_6]). Every upgrade must keep existing rows (with a migration test);
  * never add a destructive fallback.
  */
 @Database(
@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         PaintEntity::class, BrushEntity::class, ProjectEntity::class, ProgressPhotoEntity::class,
         AdviceEntity::class, BlobEntity::class, StateEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class ForjaDatabase : RoomDatabase() {
@@ -27,7 +27,7 @@ abstract class ForjaDatabase : RoomDatabase() {
 
         /** Stored in the default databases directory, which Android backup includes (`database` domain). */
         fun create(context: Context, name: String = NAME): ForjaDatabase =
-            Room.databaseBuilder(context.applicationContext, ForjaDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).build()
+            Room.databaseBuilder(context.applicationContext, ForjaDatabase::class.java, name).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).build()
 
         /** v2: the zones ticked off on each advice entry; existing rows start with none done. */
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -55,6 +55,13 @@ abstract class ForjaDatabase : RoomDatabase() {
         val MIGRATION_4_5 = object : Migration(4, 5) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE `projects` ADD COLUMN `extraPhotosJson` TEXT NOT NULL DEFAULT '[]'")
+            }
+        }
+
+        /** v6: each project's free-text base motif; existing projects start with none. */
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `projects` ADD COLUMN `baseMotif` TEXT")
             }
         }
     }

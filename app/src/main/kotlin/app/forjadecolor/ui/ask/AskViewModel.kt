@@ -103,7 +103,7 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
             // Half-painted carries the latest recipe and the zones ticked as painted.
             val recipe = fresh.advice.lastOrNull { it.response is RecipeResponse }
             val previous = if (request.moment == Moment.HALF_PAINTED && recipe != null) PreviousRecipe(recipe.response as RecipeResponse, recipe.doneZones) else null
-            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, previous = previous), repository.getInventory(), id)
+            val pkg = buildAdvicePackage(request.copy(style = look.style, baseSetting = look.baseSetting, baseMotif = look.baseMotif, previous = previous), repository.getInventory(), id)
                 .copy(extraImageIds = ids.drop(1))
             val fallback = container.advisorBridge.send(pkg) == SendResult.FALLBACK
             _state.update { it.copy(sendStatus = if (fallback) SendStatus.FALLBACK else SendStatus.SHARED, prompt = if (fallback) pkg.text else null) }

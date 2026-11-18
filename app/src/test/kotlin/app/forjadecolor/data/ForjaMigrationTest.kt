@@ -97,7 +97,7 @@ class ForjaMigrationTest {
             val advice = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration"))).getProject("p1")!!.advice.single()
             assertEquals(emptyList(), advice.doneZones)
             assertEquals(listOf("X999"), advice.unknownBrushes)
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
         } finally {
             db.close()
         }
@@ -111,7 +111,7 @@ class ForjaMigrationTest {
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val p = repo.getProject("p1")!!
             assertEquals(listOf("Paladín", "t", "Capa verde"), listOf(p.name, p.targetImageBlobId, p.notes))
@@ -135,7 +135,7 @@ class ForjaMigrationTest {
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val inv = repo.getInventory()
             assertEquals(listOf("Blanco Calavera", "Nuln Oil"), inv.paints.map { it.name })
@@ -176,7 +176,7 @@ class ForjaMigrationTest {
         }
         val db = ForjaDatabase.create(context, name)
         try {
-            assertEquals(5, db.openHelper.readableDatabase.version)
+            assertEquals(6, db.openHelper.readableDatabase.version)
             val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
             val p = repo.getProject("p1")!!
             assertEquals(listOf("Paladín", "i", "Capa verde"), listOf(p.name, p.initialPhotoBlobId, p.notes))
@@ -185,6 +185,26 @@ class ForjaMigrationTest {
 
             repo.saveProject(p.addAngle("a1").addAngle("a2"))
             assertEquals(listOf("i", "a1", "a2"), repo.getProject("p1")!!.photos)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun `migrating 5 to 6 keeps every project with no base motif, and a motif is saved and read back`() = runBlocking {
+        createAt(5) { db ->
+            db.execSQL("INSERT INTO projects VALUES ('p1', 'Paladín', '2026-11-10T09:00:00.000Z', 'IN_PROGRESS', NULL, NULL, 'Capa verde', NULL, 'WINTER', '[\"a1\"]')")
+        }
+        val db = ForjaDatabase.create(context, name)
+        try {
+            assertEquals(6, db.openHelper.readableDatabase.version)
+            val repo = RoomRepository(db, PhotoFiles(File(context.filesDir, "photos-migration")))
+            val p = repo.getProject("p1")!!
+            assertEquals(listOf("a1"), p.extraPhotoBlobIds)
+            assertEquals(Look(PaintingStyle.MY_METHOD, BaseSetting.WINTER, null), p.look)
+
+            repo.saveProject(p.setLook(p.look.copy(baseMotif = "ruinas nevadas")))
+            assertEquals("ruinas nevadas", repo.getProject("p1")!!.baseMotif)
         } finally {
             db.close()
         }

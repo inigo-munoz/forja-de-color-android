@@ -156,6 +156,7 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
         style = PaintingStyle.entries.firstOrNull { it.name == row.style },
         baseSetting = BaseSetting.entries.firstOrNull { it.name == row.baseSetting },
         extraPhotoBlobIds = ForjaJson.decodeFromString(STRINGS, row.extraPhotosJson),
+        baseMotif = row.baseMotif,
         progress = dao.progress(row.id).map { ProgressPhoto(it.id, it.takenAt, it.blobId) },
         advice = dao.advice(row.id).map {
             AdviceEntry(
@@ -172,7 +173,7 @@ class RoomRepository(private val db: ForjaDatabase, private val photos: PhotoFil
 private fun Project.toEntity() =
     ProjectEntity(
         id, name, createdAt, status.name, initialPhotoBlobId, targetImageBlobId, notes, style?.name, baseSetting?.name,
-        ForjaJson.encodeToString(STRINGS, extraPhotoBlobIds),
+        ForjaJson.encodeToString(STRINGS, extraPhotoBlobIds), baseMotif,
     )
 
 private fun Paint.toEntity(position: Int) =
