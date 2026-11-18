@@ -17,12 +17,13 @@ Branch: feat/half-painted-context (both repos). Delivery: ask-on-risk. Tests: Gr
 
 | ID | Specs | Route | Status | Commit |
 |----|-------|-------|--------|--------|
-| T1 | S3–S5, S7 | inline | todo — PWA prompt builder + tests | |
-| T2 | S3–S5, S7 | inline | todo — Android prompt builder, fixtures, tests | |
-| T3 | S3, S6 | inline | todo — both apps: Ask passes the previous recipe; half-painted photo rule | |
-| T4 | S1–S7 | inline | todo — suites, device check, release | |
+| T1 | S3–S5, S7 | inline | done — PWA prompt builder + tests | PWA a9639a5 |
+| T2 | S3–S5, S7 | inline | done — Android prompt builder, fixtures, tests | see L3 |
+| T3 | S3, S6 | inline | done — both apps: Ask passes the previous recipe; half-painted photo rule | see L3 |
+| T4 | S1–S7 | inline | partly — suites green, release 1.6.5; owner check and re-copy of the AI instructions pending | |
 
 ## Log
 
 - L1 (2026-11-18, user): "revisa a la hora de tener ya una miniatura empezada para ver como funciona el texto para la IA." Read-only review of prompt-half-painted: (1) previous recipe not sent; (2) ticked zones not sent; (3) METHOD says "I have no translucent paints" though the owner now has an ink, mediums and thinner, and inventory lines have no type; (4) without a new photo it sends the last progress photo, else the unpainted initial photo.
 - L2 (2026-11-18, user): "vale, si lo ves bien adelante". Feature document created.
+- L3 (2026-11-18): done in both apps. Prompt: method(inv) chooses NO_TRANSLUCENT or WITH_TRANSLUCENT ("use my inks and washes where they suit, or thin my opaque paints"); inventory header "(brand|code|name|family|order|role|type)" with the type last; half-painted adds "PREVIOUS RECIPE for this miniature (keep these colours unless there is a reason to change them, and say why if you change one):" with one line per zone "- name (technique): paints. Painted./Not painted yet." after the MOMENT line. Ask: half-painted without a picked photo and without progress photos stops with "For half-painted, take or choose a current photo…" instead of sending the initial photo; the latest recipe + doneZones go in the request. Fixtures regenerated from the PWA (all advisor prompts and brain-instructions change by the type column; new prompt-half-painted-previous.txt and brain-instructions-ink.txt). PWA 254 tests (RED observed), Android 351 (RED observed for the domain; UI tests written with the code). Two PWA format tests updated to the new column order (spec change S4). Release 1.6.5 (versionCode 15).
