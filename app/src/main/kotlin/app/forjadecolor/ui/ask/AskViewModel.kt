@@ -93,8 +93,10 @@ class AskViewModel(private val container: AppContainer, private val projectId: S
                 _state.update { it.copy(sendStatus = SendStatus.CURRENT_PHOTO_MISSING) }
                 return@launch
             }
-            // Start and primed see the unpainted miniature from every angle; later moments the current photo.
-            val angles = if (picked == null && (request.moment == Moment.START || request.moment == Moment.PRIMED)) {
+            // Start and primed see the unpainted miniature from every angle, while there are angles and no
+            // progress photo yet; otherwise the photo sent is the one it always was (latest progress, else main).
+            val unpainted = fresh.extraPhotoBlobIds.isNotEmpty() && fresh.progress.isEmpty()
+            val angles = if (picked == null && unpainted && (request.moment == Moment.START || request.moment == Moment.PRIMED)) {
                 fresh.photos.filter { repository.getBlob(it) != null }
             } else {
                 emptyList()
