@@ -60,7 +60,7 @@ brush|B02001|Detail núm. 1
 brush|B02002|Detail núm. 2
 brush|B07001|Dry Brush Small
 
-MOMENT: half-painted. The photo shows my miniature partly painted. Say which zones are already painted, propose complementary colours and the steps left to finish it.
+MOMENT: half-painted. The photo shows my miniature partly painted and I want to finish it: I do not want to repaint it. Review the zones already painted and suggest a fix (a wash, a glaze, a highlight) only when something clearly needs it; then give the steps to finish the zones that are left, with colours that match what is already painted.
 
 ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
 {
@@ -75,5 +75,5 @@ ANSWER FORMAT: reply with JSON only, in one ```json block, exactly this shape:
   "tips": ["..."],
   "complements": [{ "brand": "Vallejo", "code": "72.008" }],
   "remainingSteps": ["..."]
-  (mark zones that are already painted with "alreadyPainted": true)
+  (mark zones already painted with "alreadyPainted": true; their steps are only the touch-ups they need, or empty)
 }

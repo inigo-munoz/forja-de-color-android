@@ -35,7 +35,7 @@ private fun recipeFormat(moment: RecipeMoment): String {
         """,
   "complements": [{ "brand": "Vallejo", "code": "72.008" }],
   "remainingSteps": ["..."]
-  (mark zones that are already painted with "alreadyPainted": true)"""
+  (mark zones already painted with "alreadyPainted": true; their steps are only the touch-ups they need, or empty)"""
     } else {
         ""
     }
@@ -80,7 +80,7 @@ private fun inventoryLines(inv: Inventory): String {
 private fun momentRequest(req: AdviceRequest): String = when (req.moment) {
     Moment.START -> "MOMENT: start. The photo shows an unpainted miniature. Give me a palette by zones."
     Moment.PRIMED -> "MOMENT: primed. The photo shows my miniature already primed in black with the grey and white drybrush done. Skip priming and drybrushing (leave prep empty) and give me a palette by zones, starting from the colour layers."
-    Moment.HALF_PAINTED -> "MOMENT: half-painted. The photo shows my miniature partly painted. Say which zones are already painted, propose complementary colours and the steps left to finish it."
+    Moment.HALF_PAINTED -> "MOMENT: half-painted. The photo shows my miniature partly painted and I want to finish it: I do not want to repaint it. Review the zones already painted and suggest a fix (a wash, a glaze, a highlight) only when something clearly needs it; then give the steps to finish the zones that are left, with colours that match what is already painted."
     Moment.DURING -> {
         val details = if (req.freeText.isNullOrEmpty()) "" else " Details: ${req.freeText}"
         "MOMENT: during. Zone: \"${req.zone ?: ""}\". Question: ${req.question?.wire ?: "free"}.$details Tell me which technique to use and how, for that zone only."
