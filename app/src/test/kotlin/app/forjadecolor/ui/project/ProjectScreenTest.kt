@@ -13,6 +13,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
@@ -322,8 +323,10 @@ class ProjectScreenTest {
 
         restoration.emulateSavedInstanceStateRestore()
 
-        compose.onNodeWithTag("tab_photos").assertIsSelected()
-        compose.onNodeWithTag("add_progress").assertExists()
+        // The recreated screen loads the project again before the tabs come back: wait for them instead of
+        // asserting at once, which failed now and then when the whole suite ran on a busy machine.
+        app.waitFor(compose) { compose.onAllNodes(hasTestTag("tab_photos") and isSelected()).fetchSemanticsNodes().isNotEmpty() }
+        app.waitFor(compose) { compose.onAllNodesWithTag("add_progress").fetchSemanticsNodes().isNotEmpty() }
     }
 
     @Test
